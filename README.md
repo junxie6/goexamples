@@ -1,7 +1,7 @@
 # goexamples
 Some useful examples for Go golang
 
-# Two factor authentication example
+# Two factor authentication TOTP (Time-based One Time Password) example
 \# go run twofactortotpsec51/twofactortotpsec51.go
 
 Then, access the pages:
