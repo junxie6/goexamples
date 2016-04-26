@@ -22,3 +22,6 @@ http://127.0.0.1/qr
 http://127.0.0.1/v
 
 More info: https://github.com/pquerna/otp
+
+# Date Time format conversion
+\# go run datetimeconv/datetimeconv.go 127.0.0.1
