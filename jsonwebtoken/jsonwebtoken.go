@@ -11,16 +11,61 @@ import (
 )
 
 const (
-	Bearer = "Bearer"
+	bearer = "Bearer"
 
 	homeHTML = `<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Template Example</title>
-    </head>
-    <body>
-        {{.Data}}
-    </body>
+	<head>
+		<title>Template Example</title>
+		<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	  <script>
+			$(document).ready(function() {
+				var tokenJWT = "";
+
+				$('#getJWTBtn').on('click', function(event){
+					event.preventDefault();
+
+					$.ajax({
+						url: '/jwt',
+						dataType: 'json',
+					}).done(function(data) {
+						$('#msg').html(JSON.stringify(data));
+
+						if (data.status == true) {
+							tokenJWT = data.token;
+						}
+					}).fail(function() {
+					}).always(function() {
+					});
+					});
+
+				$('#validateJWTBtn').on('click', function(event){
+					event.preventDefault();
+
+					$.ajax({
+						url: '/validatejwt',
+						dataType: 'json',
+						headers: {
+							"Authorization": "Bearer " + tokenJWT,
+						},
+					}).done(function(data) {
+						$('#msg').html(JSON.stringify(data));
+					}).fail(function() {
+					}).always(function() {
+					});
+					});
+			});
+		</script>
+	</head>
+	<body>
+		<p>{{.Data}}</p>
+
+		<form>
+			<button id="getJWTBtn">Get JWT</button>
+			<button id="validateJWTBtn">Validate JWT</button>
+			<p id="msg"></p>
+		</form>
+	</body>
 </html>
 `
 )
@@ -59,21 +104,22 @@ func genJsonWebToken(username string, signingKey string) string {
 	return t
 }
 
-func serveValidateJsonWebToken(w http.ResponseWriter, r *http.Request) {
+func serveValidateJWT(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
+	outMap := map[string]interface{}{
+		"status": false,
+	}
+
 	auth := r.Header.Get("Authorization")
-	l := len(Bearer)
+	bearerLen := len(bearer)
 
 	//str := r.RemoteAddr
 
 	fmt.Printf("Here 1: %v\n", auth)
 
-	if len(auth) > l+1 && auth[:l] == Bearer {
-		fmt.Printf("Here 2: %v\n", auth[l+1:])
-
-		t, err := jwt.Parse(auth[l+1:], func(token *jwt.Token) (interface{}, error) {
-
+	if len(auth) > bearerLen+1 && auth[:bearerLen] == bearer {
+		t, err := jwt.Parse(auth[bearerLen+1:], func(token *jwt.Token) (interface{}, error) {
 			// Always check the signing method
 			// Don't forget to validate the alg is what you expect:
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -82,10 +128,10 @@ func serveValidateJsonWebToken(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Return the key for validation
-			fmt.Printf("Here username: %v\n", token.Header["username"])
+			fmt.Printf("Here username: %v\n", token.Claims["username"])
 			fmt.Printf("Here token: %v\n", token)
 
-			username := token.Header["username"].(string)
+			username := token.Claims["username"].(string)
 
 			secretkey, err := mykeys(username)
 
@@ -96,33 +142,49 @@ func serveValidateJsonWebToken(w http.ResponseWriter, r *http.Request) {
 			}
 		})
 
-		fmt.Printf("Here 5: %v\n", t)
-
 		if err == nil && t.Valid {
-			w.Write([]byte("Good " + t.Header["username"].(string)))
+			outMap["status"] = true
+			outMap["username"] = t.Claims["username"].(string)
+			outMap["msg"] = "Good"
 		} else {
-			w.Write([]byte("Bad"))
+			outMap["msg"] = "Bad"
 		}
 	} else {
-		w.Write([]byte("<script src='/static/scripts/jquery-2.2.2.min.js'></script>"))
-	}
-}
-
-func servejwt(w http.ResponseWriter, r *http.Request) {
-	testMap := map[string]interface{}{
-		"status": false,
 	}
 
-	token := genJsonWebToken("test", "test")
-	testMap["token"] = token
-
-	testJSON, err := json.Marshal(testMap)
+	outJSON, err := json.Marshal(outMap)
 
 	if err != nil {
 		w.Write([]byte("{\"status\": false}"))
 	}
 
-	w.Write([]byte(testJSON))
+	w.Write([]byte(outJSON))
+}
+
+func serveJWT(w http.ResponseWriter, r *http.Request) {
+	outMap := map[string]interface{}{
+		"status": false,
+	}
+
+	username := "username1"
+	secretkey, err := mykeys(username)
+
+	if err != nil {
+		w.Write([]byte("{\"status\": false}"))
+	}
+
+	token := genJsonWebToken(username, secretkey)
+
+	outMap["token"] = token
+	outMap["status"] = true
+
+	outJSON, err := json.Marshal(outMap)
+
+	if err != nil {
+		w.Write([]byte("{\"status\": false}"))
+	}
+
+	w.Write([]byte(outJSON))
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
@@ -141,8 +203,8 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	http.HandleFunc("/validatejwt", serveValidateJsonWebToken)
-	http.HandleFunc("/jwt", servejwt)
+	http.HandleFunc("/validatejwt", serveValidateJWT)
+	http.HandleFunc("/jwt", serveJWT)
 
 	http.HandleFunc("/", serveHome)
 
