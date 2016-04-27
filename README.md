@@ -23,6 +23,13 @@ http://127.0.0.1/v
 
 More info: https://github.com/pquerna/otp
 
+# JSON Web Token (JWT)
+\# go run jsonwebtoken/jsonwebtoken.go
+
+Then, go to http://127.0.0.1/
+
+More info: https://github.com/dgrijalva/jwt-go
+
 # Date time format conversion
 \# go run datetimeconv/datetimeconv.go 127.0.0.1
 
