@@ -87,7 +87,7 @@ func mykeys(key string) (string, error) {
 	return "", fmt.Errorf("MY: key not found")
 }
 
-func genJsonWebToken(username string, signingKey string) string {
+func genJSONWebToken(username string, signingKey string) string {
 	// New web token.
 	token := jwt.New(jwt.SigningMethodHS256)
 
@@ -126,9 +126,9 @@ func isWebTokenOk(authToken string) bool {
 
 			if err != nil {
 				return nil, fmt.Errorf("Username not found: %v", username)
-			} else {
-				return []byte(secretkey), nil
 			}
+
+			return []byte(secretkey), nil
 		})
 
 		if err == nil && t.Valid {
@@ -175,7 +175,7 @@ func serveJWT(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("{\"status\": false}"))
 	}
 
-	token := genJsonWebToken(username, secretkey)
+	token := genJSONWebToken(username, secretkey)
 
 	outMap["token"] = token
 	outMap["status"] = true
