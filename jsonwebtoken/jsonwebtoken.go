@@ -104,22 +104,11 @@ func genJsonWebToken(username string, signingKey string) string {
 	return t
 }
 
-func serveValidateJWT(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-	outMap := map[string]interface{}{
-		"status": false,
-	}
-
-	auth := r.Header.Get("Authorization")
+func isWebTokenOk(authToken string) bool {
 	bearerLen := len(bearer)
 
-	//str := r.RemoteAddr
-
-	fmt.Printf("Here 1: %v\n", auth)
-
-	if len(auth) > bearerLen+1 && auth[:bearerLen] == bearer {
-		t, err := jwt.Parse(auth[bearerLen+1:], func(token *jwt.Token) (interface{}, error) {
+	if len(authToken) > bearerLen+1 && authToken[:bearerLen] == bearer {
+		t, err := jwt.Parse(authToken[bearerLen+1:], func(token *jwt.Token) (interface{}, error) {
 			// Always check the signing method
 			// Don't forget to validate the alg is what you expect:
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -135,21 +124,34 @@ func serveValidateJWT(w http.ResponseWriter, r *http.Request) {
 
 			secretkey, err := mykeys(username)
 
-			if err == nil {
-				return []byte(secretkey), nil
+			if err != nil {
+				return nil, fmt.Errorf("Username not found: %v", username)
 			} else {
 				return []byte(secretkey), nil
 			}
 		})
 
 		if err == nil && t.Valid {
-			outMap["status"] = true
-			outMap["username"] = t.Claims["username"].(string)
-			outMap["msg"] = "Good"
-		} else {
-			outMap["msg"] = "Bad"
+			return true
 		}
+	}
+
+	return false
+}
+
+func serveValidateJWT(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	outMap := map[string]interface{}{
+		"status": false,
+	}
+	//str := r.RemoteAddr
+
+	if isWebTokenOk(r.Header.Get("Authorization")) == true {
+		outMap["status"] = true
+		outMap["msg"] = "Good"
 	} else {
+		outMap["msg"] = "Bad"
 	}
 
 	outJSON, err := json.Marshal(outMap)
