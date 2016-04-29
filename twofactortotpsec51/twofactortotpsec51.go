@@ -8,7 +8,7 @@ import (
 	"gopkg.in/redis.v3"
 	"log"
 	"net/http"
-	"strconv"
+	//"strconv"
 )
 
 var redisClient = redis.NewClient(&redis.Options{
@@ -51,6 +51,10 @@ func writeImage(w http.ResponseWriter, r *http.Request) {
 	//	log.Println("unable to write image.")
 	//}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	encoded := base64.StdEncoding.EncodeToString([]byte(qrBytes))
+
+	w.Write([]byte("Scan the QR code:<br><img src=\"data:image/png;base64," + encoded + "\" style=\"width: 200px;\">"))
+	//fmt.Fprintf(w, "Home: %s!", r.URL.Path[1:])
 }
 
 func verifyIt(w http.ResponseWriter, r *http.Request) {
