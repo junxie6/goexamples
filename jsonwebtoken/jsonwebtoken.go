@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"html/template"
 	"log"
 	"net/http"
-	"text/template"
 	"time"
 )
 
@@ -200,7 +200,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		"Test",
 	}
 
-	homeTempl.Execute(w, &v)
+	homeTempl.Execute(w, v)
 }
 
 func main() {
