@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto"
+	"encoding/base64"
 	"fmt"
 	"github.com/sec51/twofactor"
 	"gopkg.in/redis.v3"
@@ -43,12 +44,13 @@ func writeImage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "image/png")
-	w.Header().Set("Content-Length", strconv.Itoa(len(qrBytes)))
+	//w.Header().Set("Content-Type", "image/png")
+	//w.Header().Set("Content-Length", strconv.Itoa(len(qrBytes)))
 
-	if _, err := w.Write(qrBytes); err != nil {
-		log.Println("unable to write image.")
-	}
+	//if _, err := w.Write(qrBytes); err != nil {
+	//	log.Println("unable to write image.")
+	//}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 }
 
 func verifyIt(w http.ResponseWriter, r *http.Request) {
