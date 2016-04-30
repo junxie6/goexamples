@@ -91,7 +91,7 @@ func exampleConvStructToJSONOutputBrowser(w http.ResponseWriter, r *http.Request
 }
 
 func main() {
-	exampleConvStructToJSONOutputScreen()
+	exampleConvStructToJSONOutputScreen() // output to screen
 
 	http.HandleFunc("/exampleConvStructToJSONOutputBrowser", exampleConvStructToJSONOutputBrowser)
 
