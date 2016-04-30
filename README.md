@@ -1,4 +1,4 @@
-# goexamples
+# Go Examples
 Some useful examples for Go golang
 
 # Two factor authentication TOTP (Time-based One Time Password) example
@@ -35,3 +35,7 @@ More info: https://github.com/dgrijalva/jwt-go
 
 # Loop through golang struct
 \# go run loopthroughstruct/loopthroughstruct.go
+
+# HTML template
+\# go run htmltemplate/htmltemplate.go
+
