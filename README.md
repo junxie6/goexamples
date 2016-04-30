@@ -1,7 +1,10 @@
 # Go Examples
 Some useful examples for Go golang
 
-# Convert struct to a JSON string
+# Convert a map to a JSON string
+\# go run convmapjson/convmapjson.go
+
+# Convert a struct to a JSON string
 \# go run convstructjson/convstructjson.go
 
 # Two factor authentication TOTP (Time-based One Time Password) example
