@@ -2,7 +2,7 @@
 Some useful examples for Go golang
 
 # Convert struct to a JSON string
-\# go run jsonusage/jsonusage.go
+\# go run convstructjson/convstructjson.go
 
 # Two factor authentication TOTP (Time-based One Time Password) example
 \# go run twofactortotpsec51/twofactortotpsec51.go
