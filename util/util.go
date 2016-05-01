@@ -41,3 +41,7 @@ func ReadWebContent(url string) ([]byte, error) {
 		return body, nil
 	}
 }
+
+func daysAgo(t time.Time) int {
+	return int(time.Since(t).Hours() / 24)
+}
