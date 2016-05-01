@@ -12,7 +12,7 @@ import (
 type Todo struct {
 	Name      string `json:"name"` // By adding struct tags you can control exactly what and how your struct field name will be marshalled to JSON.
 	Completed bool
-	due       time.Time
+	Due       time.Time
 }
 
 type Todos []Todo
