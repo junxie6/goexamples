@@ -7,14 +7,25 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"time"
 )
 
 const (
 	exp1TplHTML = `
 	<p>Host: {{.Host}}</p>
+	<p>Date:	{{.CreatedDate | daysAgo}} days ago</p>
 	<p>Data:	{{.Data}}</p>
 `
 )
+
+func convStrToTime(str string) (time.Time, error) {
+	layout := "2006-01-02" // Mon Jan 2 15:04:05 -0700 MST 2006
+	return time.Parse(layout, str)
+}
+
+func daysAgo(t time.Time) int {
+	return int(time.Since(t).Hours() / 24)
+}
 
 // This example shows:
 // 1. A shortcut way to create a new HTML template.
@@ -22,15 +33,21 @@ const (
 func serveExample1(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
+	t, _ := convStrToTime("2016-04-20")
+
 	var v = struct {
-		Host string
-		Data string
+		Host        string
+		CreatedDate time.Time
+		Data        string
 	}{
 		r.Host,
+		t,
 		"Test",
 	}
 
-	exp1Tpl := template.Must(template.New("").Parse(exp1TplHTML))
+	exp1Tpl := template.Must(template.New("").
+		Funcs(template.FuncMap{"daysAgo": daysAgo}).
+		Parse(exp1TplHTML))
 	exp1Tpl.Execute(w, v)
 }
 

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 func ReadInput() (string, error) {
@@ -42,6 +43,11 @@ func ReadWebContent(url string) ([]byte, error) {
 	}
 }
 
-func daysAgo(t time.Time) int {
+func DaysAgo(t time.Time) int {
 	return int(time.Since(t).Hours() / 24)
+}
+
+func ConvStrToTime(str string) (time.Time, error) {
+	layout := "2006-01-02" // Mon Jan 2 15:04:05 -0700 MST 2006
+	return time.Parse(layout, str)
 }
