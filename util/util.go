@@ -2,7 +2,9 @@ package util
 
 import (
 	"bufio"
+	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 )
 
@@ -16,4 +18,26 @@ func WriteFile(fileName string, data []byte) error {
 
 func ReadFile(fileName string) ([]byte, error) {
 	return ioutil.ReadFile(fileName)
+}
+
+func ReadWebContent(url string) ([]byte, error) {
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// We must close resp.Body on all execution paths.
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return nil, fmt.Errorf("StatusCode: %s", resp.Status)
+	}
+
+	defer resp.Body.Close()
+
+	if body, err := ioutil.ReadAll(resp.Body); err != nil {
+		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
+	} else {
+		return body, nil
+	}
 }
