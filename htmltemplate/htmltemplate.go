@@ -14,7 +14,8 @@ const (
 	exp1TplHTML = `
 	<p>Host: {{.Host}}</p>
 	<p>Date:	{{.CreatedDate | daysAgo}} days ago</p>
-	<p>Data:	{{.Data}}</p>
+	<p>Data A:	{{.DataA}}</p>
+	<p>Data B:	{{.DataB}}</p>
 `
 )
 
@@ -38,11 +39,13 @@ func serveExample1(w http.ResponseWriter, r *http.Request) {
 	var v = struct {
 		Host        string
 		CreatedDate time.Time
-		Data        string
+		DataA       string        // untrusted plain text
+		DataB       template.HTML // trusted HTML
 	}{
 		r.Host,
 		t,
-		"Test",
+		"<b>Test A</b>",
+		"<b>Test B</b>",
 	}
 
 	exp1Tpl := template.Must(template.New("").
