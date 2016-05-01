@@ -34,11 +34,13 @@ func ReadWebContent(url string) ([]byte, error) {
 
 	defer resp.Body.Close()
 
-	if body, err := ioutil.ReadAll(resp.Body); err != nil {
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
 		return nil, err
-	} else {
-		return body, nil
 	}
+
+	return body, nil
 }
 
 func DaysAgo(t time.Time) int {
