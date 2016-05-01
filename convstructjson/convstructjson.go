@@ -38,7 +38,14 @@ func exampleConvStructToJSONOutputScreen1() {
 	if data, err := json.Marshal(todos); err != nil {
 		log.Fatalf("JSON marshaling failed: %s", err)
 	} else {
-		fmt.Printf("json.Marshal:\n%s\n", data)
+		fmt.Printf("json.Marshal:\n%s\n\n", data)
+	}
+
+	// produces neatly indented output
+	if data, err := json.MarshalIndent(todos, "", " "); err != nil {
+		log.Fatalf("JSON marshaling failed: %s", err)
+	} else {
+		fmt.Printf("json.MarshalIndent:\n%s\n\n", data)
 	}
 }
 
@@ -49,7 +56,7 @@ func exampleConvStructToJSONOutputScreen2() {
 		Todo{Name: "Host meetup", Due: time.Now()},
 	}
 
-	fmt.Println("\njson.NewEncoder:")
+	fmt.Println("json.NewEncoder:")
 	if err := json.NewEncoder(os.Stdout).Encode(todos); err != nil {
 		fmt.Println(err)
 	}
