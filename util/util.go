@@ -36,7 +36,7 @@ func ReadWebContent(url string) ([]byte, error) {
 	defer resp.Body.Close()
 
 	if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
+		return nil, err
 	} else {
 		return body, nil
 	}
