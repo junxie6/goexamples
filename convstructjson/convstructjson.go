@@ -28,13 +28,28 @@ type MyOrder struct {
 	ItemArr      []Item
 }
 
-// This example convert the struct to a JSON string. Then, output to screen.
-func exampleConvStructToJSONOutputScreen() {
+// This example convert the struct to a JSON string.
+func exampleConvStructToJSONOutputScreen1() {
 	todos := Todos{
 		Todo{Name: "Write presentation", Due: time.Now()},
 		Todo{Name: "Host meetup", Due: time.Now()},
 	}
 
+	if data, err := json.Marshal(todos); err != nil {
+		log.Fatalf("JSON marshaling failed: %s", err)
+	} else {
+		fmt.Printf("json.Marshal:\n%s\n", data)
+	}
+}
+
+// This example convert the struct to a JSON string and output to screen directly.
+func exampleConvStructToJSONOutputScreen2() {
+	todos := Todos{
+		Todo{Name: "Write presentation", Due: time.Now()},
+		Todo{Name: "Host meetup", Due: time.Now()},
+	}
+
+	fmt.Println("\njson.NewEncoder:")
 	if err := json.NewEncoder(os.Stdout).Encode(todos); err != nil {
 		fmt.Println(err)
 	}
@@ -91,7 +106,8 @@ func exampleConvStructToJSONOutputBrowser(w http.ResponseWriter, r *http.Request
 }
 
 func main() {
-	exampleConvStructToJSONOutputScreen() // output to screen
+	exampleConvStructToJSONOutputScreen1() // output to screen
+	exampleConvStructToJSONOutputScreen2() // output to screen
 
 	http.HandleFunc("/exampleConvStructToJSONOutputBrowser", exampleConvStructToJSONOutputBrowser)
 
