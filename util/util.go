@@ -3,6 +3,7 @@ package util
 import (
 	"bufio"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -68,4 +69,12 @@ func WaitForServer(url string) error {
 		time.Sleep(time.Second << uint(tries)) // exponential backoff
 	}
 	return fmt.Errorf("server %s failed to respond after %s", url, timeout)
+}
+
+func HashPassword(plaintextPassword string) ([]byte, error) {
+	return bcrypt.GenerateFromPassword([]byte(plaintextPassword), bcrypt.DefaultCost)
+}
+
+func ValidatePassword(hashed string, plaintextPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashed), []byte(plaintextPassword))
 }
