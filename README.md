@@ -45,3 +45,5 @@ More info: https://github.com/dgrijalva/jwt-go
 # HTML template
 \# go run htmltemplate/htmltemplate.go
 
+# Print Message
+\# go run printmessage/printmessage.go
