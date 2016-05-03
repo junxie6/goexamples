@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 )
 
@@ -11,47 +12,13 @@ var (
 	db *sql.DB
 )
 
-func test() {
-	// query
-	var (
-		id   int
-		name string
-	)
-
-	rows, err := db.Query("SELECT uid, username from users where uid = ?", 1)
-
-	if err != nil {
-		log.Fatalf("Error: %s", err)
-	}
-
-	//defer rows.Close()
-
-	for rows.Next() {
-		err := rows.Scan(&id, &name)
-
-		if err != nil {
-			log.Fatalf("Error: %s", err)
-		}
-
-		fmt.Println(id, name)
-	}
-
-	err = rows.Err()
-
-	if err != nil {
-		log.Fatalf("Error: %s", err)
-	}
-}
-
 func initDB() {
 	var err error
-	db, err = sql.Open("mysql", "MyUser:MyPassword@tcp(localhost:3306)/MyDB")
+	db, err = sql.Open("mysql", "MyUser:MyPassword(localhost:3306)/MyDB")
 
 	if err != nil {
 		log.Fatalf("Error on initializing database connection: %s", err.Error())
 	}
-
-	//defer db.Close()
 
 	// Open doesn't open a connection. Validate DSN data:
 	err = db.Ping()
@@ -61,7 +28,145 @@ func initDB() {
 	}
 }
 
+func testInsert(username string, plaintextPassword string) {
+	var hashPassword string
+
+	if s, err := HashPassword(plaintextPassword); err != nil {
+		log.Fatal(err)
+	} else {
+		hashPassword = string(s)
+	}
+
+	stmt, err := db.Prepare("INSERT INTO users (username, password) VALUES (?, ?)")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer stmt.Close()
+
+	res, err := stmt.Exec(username, hashPassword)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lastID, err := res.LastInsertId()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rowCnt, err := res.RowsAffected()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("testInsert: ID = %d, affected = %d\n", lastID, rowCnt)
+}
+
+func testSelectMultipleRowsV1() {
+	// query
+	var (
+		uid      int
+		username string
+	)
+
+	stmt, err := db.Prepare("SELECT uid, username FROM users WHERE ?")
+
+	if err != nil {
+		log.Printf("Error: %s", err)
+	}
+
+	defer stmt.Close()
+
+	rows, err := stmt.Query(1)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&uid, &username)
+
+		if err != nil {
+			log.Printf("Error: %s", err)
+		}
+
+		fmt.Printf("testSelectMultipleRowsV1: %d, %s\n", uid, username)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Error: %s", err)
+	}
+}
+
+func testSelectMultipleRowsV2() {
+	// query
+	var (
+		uid      int
+		username string
+	)
+
+	// Under the hood, db.Query() actually prepares, executes, and closes a prepared statement.
+	// That's three round-trips to the database. If you're not careful, you can triple the number of database interactions your application makes!
+	rows, err := db.Query("SELECT uid, username FROM users WHERE ?", 1)
+
+	if err != nil {
+		log.Printf("Error: %s", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&uid, &username)
+
+		if err != nil {
+			log.Printf("Error: %s", err)
+		}
+
+		fmt.Printf("testSelectMultipleRowsV2: %d, %s\n", uid, username)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Error: %s", err)
+	}
+}
+
+func testSelectSingleRow() {
+	var (
+		uid  int
+		name string
+	)
+
+	err := db.QueryRow("SELECT uid, username FROM users WHERE username =  ?", "jun").Scan(&uid, &name)
+
+	if err != nil {
+		log.Printf("Error: %s", err)
+	}
+
+	fmt.Printf("testSelectSingleRow: %d, %s\n", uid, name)
+}
+
+// HashPassword ...
+func HashPassword(plaintextPassword string) ([]byte, error) {
+	return bcrypt.GenerateFromPassword([]byte(plaintextPassword), bcrypt.DefaultCost)
+}
+
+// ValidatePassword ...
+func ValidatePassword(hashed string, plaintextPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashed), []byte(plaintextPassword))
+}
+
 func main() {
 	initDB()
-	test()
+	defer db.Close()
+
+	testInsert("test1", "test1")
+	testSelectMultipleRowsV1()
+	testSelectMultipleRowsV2()
+	testSelectSingleRow()
 }
