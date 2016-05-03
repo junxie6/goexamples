@@ -14,17 +14,17 @@ var (
 
 func initDB() {
 	var err error
-	db, err = sql.Open("mysql", "MyUser:MyPassword(localhost:3306)/MyDB")
+	db, err = sql.Open("mysql", "MyUser:MyPassword@tcp(localhost:3306)/MyDB")
 
 	if err != nil {
-		log.Fatalf("Error on initializing database connection: %s", err.Error())
+		log.Fatalf("Error on initializing database connection: %v", err.Error())
 	}
 
 	// Open doesn't open a connection. Validate DSN data:
 	err = db.Ping()
 
 	if err != nil {
-		log.Fatalf("Error on opening database connection: %s", err.Error())
+		log.Fatalf("Error on opening database connection: %v", err.Error())
 	}
 }
 
@@ -32,7 +32,7 @@ func testInsert(username string, plaintextPassword string) {
 	var hashPassword string
 
 	if s, err := HashPassword(plaintextPassword); err != nil {
-		log.Fatal(err)
+		log.Printf("%v", err)
 	} else {
 		hashPassword = string(s)
 	}
@@ -40,7 +40,7 @@ func testInsert(username string, plaintextPassword string) {
 	stmt, err := db.Prepare("INSERT INTO users (username, password) VALUES (?, ?)")
 
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error: %v", err)
 	}
 
 	defer stmt.Close()
@@ -48,19 +48,19 @@ func testInsert(username string, plaintextPassword string) {
 	res, err := stmt.Exec(username, hashPassword)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error: %v", err)
 	}
 
 	lastID, err := res.LastInsertId()
 
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error: %v", err)
 	}
 
 	rowCnt, err := res.RowsAffected()
 
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error: %v", err)
 	}
 
 	fmt.Printf("testInsert: ID = %d, affected = %d\n", lastID, rowCnt)
@@ -76,7 +76,7 @@ func testSelectMultipleRowsV1() {
 	stmt, err := db.Prepare("SELECT uid, username FROM users WHERE ?")
 
 	if err != nil {
-		log.Printf("Error: %s", err)
+		log.Printf("Error: %v", err)
 	}
 
 	defer stmt.Close()
@@ -84,7 +84,7 @@ func testSelectMultipleRowsV1() {
 	rows, err := stmt.Query(1)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error: %v", err)
 	}
 
 	defer rows.Close()
@@ -93,14 +93,14 @@ func testSelectMultipleRowsV1() {
 		err := rows.Scan(&uid, &username)
 
 		if err != nil {
-			log.Printf("Error: %s", err)
+			log.Printf("Error: %v", err)
 		}
 
 		fmt.Printf("testSelectMultipleRowsV1: %d, %s\n", uid, username)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Printf("Error: %s", err)
+		log.Printf("Error: %v", err)
 	}
 }
 
@@ -116,7 +116,7 @@ func testSelectMultipleRowsV2() {
 	rows, err := db.Query("SELECT uid, username FROM users WHERE ?", 1)
 
 	if err != nil {
-		log.Printf("Error: %s", err)
+		log.Printf("Error: %v", err)
 	}
 
 	defer rows.Close()
@@ -125,14 +125,14 @@ func testSelectMultipleRowsV2() {
 		err := rows.Scan(&uid, &username)
 
 		if err != nil {
-			log.Printf("Error: %s", err)
+			log.Printf("Error: %v", err)
 		}
 
 		fmt.Printf("testSelectMultipleRowsV2: %d, %s\n", uid, username)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Printf("Error: %s", err)
+		log.Printf("Error: %v", err)
 	}
 }
 
@@ -145,7 +145,7 @@ func testSelectSingleRow() {
 	err := db.QueryRow("SELECT uid, username FROM users WHERE username =  ?", "jun").Scan(&uid, &name)
 
 	if err != nil {
-		log.Printf("Error: %s", err)
+		log.Printf("Error: %v", err)
 	}
 
 	fmt.Printf("testSelectSingleRow: %d, %s\n", uid, name)
