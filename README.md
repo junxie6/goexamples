@@ -50,3 +50,6 @@ More info: https://github.com/dgrijalva/jwt-go
 
 # Read arguments from console
 \# go run consoleargument/consoleargument.go test.txt A B C
+
+# Connect to MySQL
+\# go run connectmysql/connectmysql.go
