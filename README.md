@@ -47,3 +47,6 @@ More info: https://github.com/dgrijalva/jwt-go
 
 # Print Message
 \# go run printmessage/printmessage.go
+
+# Read arguments from console
+\# go run consoleargument/consoleargument.go test.txt A B C
