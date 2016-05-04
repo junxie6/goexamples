@@ -1,0 +1,21 @@
+{{ define "layout" }}<html>
+  <head>
+  </head>
+  <body>
+    {{ with $x := "XXX" }}
+      x: {{ $x }}
+      x: {{ $x | printf "%q" }}
+    {{end}}
+
+    {{ template "header" }}
+
+    {{ template "body" . }} {{/* pipeline the variable to body */}}
+
+    {{ template "footer" }}
+
+    MyMsgA: {{ .MyMsgA }}
+    MyMsgB: {{ .MyMsgB }}
+  </body>
+</html>
+{{ end }}
+
