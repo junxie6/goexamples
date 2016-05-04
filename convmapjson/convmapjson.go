@@ -8,6 +8,8 @@ import (
 )
 
 func exampleConvMapToJSONOutputBrowser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
 	orderMap := map[string]interface{}{
 		"status":  true,
 		"name":    "bot",
@@ -47,7 +49,7 @@ func exampleConvMapToJSONOutputBrowser(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		w.Write([]byte(orderJson))
 	} else {
-		w.Write([]byte("{\"status\": false}"))
+		w.Write([]byte(`{"status": false}`))
 	}
 }
 
