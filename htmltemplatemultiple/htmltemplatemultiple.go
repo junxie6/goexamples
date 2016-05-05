@@ -18,10 +18,10 @@ func main() {
 		MyMsgB: "<b>Hello World B</b>",
 	}
 
-	layoutTpl := "htmltemplatemultiple/template/testlayout.tpl.html"
-	headerTpl := "htmltemplatemultiple/template/testheader.tpl.html"
-	bodyTpl := "htmltemplatemultiple/template/testbody.tpl.html"
-	footerTpl := "htmltemplatemultiple/template/testfooter.tpl.html"
+	layoutTpl := "htmltemplatemultiple/template/layout.tpl.html"
+	headerTpl := "htmltemplatemultiple/template/header.tpl.html"
+	bodyTpl := "htmltemplatemultiple/template/body.tpl.html"
+	footerTpl := "htmltemplatemultiple/template/footer.tpl.html"
 
 	tmpl := template.Must(template.ParseFiles(layoutTpl, headerTpl, bodyTpl, footerTpl))
 
