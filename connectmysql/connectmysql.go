@@ -269,8 +269,13 @@ func main() {
 	initDB()
 	defer db.Close()
 
+	// this example shows how to insert data.
 	//testInsert("test1", "test1")
+
+	// this example shows how to select multiple rows
 	//testSelectMultipleRowsV1()
+
+	// this example shows how to select multiple rows
 	//testSelectMultipleRowsV2()
 
 	// this example shows how to dynamically assign a list of field name to the rows.Scan() function.
@@ -278,5 +283,6 @@ func main() {
 	optArr["idOrder"] = 1
 	testSelectMultipleRowsV3(optArr)
 
-	//testSelectSingleRow()
+	// this example shows how to select single row.
+	testSelectSingleRow()
 }
