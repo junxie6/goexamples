@@ -6,6 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"reflect"
 )
 
 var (
@@ -164,6 +165,19 @@ func HashPassword(plaintextPassword string) ([]byte, error) {
 // ValidatePassword ...
 func ValidatePassword(hashed string, plaintextPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashed), []byte(plaintextPassword))
+}
+
+func StrutToSliceOfFieldAddress(s interface{}) []interface{} {
+	fieldArr := reflect.ValueOf(s).Elem()
+
+	fieldAddrArr := make([]interface{}, fieldArr.NumField())
+
+	for i := 0; i < fieldArr.NumField(); i++ {
+		f := fieldArr.Field(i)
+		fieldAddrArr[i] = f.Addr().Interface()
+	}
+
+	return fieldAddrArr
 }
 
 func main() {
