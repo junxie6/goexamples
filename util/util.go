@@ -78,3 +78,33 @@ func HashPassword(plaintextPassword string) ([]byte, error) {
 func ValidatePassword(hashed string, plaintextPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashed), []byte(plaintextPassword))
 }
+
+// this function can be used for rows.Scan() for setting the value for database fields from SQL query.
+func StrutToSliceOfFieldAddress(theStruct interface{}) []interface{} {
+	fieldArr := reflect.ValueOf(theStruct).Elem()
+
+	fieldAddrArr := make([]interface{}, fieldArr.NumField())
+
+	for i := 0; i < fieldArr.NumField(); i++ {
+		f := fieldArr.Field(i)
+		fieldAddrArr[i] = f.Addr().Interface()
+	}
+
+	return fieldAddrArr
+}
+
+// Fill a slice with values.
+func sliceFill(num int, str string) []string {
+	slice := make([]string, num)
+
+	for k, _ := range slice {
+		slice[k] = str
+	}
+
+	return slice
+}
+
+// Generate the placeholders for SQL query.
+func placeholder(num int) string {
+	return strings.Join(sliceFill(num, "?"), ",")
+}
