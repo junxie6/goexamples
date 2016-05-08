@@ -148,6 +148,23 @@ func PrintErrJSON(rowArr []error) {
 	PrintJSON(b)
 }
 
+func ConvErrArrToJSON(errArr []error) string {
+	b := make([]interface{}, len(errArr))
+	for i := range errArr {
+		b[i] = errArr[i].Error()
+	}
+
+	var byteJSON []byte
+	var err error
+
+	if byteJSON, err = json.Marshal(b); err != nil {
+		log.Printf("JSON marshaling failed: %s\n", err)
+		return `{"status":false,"err":"` + err.Error() + `"}`
+	}
+
+	return string(byteJSON)
+}
+
 func ConvSliceToInterface(slice interface{}) []interface{} {
 	s := reflect.ValueOf(slice)
 
