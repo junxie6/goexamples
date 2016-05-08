@@ -94,7 +94,7 @@ func StrutToSliceOfFieldAddress(theStruct interface{}) []interface{} {
 }
 
 // Fill a slice with values.
-func sliceFill(num int, str string) []string {
+func SliceFill(num int, str string) []string {
 	slice := make([]string, num)
 
 	for k, _ := range slice {
@@ -105,6 +105,6 @@ func sliceFill(num int, str string) []string {
 }
 
 // Generate the placeholders for SQL query.
-func placeholder(num int) string {
+func Placeholder(num int) string {
 	return strings.Join(sliceFill(num, "?"), ",")
 }
