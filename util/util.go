@@ -49,6 +49,11 @@ func DaysAgo(t time.Time) int {
 	return int(time.Since(t).Hours() / 24)
 }
 
+func Now() string {
+	// Mon Jan 2 15:04:05 -0700 MST 2006
+	return time.Now().Format("2006-01-02 15:04:05")
+}
+
 func ConvStrToTime(str string) (time.Time, error) {
 	layout := "2006-01-02" // Mon Jan 2 15:04:05 -0700 MST 2006
 	return time.Parse(layout, str)
