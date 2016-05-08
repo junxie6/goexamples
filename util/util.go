@@ -118,3 +118,45 @@ func RandomNumInSlice(slice []int) int {
 	rand.Seed(time.Now().UTC().UnixNano())
 	return slice[rand.Intn(len(slice))]
 }
+
+func PrintJSON(rowArr []interface{}) {
+	// produces neatly indented output
+	if data, err := json.MarshalIndent(rowArr, "", " "); err != nil {
+		log.Printf("JSON marshaling failed: %s\n", err)
+	} else {
+		fmt.Printf("%s\n", data)
+	}
+}
+
+func PrintErrJSON(rowArr []error) {
+	b := make([]interface{}, len(rowArr))
+	for i := range rowArr {
+		b[i] = rowArr[i].Error()
+	}
+	PrintJSON(b)
+}
+
+func ConvSliceToInterface(slice interface{}) []interface{} {
+	s := reflect.ValueOf(slice)
+
+	if s.Kind() != reflect.Slice {
+		log.Printf("ConvSliceToInterface() given a non-slice type")
+		return nil
+	}
+
+	ret := make([]interface{}, s.Len())
+
+	for i := 0; i < s.Len(); i++ {
+		ret[i] = s.Index(i).Interface()
+	}
+
+	return ret
+}
+
+func ConvErrArrToStringArr(errArr []error) []string {
+	strArr := make([]string, len(errArr))
+	for i := range errArr {
+		strArr[i] = errArr[i].Error()
+	}
+	return strArr
+}
