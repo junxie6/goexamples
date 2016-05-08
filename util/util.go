@@ -113,3 +113,8 @@ func SliceFill(num int, str string) []string {
 func Placeholder(num int) string {
 	return strings.Join(sliceFill(num, "?"), ",")
 }
+
+func RandomNumInSlice(slice []int) int {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return slice[rand.Intn(len(slice))]
+}
