@@ -2,12 +2,16 @@ package util
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"reflect"
+	"strings"
 	"time"
 )
 
@@ -111,12 +115,20 @@ func SliceFill(num int, str string) []string {
 
 // Generate the placeholders for SQL query.
 func Placeholder(num int) string {
-	return strings.Join(sliceFill(num, "?"), ",")
+	return strings.Join(SliceFill(num, "?"), ",")
 }
 
 func RandomNumInSlice(slice []int) int {
 	rand.Seed(time.Now().UTC().UnixNano())
 	return slice[rand.Intn(len(slice))]
+}
+
+func PrintStructJSON(s interface{}) {
+	if strJSON, err := json.MarshalIndent(s, "", " "); err != nil {
+		log.Printf("JSON marshaling failed: %s\n", err)
+	} else {
+		fmt.Printf("%s\n", strJSON)
+	}
 }
 
 func PrintJSON(rowArr []interface{}) {
