@@ -10,7 +10,7 @@ func main() {
 	var docHTML1 bytes.Buffer
 	var docHTML2 bytes.Buffer
 
-	var v = struct {
+	var tplParam = struct {
 		MyMsgA string        // untrusted plain text
 		MyMsgB template.HTML // trusted HTML
 	}{
@@ -23,16 +23,18 @@ func main() {
 	bodyTpl := "htmltemplatemultiple/template/body.tpl.html"
 	footerTpl := "htmltemplatemultiple/template/footer.tpl.html"
 
-	tmpl := template.Must(template.ParseFiles(layoutTpl, headerTpl, bodyTpl, footerTpl))
-
-	fmt.Printf("Show the body region:\n")
-	tmpl.ExecuteTemplate(&docHTML1, "body", v)
-	str1 := docHTML1.String()
-	fmt.Printf("%s\n", str1)
+	tpl := template.Must(template.ParseFiles(layoutTpl, headerTpl, bodyTpl, footerTpl))
 
 	fmt.Printf("Show the entire layout:\n")
-	//tmpl.Execute(&docHTML2, v)
-	tmpl.ExecuteTemplate(&docHTML2, "layout", v)
+	tpl.ExecuteTemplate(&docHTML1, "layout", tplParam)
+	str1 := docHTML1.String()
+	//bytes := buffer.Bytes() // Convert to []byte
+	//bytes := buffer.WriteTo(w) // use Buffer.WriteTo() to copy the buffer contents directly to a Writer.
+	fmt.Printf("%s\n", str1)
+
+	fmt.Printf("Show the body region:\n")
+	//tpl.Execute(&docHTML2, tplParam)
+	tpl.ExecuteTemplate(&docHTML2, "body", tplParam)
 	str2 := docHTML2.String()
 	fmt.Printf("%s\n", str2)
 }

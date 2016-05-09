@@ -60,7 +60,7 @@ func serveExample1(w http.ResponseWriter, r *http.Request) {
 func serveExample2(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	var v = struct {
+	var tplParam = struct {
 		MyMsg string
 	}{
 		"Hello World",
@@ -76,7 +76,7 @@ func serveExample2(w http.ResponseWriter, r *http.Request) {
 	} else {
 		var doc bytes.Buffer
 
-		exp2Tpl.Execute(&doc, v)
+		exp2Tpl.Execute(&doc, tplParam)
 		outStr = doc.String()
 	}
 

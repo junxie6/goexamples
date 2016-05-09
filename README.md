@@ -59,3 +59,6 @@ More info: https://github.com/dgrijalva/jwt-go
 
 # Connect to MySQL
 \# go run connectmysql/connectmysql.go
+
+# HTTP Post
+\# go run httppost/httppost.go
