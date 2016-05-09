@@ -11,18 +11,22 @@ import (
 	"strings"
 )
 
+const (
+	dataSourceName = "MyUser:MyPassword@tcp(localhost:3306)/MyDB"
+)
+
 var (
 	db *sql.DB
 )
 
-func initDB() {
+func initDB(dsn string) {
 	var err error
 
 	// The database/sql package manages the connection pooling automatically for you.
 	// sql.Open(..) returns a handle which represents a connection pool, not a single connection.
 	// The database/sql package automatically opens a new connection if all connections in the pool are busy.
 	// Reference: http://stackoverflow.com/questions/17376207/how-to-share-mysql-connection-between-http-goroutines
-	db, err = sql.Open("mysql", "MyUser:MyPassword@tcp(localhost:3306)/MyDB")
+	db, err = sql.Open("mysql", dsn)
 	//db, err = sql.Open("mysql", "MyUser:MyPassword@tcp(localhost:3306)/MyDB?tx_isolation='READ-COMMITTED'") // optional
 
 	if err != nil {
@@ -266,7 +270,7 @@ func StrutToSliceOfFieldAddress(s interface{}) []interface{} {
 }
 
 func main() {
-	initDB()
+	initDB(dataSourceName)
 	defer db.Close()
 
 	// this example shows how to insert data.
