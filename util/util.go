@@ -208,3 +208,8 @@ func FormValueArr(r *http.Request) map[string]string {
 
 	return mapArr
 }
+
+func Atoi64(num string) int64 {
+	i, _ := strconv.ParseInt(num, 10, 64)
+	return i
+}
