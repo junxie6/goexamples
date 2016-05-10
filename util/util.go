@@ -152,15 +152,15 @@ func ConvErrArrToJSON(errArr []error) string {
 	strArr := ConvErrArrToStringArr(errArr)
 
 	outMap := map[string]interface{}{
-		"status": false,
-		"errArr": strArr,
+		"Status": false,
+		"ErrArr": strArr,
 	}
 
 	var byteJSON []byte
 	var err error
 
 	if byteJSON, err = json.Marshal(outMap); err != nil {
-		return `{"status":false,"errArr":["` + err.Error() + `"]}`
+		return `{"Status":false,"ErrArr":["` + err.Error() + `"]}`
 	}
 
 	return string(byteJSON)
