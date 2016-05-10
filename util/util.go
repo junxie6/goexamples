@@ -190,3 +190,21 @@ func ConvErrArrToStringArr(errArr []error) []string {
 	}
 	return strArr
 }
+
+func FormValueArr(r *http.Request) map[string]string {
+	mapArr := map[string]string{}
+
+	if r.Form == nil {
+		r.ParseMultipartForm(32 << 20) // 32 MB
+	}
+
+	for k, vs := range r.Form {
+		if len(vs) > 0 {
+			mapArr[k] = vs[0]
+		} else {
+			mapArr[k] = ""
+		}
+	}
+
+	return mapArr
+}
