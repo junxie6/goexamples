@@ -6,8 +6,54 @@ import (
 
 // SO is SalesOrder
 type SO struct {
-	IDOrder int
-	Status  int
+	IDOrder   int
+	Status    int
+	Created   string
+	Changed   string
+	SOInfo    SOInfo
+	SOAddr    SOAddr
+	SOLineArr []SOLine
+	PackArr   []SP
+}
+
+// SOInfo ...
+type SOInfo struct {
+	IDOrder  int
+	IDDealer int
+	PONum    string
+}
+
+// SOAddr ...
+type SOAddr struct {
+	IDOrder     int
+	IDShipAddr  int
+	DealerName  string
+	BillContact string
+	BillStreet1 string
+	BillStreet2 string
+	BillCity    string
+	BillState   string
+	BillZip     string
+	BillCountry string
+	ShipContact string
+	ShipStreet1 string
+	ShipStreet2 string
+	ShipCity    string
+	ShipState   string
+	ShipZip     string
+	ShipCountry string
+}
+
+// SOLine ...
+type SOLine struct {
+	IDOrder      int
+	LineNum      int
+	IDWarehouse  int
+	IDItem       int
+	OrderedQty   int
+	ShippedQty   int
+	BackOrderQty int
+	Changed      string
 }
 
 func (so *SO) Insert() {
