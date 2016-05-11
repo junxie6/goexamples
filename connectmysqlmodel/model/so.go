@@ -29,3 +29,30 @@ func (so *SO) Insert() {
 		}
 	}
 }
+
+// editSO runs the queries in transaction.
+func (so *SO) editSO() (bool, []error) {
+	errArr := []error{}
+	tx, err := db.Begin()
+
+	if err != nil {
+		return false, append(errArr, err)
+	}
+
+	// Lock SO - considering whether to add "locked IDOrder rows" checking as well.
+	if so.lockSO(tx, &errArr); len(errArr) == 0 {
+		// [DEBUG] Sleep
+		if so.SOInfo.PONum == "lock" {
+			time.Sleep(15 * time.Second)
+		}
+
+		// more actions once it's locked
+		//so.editSORaw(tx, &errArr)
+	}
+
+	if ok := txEnd(tx, &errArr); !ok {
+		return false, errArr
+	}
+
+	return true, nil
+}

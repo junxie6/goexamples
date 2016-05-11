@@ -29,3 +29,20 @@ func InitDB(dsn string) (*sql.DB, error) {
 
 	return db, nil
 }
+
+// txEnd handles the transaction Rollback and Commit logic by checking errors.
+func txEnd(tx *sql.Tx, errArrPtr *[]error) bool {
+	if len(*errArrPtr) > 0 {
+		if err := tx.Rollback(); err != nil {
+			*errArrPtr = append(*errArrPtr, err)
+		}
+	} else if err := tx.Commit(); err != nil {
+		*errArrPtr = append(*errArrPtr, err)
+	}
+
+	if len(*errArrPtr) > 0 {
+		return false
+	}
+
+	return true
+}
