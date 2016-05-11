@@ -210,7 +210,23 @@ func FormValueArr(r *http.Request) map[string]string {
 	return mapArr
 }
 
+func Atoi(num string) int {
+	i, _ := strconv.ParseInt(num, 10, 0)
+	return int(i)
+}
+
 func Atoi64(num string) int64 {
 	i, _ := strconv.ParseInt(num, 10, 64)
 	return i
+}
+
+func StructFieldNameArr(s interface{}) []string {
+	sFields := reflect.TypeOf(s)
+	fieldNameArr := make([]string, sFields.NumField())
+
+	for i := 0; i < sFields.NumField(); i++ {
+		fieldNameArr[i] = sFields.Field(i).Name
+	}
+
+	return fieldNameArr
 }
