@@ -100,6 +100,7 @@ func (so *SO) editSO() []error {
 	}
 
 	txEnd(tx, &errArr)
+
 	return errArr
 }
 
