@@ -80,7 +80,7 @@ func (so *SO) Insert() {
 }
 
 // editSO runs the queries in transaction.
-func (so *SO) editSO() (bool, []error) {
+func (so *SO) editSO() []error {
 	errArr := []error{}
 	tx, err := db.Begin()
 
@@ -99,11 +99,9 @@ func (so *SO) editSO() (bool, []error) {
 		//so.editSORaw(tx, &errArr)
 	}
 
-	if ok := txEnd(tx, &errArr); !ok {
-		return false, errArr
-	}
+	txEnd(tx, &errArr)
 
-	return true, nil
+	return errArr
 }
 
 func (so *SO) lockSO(tx *sql.Tx, errArrPtr *[]error) {
