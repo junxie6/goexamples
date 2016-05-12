@@ -85,7 +85,7 @@ func (so *SO) editSO() []error {
 	tx, err := db.Begin()
 
 	if err != nil {
-		return false, append(errArr, err)
+		return append(errArr, err)
 	}
 
 	// Lock SO - considering whether to add "locked IDOrder rows" checking as well.
