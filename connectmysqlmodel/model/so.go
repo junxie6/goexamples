@@ -1,7 +1,10 @@
 package model
 
 import (
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"time"
 )
 
 // SO is SalesOrder
@@ -101,4 +104,7 @@ func (so *SO) editSO() (bool, []error) {
 	}
 
 	return true, nil
+}
+
+func (so *SO) lockSO(tx *sql.Tx, errArrPtr *[]error) {
 }
