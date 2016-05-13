@@ -59,10 +59,10 @@ type SOLine struct {
 	Changed      string
 }
 
-func (so *SO) Insert() {
+func (so *SO) Insert(tx *sql.Tx, errArrPtr *[]error) {
 	so.Status = 1
 
-	stmt, err := db.Prepare("INSERT INTO SO (Status, changed) VALUES (?, NOW())")
+	stmt, err := tx.Prepare("INSERT INTO SO (Status, changed) VALUES (?, NOW())")
 
 	if err != nil {
 		log.Printf("Error: %v", err)
@@ -97,6 +97,7 @@ func (so *SO) editSO() []error {
 
 		// more actions once it's locked
 		//so.editSORaw(tx, &errArr)
+		//so.Insert(tx, &errArr)
 	}
 
 	txEnd(tx, &errArr)
