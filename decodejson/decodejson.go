@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 )
 
 // convJSONToMap shows how to decode the nested JSON string into a map by doing type assertion.
@@ -15,10 +16,11 @@ func convJSONToMap() {
 	if err := json.Unmarshal([]byte(strJSON), &data); err != nil {
 	} else {
 		for IdDealer, v0 := range data {
+			//
 			DealerName := v0.(map[string]interface{})["DealerName"]
 			DealerCountry := v0.(map[string]interface{})["DealerCountry"]
 
-			fmt.Printf("%v\t%v\t%v\n", IdDealer, DealerName, DealerCountry)
+			fmt.Printf("\n%v\t%v\t%v\n", IdDealer, DealerName, DealerCountry)
 
 			ItemArr := v0.(map[string]interface{})["ItemArr"]
 
@@ -29,18 +31,21 @@ func convJSONToMap() {
 				fmt.Printf("\tLine[%v]:\t%v\t%v\t%v\n", k1, LineNum, IdItem, ItemNum)
 			}
 
-			// If the underlying type is unknown, a type switch determines the type:
+			// Optional: Use reflect to determine the type:
+			fmt.Printf("Type: %v\n", reflect.TypeOf(ItemArr))
+
+			// Optional: If the underlying type is unknown, use a type switch to determine the type:
 			switch v := ItemArr.(type) {
 			case int:
-				fmt.Printf("It's int: %v\n", v)
+				fmt.Printf("Type: int: %v\n", v)
 			case float64:
-				fmt.Printf("It's float64: %v\n", v)
+				fmt.Printf("Type: float64: %v\n", v)
 			case string:
-				fmt.Printf("It's string: %v\n", v)
+				fmt.Printf("Type: string: %v\n", v)
 			case []interface{}:
-				fmt.Printf("It's []interface{}: %v\n", v)
+				fmt.Printf("Type: []interface{}: %v\n", v)
 			default:
-				fmt.Printf("It is not one of the types above: %v\n", v)
+				fmt.Printf("Type: It is not one of the types above: %v\n", v)
 			}
 		}
 	}
