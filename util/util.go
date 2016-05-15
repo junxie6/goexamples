@@ -230,3 +230,38 @@ func StructFieldNameArr(s interface{}) []string {
 
 	return fieldNameArr
 }
+
+// Not Tested Yet
+func InArrayV1(val interface{}, array interface{}) (exists bool, index int) {
+	exists = false
+	index = -1
+
+	switch reflect.TypeOf(array).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(array)
+
+		for i := 0; i < s.Len(); i++ {
+			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
+				index = i
+				exists = true
+				return
+			}
+		}
+	}
+
+	return
+}
+
+// Not Tested Yet
+func InArrayV2(v interface{}, in interface{}) (ok bool, i int) {
+	val := reflect.Indirect(reflect.ValueOf(in))
+	switch val.Kind() {
+	case reflect.Slice, reflect.Array:
+		for ; i < val.Len(); i++ {
+			if ok = v == val.Index(i).Interface(); ok {
+				return
+			}
+		}
+	}
+	return
+}
