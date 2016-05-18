@@ -105,25 +105,24 @@ func (so *SO) Insert(tx *sql.Tx, errArrPtr *[]error) {
 // editSO runs the queries in transaction.
 func (so *SO) EditSO() []error {
 	errArr := []error{}
-	tx, err := db.Begin()
 
-	if err != nil {
-		return append(errArr, err)
-	}
+	if tx, err := db.Begin(); err != nil {
+		errArr = append(errArr, err)
+	} else {
+		// Lock SO - considering whether to add "locked IDOrder rows" checking as well.
+		if so.lockSO(tx, &errArr); len(errArr) == 0 {
+			// [DEBUG] Sleep
+			if so.SOInfo.PONum == "lock" {
+				time.Sleep(15 * time.Second)
+			}
 
-	// Lock SO - considering whether to add "locked IDOrder rows" checking as well.
-	if so.lockSO(tx, &errArr); len(errArr) == 0 {
-		// [DEBUG] Sleep
-		if so.SOInfo.PONum == "lock" {
-			time.Sleep(15 * time.Second)
+			// more actions once it's locked
+			//so.editSORaw(tx, &errArr)
+			//so.Insert(tx, &errArr)
 		}
 
-		// more actions once it's locked
-		//so.editSORaw(tx, &errArr)
-		//so.Insert(tx, &errArr)
+		txEnd(tx, &errArr)
 	}
-
-	txEnd(tx, &errArr)
 
 	return errArr
 }
