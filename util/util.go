@@ -192,6 +192,16 @@ func ConvErrArrToStringArr(errArr []error) []string {
 	return strArr
 }
 
+func DecodeJSONStream(r *http.Request) (map[string]interface{}, error) {
+	var data interface{}
+
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		return nil, err
+	}
+
+	return data.(map[string]interface{}), nil
+}
+
 func FormValueArr(r *http.Request) map[string]string {
 	mapArr := map[string]string{}
 

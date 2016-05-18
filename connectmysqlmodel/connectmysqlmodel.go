@@ -16,6 +16,6 @@ func main() {
 		defer db.Close()
 
 		so := model.SO{}
-		so.Insert()
+		so.EditSO()
 	}
 }
