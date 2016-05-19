@@ -192,7 +192,15 @@ func ConvErrArrToStringArr(errArr []error) []string {
 	return strArr
 }
 
-func DecodeJSONStream(r *http.Request) (map[string]interface{}, error) {
+func DecodeJSONStreamStruct(r *http.Request, v interface{}) error {
+	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DecodeJSONStreamMap(r *http.Request) (map[string]interface{}, error) {
 	var data interface{}
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
