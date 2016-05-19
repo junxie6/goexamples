@@ -173,10 +173,9 @@ func (so *SO) lockSORaw(tx *sql.Tx, errArrPtr *[]error) []int {
 		sqlFieldArrPtr := util.StrutToSliceOfFieldAddress(&sqlField)
 
 		for rs.Next() {
-			err := rs.Scan(sqlFieldArrPtr...)
-
-			if err != nil {
+			if err := rs.Scan(sqlFieldArrPtr...); err != nil {
 				*errArrPtr = append(*errArrPtr, err)
+				break
 			}
 
 			outArr = append(outArr, sqlField.IDOrder)
