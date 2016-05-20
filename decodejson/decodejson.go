@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -51,6 +52,35 @@ func convJSONToMap() {
 	}
 }
 
+func convJSONTOStruct() {
+	type SOLine struct {
+		LineNum int
+		ItemNum string
+		Price   float64
+	}
+	var data = struct {
+		Status    bool
+		PONum     string
+		SOLineArr []SOLine
+		IDOrder   int
+		IDDealer  int
+		Test      string
+		test2     string
+	}{}
+
+	jsonStr := `{"Status":true,"IDOrder":5,"IDDealer":99,"PONum":"My PO","SOLineArr":[{"LineNum":0,"ItemNum":"AAA0","Price":99},{"LineNum":1,"ItemNum":"AAA1","Price":99}]}`
+
+	json.NewDecoder(bytes.NewBufferString(jsonStr)).Decode(&data)
+
+	fmt.Printf("IDOrder: %v\n", data.IDOrder)
+	fmt.Printf("IDDealer: %v\n", data.IDDealer)
+
+	for _, v := range data.SOLineArr {
+		fmt.Printf("SOLineArr.ItemNum: %v\n", v.ItemNum)
+	}
+}
+
 func main() {
-	convJSONToMap()
+	//convJSONToMap()
+	convJSONTOStruct()
 }
