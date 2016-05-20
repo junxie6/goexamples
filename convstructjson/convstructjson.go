@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -113,7 +114,38 @@ func exampleConvStructToJSONOutputBrowser(w http.ResponseWriter, r *http.Request
 	}
 }
 
+func exampleConvStructToJSONReturnString1() {
+	type SOLine struct {
+		LineNum int
+		ItemNum string
+		Price   float64
+	}
+
+	var data = struct {
+		Status    bool
+		PONum     string
+		SOLineArr []SOLine
+		IDOrder   int
+		IDDealer  int
+	}{}
+
+	// first way
+	var doc1 bytes.Buffer
+	json.NewEncoder(&doc1).Encode(data)
+	fmt.Printf("JSON String: %v\n", doc1.String())
+	fmt.Printf("JSON Bytes: %v\n\n", doc1.Bytes())
+
+	// second way
+	doc2 := new(bytes.Buffer)
+	json.NewEncoder(doc2).Encode(data)
+
+	fmt.Printf("JSON String: %v\n", doc2.String())
+	fmt.Printf("JSON Bytes: %v\n\n", doc2.Bytes())
+}
+
 func main() {
+	exampleConvStructToJSONReturnString1() // Return JSON string
+
 	exampleConvStructToJSONOutputScreen1() // output to screen
 	exampleConvStructToJSONOutputScreen2() // output to screen
 
