@@ -281,3 +281,16 @@ func InArrayV2(v interface{}, in interface{}) (ok bool, i int) {
 	}
 	return
 }
+
+var FGColor = struct {
+	White, Red, Green, Yellow string
+}{
+	White:  "1;37",
+	Red:    "0;31",
+	Green:  "0;32",
+	Yellow: "1;33",
+}
+
+func EchoColor(msg string, color string) string {
+	return "\033[" + color + "m" + msg + "\033[0m"
+}
