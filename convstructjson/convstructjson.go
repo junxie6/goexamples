@@ -131,16 +131,23 @@ func exampleConvStructToJSONReturnString1() {
 
 	// first way
 	var doc1 bytes.Buffer
-	json.NewEncoder(&doc1).Encode(data)
-	fmt.Printf("JSON String: %v\n", doc1.String())
-	fmt.Printf("JSON Bytes: %v\n\n", doc1.Bytes())
+
+	if err := json.NewEncoder(&doc1).Encode(data); err != nil {
+		log.Printf("%v", err)
+	} else {
+		fmt.Printf("JSON String: %v\n", doc1.String())
+		fmt.Printf("JSON Bytes: %v\n\n", doc1.Bytes())
+	}
 
 	// second way
 	doc2 := new(bytes.Buffer)
-	json.NewEncoder(doc2).Encode(data)
 
-	fmt.Printf("JSON String: %v\n", doc2.String())
-	fmt.Printf("JSON Bytes: %v\n\n", doc2.Bytes())
+	if err := json.NewEncoder(doc2).Encode(data); err != nil {
+		log.Printf("%v", err)
+	} else {
+		fmt.Printf("JSON String: %v\n", doc2.String())
+		fmt.Printf("JSON Bytes: %v\n\n", doc2.Bytes())
+	}
 }
 
 func main() {
