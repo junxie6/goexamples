@@ -282,9 +282,19 @@ func InArrayV2(v interface{}, in interface{}) (ok bool, i int) {
 	return
 }
 
-func InArrayInt(n int, nArr []int) bool {
-	for _, v := range nArr {
-		if n == v {
+func InArrayInt(v int, vArr []int) bool {
+	for _, vv := range vArr {
+		if v == vv {
+			return true
+		}
+	}
+
+	return false
+}
+
+func InArrayStr(v string, vArr []string) bool {
+	for _, vv := range vArr {
+		if v == vv {
 			return true
 		}
 	}
