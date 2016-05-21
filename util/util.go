@@ -282,6 +282,16 @@ func InArrayV2(v interface{}, in interface{}) (ok bool, i int) {
 	return
 }
 
+func InArrayInt(n int, nArr []int) bool {
+	for _, v := range nArr {
+		if n == v {
+			return true
+		}
+	}
+
+	return false
+}
+
 var FGColor = struct {
 	White, Red, Green, Yellow string
 }{
