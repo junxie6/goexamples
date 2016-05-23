@@ -96,6 +96,10 @@ func (so *SO) Insert(tx *sql.Tx, errArrPtr *[]error) {
 			log.Printf("Error: %v", err)
 		} else if lastID, err := rs.LastInsertId(); err != nil {
 			log.Printf("Error: %v", err)
+		} else if rowCnt, err := rs.RowsAffected(); err != nil {
+			*errArrPtr = append(*errArrPtr, err)
+		} else if rowCnt != 1 {
+			*errArrPtr = append(*errArrPtr, fmt.Errorf("RowsAffected %v. Should be 1", rowCnt))
 		} else {
 			log.Printf("lastID: %v", lastID)
 		}
