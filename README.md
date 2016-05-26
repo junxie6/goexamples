@@ -1,6 +1,12 @@
 # Go Examples
 Some useful examples for Go golang
 
+# Run a web server and Transparently gzip the response body
+\# go run webgzip/webgzip.go
+
+# Run a web server and serve static files
+\# go run webstaticfile/webstaticfile.go
+
 # Convert a map to a JSON string
 \# go run convmapjson/convmapjson.go
 
