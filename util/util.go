@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -313,4 +314,11 @@ var FGColor = struct {
 
 func EchoColor(msg string, color string) string {
 	return "\033[" + color + "m" + msg + "\033[0m"
+}
+
+// Close example defer Close(VarResource)
+func Close(c io.Closer) {
+	if err := c.Close(); err != nil {
+		log.Printf(err.Error())
+	}
 }
