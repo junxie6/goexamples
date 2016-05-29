@@ -24,8 +24,14 @@ func Close(c io.Closer) {
 	}
 }
 
-// Reference: Deferred Cleanup, Checking Errors, and Potential Problems
+// Reference:
+// Deferred Cleanup, Checking Errors, and Potential Problems
 // http://www.blevesearch.com/news/Deferred-Cleanup,-Checking-Errors,-and-Potential-Problems/
+// Defer, Panic, and Recover
+// http://blog.golang.org/defer-panic-and-recover
+//
+// "deferred function's arguments are evaluated when the defer statement is evaluated."
+// "…they may refer to variables defined in a surrounding function. Those variables are then shared between the surrounding function and the function literal, and they survive as long as they are accessible."
 func main() {
 	// example one
 	if r, err := Open("a"); err != nil {
