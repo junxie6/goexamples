@@ -6,12 +6,20 @@ import (
 	"net/http"
 )
 
+func doSomething() error {
+	return nil
+}
+
 func serveExample1(w http.ResponseWriter, r *http.Request) {
 	str := "Hello World"
 
 	fmt.Fprintf(w, "URL: %s\n\nstr: %s\n\n", r.URL.Path[1:], str)
 
-	w.Write([]byte(str))
+	if err := doSomething(); err != nil {
+		http.Error(w, err.Error(), 500) // response http error
+	} else {
+		w.Write([]byte(str))
+	}
 }
 
 func main() {
