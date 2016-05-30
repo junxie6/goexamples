@@ -316,8 +316,9 @@ func EchoColor(msg string, color string) string {
 	return "\033[" + color + "m" + msg + "\033[0m"
 }
 
-// Close example defer Close(VarResource)
+// Close is used for defer statement. Example: defer Close(VarResource)
 func Close(c io.Closer) {
+	// Note: do we need to add recover() here?
 	if err := c.Close(); err != nil {
 		log.Printf(err.Error())
 	}
