@@ -49,12 +49,9 @@ type (
 	MyHandler func(w http.ResponseWriter, r *http.Request) error
 )
 
-func serveCommon(myhandlers ...MyHandler) http.Handler {
-	commonHandlers := []MyHandler{serveLog, serveCheckAllowHost}
-	commonHandlers = append(commonHandlers, myhandlers...)
-
+func serveHandlers(myhandlers ...MyHandler) http.Handler {
 	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		for _, myhandler := range commonHandlers {
+		for _, myhandler := range myhandlers {
 			if err := myhandler(w, r); err != nil {
 				w.Write([]byte(err.Error()))
 				return
@@ -88,8 +85,16 @@ func serveTest2(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func serveTest3(w http.ResponseWriter, r *http.Request) error {
+	w.Write([]byte("Test3"))
+	return nil
+}
+
 func main() {
-	http.Handle("/test", serveCommon(serveTest1, serveTest2))
+	commonHandlers := []MyHandler{serveLog, serveCheckAllowHost}
+
+	http.Handle("/test", serveHandlers(append(commonHandlers, serveTest1, serveTest2)...))
+	http.Handle("/test3", serveHandlers(append(commonHandlers, serveTest3)...))
 
 	if err := http.ListenAndServe(":80", nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
