@@ -14,6 +14,7 @@ func serveTest2(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Test2"))
 }
 
+// Reference: http://stackoverflow.com/questions/26204485/gorilla-mux-custom-middleware
 func serveCommon(h http.Handler) http.Handler {
 	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("middleware: ", r.URL)
