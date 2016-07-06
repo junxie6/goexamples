@@ -77,6 +77,40 @@ func example2() {
 	fmt.Printf("%v\t%s", resp.Status, body)
 }
 
+func example3() {
+        postURL := "http://127.0.0.1:8080/so?act=SaveSO"
+
+        var jsonStr = `{"Status":true,"Data":{"so":{"IDOrder":1,"Status":1,"Created":"123","Changed":"456"}}}`
+
+        //
+        req, err := http.NewRequest("POST", postURL, bytes.NewBuffer([]byte(jsonStr)))
+
+        if err != nil {
+                log.Printf("%v", err)
+        }
+
+        req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+        //
+        client := &http.Client{}
+        resp, err := client.Do(req)
+
+        if err != nil {
+                log.Printf("%v", err)
+        }
+
+        defer resp.Body.Close()
+
+        body, err := ioutil.ReadAll(resp.Body)
+
+        if err != nil {
+                log.Printf("%v", err)
+        }
+
+        fmt.Printf("%v\t%v\n", resp.Status, resp.Header)
+        fmt.Printf("%s\n", body)
+}
+
 func main() {
 	//example1()
 	example2()
