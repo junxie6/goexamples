@@ -12,14 +12,17 @@ import (
 	"time"
 )
 
+// example1 - Simple
 func example1() {
 	var postURL = "http://127.0.0.1/"
-	client := &http.Client{Timeout: 20 * time.Second}
 
+	//
 	formData := url.Values{"action": {"createOrder"}}
 	formData.Set("idDealer", "916") // Set sets the key to value. It replaces any existing values.
 	formData.Add("poNum", "test")   // Add adds the value to key. It appends to any existing values associated with key.
 
+	//
+	client := &http.Client{Timeout: 20 * time.Second}
 	resp, err := client.PostForm(postURL, formData)
 
 	if err != nil {
@@ -37,14 +40,13 @@ func example1() {
 	fmt.Printf("%v\t%s", resp.Status, body)
 }
 
+// example2 - Advanced
 func example2() {
 	var postURL = "http://127.0.0.1/"
 
 	formData := url.Values{"action": {"createOrder"}}
 	formData.Set("idDealer", "916") // Set sets the key to value. It replaces any existing values.
 	formData.Add("poNum", "test")   // Add adds the value to key. It appends to any existing values associated with key.
-
-	client := &http.Client{}
 
 	// first way
 	req, err := http.NewRequest("POST", postURL, bytes.NewBufferString(formData.Encode()))
@@ -60,7 +62,9 @@ func example2() {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(formData.Encode())))
 
-	resp, _ := client.Do(req)
+	//
+	client := &http.Client{Timeout: 20 * time.Second}
+	resp, err := client.Do(req)
 
 	if err != nil {
 		log.Printf("%v", err)
@@ -74,44 +78,47 @@ func example2() {
 		log.Printf("%v", err)
 	}
 
-	fmt.Printf("%v\t%s", resp.Status, body)
+	fmt.Printf("%v\t%v\n", resp.Status, resp.Header)
+	fmt.Printf("%s\n", body)
 }
 
+// example3 - Advanced - post JSON
 func example3() {
-        postURL := "http://127.0.0.1:8080/so?act=SaveSO"
+	postURL := "http://127.0.0.1:8080/so?act=SaveSO"
 
-        var jsonStr = `{"Status":true,"Data":{"so":{"IDOrder":1,"Status":1,"Created":"123","Changed":"456"}}}`
+	var jsonStr = `{"Status":true,"Data":{"so":{"IDOrder":1,"Status":1,"Created":"123","Changed":"456"}}}`
 
-        //
-        req, err := http.NewRequest("POST", postURL, bytes.NewBuffer([]byte(jsonStr)))
+	//
+	req, err := http.NewRequest("POST", postURL, bytes.NewBuffer([]byte(jsonStr)))
 
-        if err != nil {
-                log.Printf("%v", err)
-        }
+	if err != nil {
+		log.Printf("%v", err)
+	}
 
-        req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
-        //
-        client := &http.Client{}
-        resp, err := client.Do(req)
+	//
+	client := &http.Client{Timeout: 20 * time.Second}
+	resp, err := client.Do(req)
 
-        if err != nil {
-                log.Printf("%v", err)
-        }
+	if err != nil {
+		log.Printf("%v", err)
+	}
 
-        defer resp.Body.Close()
+	defer resp.Body.Close()
 
-        body, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 
-        if err != nil {
-                log.Printf("%v", err)
-        }
+	if err != nil {
+		log.Printf("%v", err)
+	}
 
-        fmt.Printf("%v\t%v\n", resp.Status, resp.Header)
-        fmt.Printf("%s\n", body)
+	fmt.Printf("%v\t%v\n", resp.Status, resp.Header)
+	fmt.Printf("%s\n", body)
 }
 
 func main() {
 	//example1()
-	example2()
+	//example2()
+	example3()
 }
