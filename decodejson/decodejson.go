@@ -80,7 +80,25 @@ func convJSONTOStruct() {
 	}
 }
 
+func convJSONToStructV2() error {
+	var b []byte
+	var err error
+
+	fn := "config/config.json"
+
+	if b, err = ioutil.ReadFile(fn); err != nil {
+		return err
+	}
+
+	if err := json.NewDecoder(bytes.NewReader(b)).Decode(c); err != nil {
+		return err
+	}
+	
+	return nil
+}
+
 func main() {
 	//convJSONToMap()
 	convJSONTOStruct()
+	convJSONToStructV2()
 }
