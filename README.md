@@ -71,3 +71,6 @@ More info: https://github.com/dgrijalva/jwt-go
 
 # HTTP Post
 \# go run httppost/httppost.go
+
+# Run an external command
+\# go run runexternalcommand/runexternalcommand.go
