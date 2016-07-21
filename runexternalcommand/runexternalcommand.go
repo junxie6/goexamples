@@ -17,6 +17,8 @@ func main() {
 		fmt.Printf("%v", err)
 	}
 
+	defer out.Close()
+
 	cmd := exec.Command("/usr/bin/mysqldump", args...)
 	cmd.Stdout = out
 
