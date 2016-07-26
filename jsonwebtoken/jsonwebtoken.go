@@ -94,9 +94,13 @@ func genJSONWebToken(username string, signingKey string) string {
 	// Set a header and a claim
 	token.Header["typ"] = "JWT"
 
-	token.Claims["username"] = username
-	token.Claims["exp"] = time.Now().Add(time.Hour * 96).Unix()
-	token.Claims["foo"] = "bar"
+	claims := make(jwt.MapClaims)
+
+	claims["username"] = username
+	claims["exp"] = time.Now().Add(time.Hour * 96).Unix()
+	claims["foo"] = "bar"
+
+	token.Claims = claims
 
 	// Generate encoded token
 	t, _ := token.SignedString([]byte(signingKey))
@@ -117,10 +121,12 @@ func isWebTokenOk(authToken string) bool {
 			}
 
 			// Return the key for validation
-			fmt.Printf("Here username: %v\n", token.Claims["username"])
+			claims := token.Claims.(jwt.MapClaims)
+
+			fmt.Printf("Here username: %v\n", claims["username"])
 			fmt.Printf("Here token: %v\n", token)
 
-			username := token.Claims["username"].(string)
+			username := claims["username"].(string)
 
 			secretkey, err := mykeys(username)
 
