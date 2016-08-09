@@ -10,6 +10,9 @@ import (
 	"testing"
 )
 
+// Reference:
+// http://www.markjberger.com/testing-web-apps-in-golang/
+// https://elithrar.github.io/article/testing-http-handlers-go/
 func TestSrvHello(t *testing.T) {
 	// create a new http request
 	var jsonStr = []byte(`{"Data":{"test":{"name":"bot"}}}`)
