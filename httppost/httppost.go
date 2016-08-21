@@ -91,6 +91,9 @@ func example3() {
 	//
 	req, err := http.NewRequest("POST", postURL, bytes.NewBuffer([]byte(jsonStr)))
 
+	// Or, faster?
+	//req, err := http.NewRequest("POST", postURL, strings.NewReader(jsonStr))
+
 	if err != nil {
 		log.Printf("%v", err)
 	}
