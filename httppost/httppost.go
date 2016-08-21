@@ -18,6 +18,8 @@ func example1() {
 
 	//
 	formData := url.Values{"action": {"createOrder"}}
+	//formData := make(url.Values)
+
 	formData.Set("idDealer", "916") // Set sets the key to value. It replaces any existing values.
 	formData.Add("poNum", "test")   // Add adds the value to key. It appends to any existing values associated with key.
 
@@ -45,6 +47,8 @@ func example2() {
 	var postURL = "http://127.0.0.1/"
 
 	formData := url.Values{"action": {"createOrder"}}
+	//formData := make(url.Values)
+
 	formData.Set("idDealer", "916") // Set sets the key to value. It replaces any existing values.
 	formData.Add("poNum", "test")   // Add adds the value to key. It appends to any existing values associated with key.
 
@@ -88,10 +92,8 @@ func example3() {
 
 	var jsonStr = `{"Status":true,"Data":{"so":{"IDOrder":1,"Status":1,"Created":"123","Changed":"456"}}}`
 
-	//
+	// TODO: Is strings.NewReader() faster than bytes.NewBufferString()?
 	req, err := http.NewRequest("POST", postURL, bytes.NewBuffer([]byte(jsonStr)))
-
-	// Or, faster?
 	//req, err := http.NewRequest("POST", postURL, strings.NewReader(jsonStr))
 
 	if err != nil {
