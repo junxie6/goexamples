@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"golang.org/x/net/publicsuffix"
 	"io/ioutil"
@@ -10,10 +12,14 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	//"bytes"
 )
 
 func main() {
+	cookie := example_httppost()
+	example_httpget(cookie)
+}
+
+func example_httppost() *cookiejar.Jar {
 	options := cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	}
@@ -44,6 +50,10 @@ func main() {
 	req, err := http.NewRequest("POST", postURL, strings.NewReader(postData.Encode()))
 	//req, err := http.NewRequest("POST", postURL, bytes.NewBufferString(postData.Encode()))
 
+	if err != nil {
+		log.Printf("http.NewRequest: %v", err.Error())
+	}
+
 	// Must set Content-Type. Otherwise, web server will not pick up the data.
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(postData.Encode())))
@@ -54,14 +64,54 @@ func main() {
 	resp, err := client.Do(req)
 
 	// Read response
-	data, err := ioutil.ReadAll(resp.Body)
-
-	// error handle
-	if err != nil {
+	if data, err := ioutil.ReadAll(resp.Body); err != nil {
 		fmt.Printf("error = %s \n", err)
+	} else {
+		b := new(bytes.Buffer)
+
+		if err := gob.NewEncoder(b).Encode(jar); err != nil {
+			log.Printf("gob error: %s", err.Error())
+		} else {
+			log.Printf("gob: %s", b.Bytes())
+		}
+
+		// Print response
+		log.Printf("Response = %s", string(data))
+		log.Printf("Cookie: %v", jar)
 	}
 
-	// Print response
-	fmt.Printf("Response = %s", string(data))
-	fmt.Printf("Cookie: %v", jar)
+	return jar
+}
+
+func example_httpget(jar *cookiejar.Jar) {
+	// Declare http client
+	client := &http.Client{
+		Jar: jar,
+	}
+
+	// Declare post data
+	//postData := make(url.Values)
+
+	// Declare HTTP Method and Url
+	var postURL = "http://erp.local:8080/"
+
+	req, err := http.NewRequest("GET", postURL+"?act=Test2", strings.NewReader("act=Test"))
+
+	if err != nil {
+		log.Printf("http.NewRequest: %v", err.Error())
+	}
+
+	// Set cookie
+	//req.Header.Set("Cookie", "name=MySession; count=1")
+
+	resp, err := client.Do(req)
+
+	// Read response
+	if data, err := ioutil.ReadAll(resp.Body); err != nil {
+		fmt.Printf("error = %s \n", err)
+	} else {
+		// Print response
+		log.Printf("Response2 = %s", string(data))
+		log.Printf("Cookie2: %v", jar)
+	}
 }

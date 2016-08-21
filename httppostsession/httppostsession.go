@@ -8,10 +8,15 @@ import (
 	"net/http"
 )
 
+// store session on client side.
 //var store = sessions.NewCookieStore([]byte("something-very-secret"))
+
+// store session on server side.
 var store = sessions.NewFilesystemStore("./session", []byte("something-very-secret"))
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Header: %v", r.Header)
+
 	// Get a session. Get() always returns a session, even if empty.
 	session, err := store.Get(r, "MySession")
 
