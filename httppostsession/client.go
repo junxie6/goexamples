@@ -30,17 +30,21 @@ func main() {
 	}
 
 	// Declare post data
+	postData := make(url.Values)
+	//postData := url.Values{}
 	//PostData := strings.NewReader("act=set&name=bot")
-	postData := url.Values{}
+
 	postData.Set("act", "set")
 	postData.Set("name", "bot")
 
 	// Declare HTTP Method and Url
 	var postURL = "http://erp.local:8080/"
 
+	// TODO: Is strings.NewReader() faster than bytes.NewBufferString()?
 	req, err := http.NewRequest("POST", postURL, strings.NewReader(postData.Encode()))
 	//req, err := http.NewRequest("POST", postURL, bytes.NewBufferString(postData.Encode()))
 
+	// Must set Content-Type. Otherwise, web server will not pick up the data.
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(postData.Encode())))
 
