@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bytes"
-	"encoding/gob"
+	//"bytes"
+	//"encoding/gob"
 	"fmt"
 	"golang.org/x/net/publicsuffix"
 	"io/ioutil"
@@ -15,6 +15,9 @@ import (
 )
 
 func main() {
+	// To store the cookie:
+	// https://github.com/juju/persistent-cookiejar
+
 	cookie := example_httppost()
 	example_httpget(cookie)
 }
@@ -55,7 +58,7 @@ func example_httppost() *cookiejar.Jar {
 	}
 
 	// Must set Content-Type. Otherwise, web server will not pick up the data.
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded; param=value")
 	req.Header.Add("Content-Length", strconv.Itoa(len(postData.Encode())))
 
 	// Set cookie
@@ -67,16 +70,9 @@ func example_httppost() *cookiejar.Jar {
 	if data, err := ioutil.ReadAll(resp.Body); err != nil {
 		fmt.Printf("error = %s \n", err)
 	} else {
-		b := new(bytes.Buffer)
-
-		if err := gob.NewEncoder(b).Encode(jar); err != nil {
-			log.Printf("gob error: %s", err.Error())
-		} else {
-			log.Printf("gob: %s", b.Bytes())
-		}
-
 		// Print response
 		log.Printf("Response = %s", string(data))
+
 		log.Printf("Cookie: %v", jar)
 	}
 
