@@ -22,16 +22,35 @@ $(document).ready(function() {
 	});
 
 	//
-	asdf();
+	BindSalOrder();
+	BindNews();
 });
 
-function asdf() {
+function BindSalOrder() {
 	$('#SalOrderBtn').on('click', function(event){
 		var optObj = {
 			SQLDealerName: 'Not Yet',
 		};
 
 		$.ajax({url: '/SalOrder/5', data: JSON.stringify(optObj),
+			headers: {
+				Authorization: $('#User').val(),
+			},
+		}).done(function(dataObj){
+			console.log(dataObj);
+		}).fail(function(dataObj){
+		}).always(function(dataObj) {
+		});
+	});
+}
+
+function BindNews() {
+	$('#NewsBtn').on('click', function(event){
+		var optObj = {
+			SQLDealerName: 'Not Yet',
+		};
+
+		$.ajax({url: 'http://news.local:8080/News', data: JSON.stringify(optObj),
 			headers: {
 				Authorization: $('#User').val(),
 			},

@@ -28,6 +28,7 @@ func homeHTML() string {
 					<option value="user3">User3</option>
 				</select>
 				<button id="SalOrderBtn">SalOrder</button>
+				<button id="NewsBtn">News</button>
 			</body>
 		</html>
 `
@@ -48,6 +49,10 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func srvNotFound(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+	o.AddError("404 page not found")
+}
+
 func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	Authorization := r.Header.Get("Authorization")
 
@@ -66,6 +71,23 @@ func srvSalOrder(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	IDSalOrder := vars["IDSalOrder"]
 
 	o.PutData("IDSalOrder", IDSalOrder)
+}
+
+func srvNews(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+	news := struct {
+		Subject string
+		Author  string
+		Body    string
+	}{
+		Subject: "Hello World",
+		Author:  "Jun",
+		Body:    "This is a Hello World message",
+	}
+	o.PutObj(news)
+}
+
+func srvNoChecking(mh ...MyHandlerV3) http.HandlerFunc {
+	return handlerLoopV3(append([]MyHandlerV3{}, mh...))
 }
 
 func srvRegularChecking(mh ...MyHandlerV3) http.HandlerFunc {
@@ -97,6 +119,9 @@ func main() {
 	//
 	r := mux.NewRouter()
 
+	//r.NotFoundHandler = http.HandlerFunc(srvNotFound)
+	r.NotFoundHandler = srvNoChecking(srvNotFound)
+
 	r.HandleFunc("/", srvHome)
 
 	// This will serve files under http://localhost:8000/static/<filename>
@@ -106,6 +131,10 @@ func main() {
 	s := r.Host("erp.local").Subrouter()
 
 	s.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularChecking(srvSalOrder))
+
+	//
+	s2 := r.Host("news.local").Subrouter()
+	s2.HandleFunc("/News", srvNoChecking(srvNews))
 
 	//
 	srv := &http.Server{
