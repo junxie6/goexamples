@@ -28,8 +28,17 @@ $(document).ready(function() {
 
 function BindSalOrder() {
 	$('#SalOrderBtn').on('click', function(event){
+		event.preventDefault();
+
 		var optObj = {
-			SQLDealerName: 'Not Yet',
+			Data: {
+				SQLDealerName: 'Care 1',
+				SQLIDShipAddr: 111,
+				SQLPrice: 111.11,
+			},
+			ObjArr: [
+				{DealerName: 'Health 1', IDShipAddr: 222, Price: 222.22},
+			],
 		};
 
 		$.ajax({url: '/SalOrder/5', data: JSON.stringify(optObj),
@@ -46,11 +55,13 @@ function BindSalOrder() {
 
 function BindNews() {
 	$('#NewsBtn').on('click', function(event){
+		event.preventDefault();
+
 		var optObj = {
 			SQLDealerName: 'Not Yet',
 		};
 
-		$.ajax({url: 'http://news.local:8080/News', data: JSON.stringify(optObj),
+		$.ajax({url: '/News', data: JSON.stringify(optObj),
 			headers: {
 				Authorization: $('#User').val(),
 			},

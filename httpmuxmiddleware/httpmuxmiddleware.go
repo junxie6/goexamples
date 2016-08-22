@@ -59,7 +59,7 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 	log.Printf("Authorization: %v", Authorization)
 
 	switch Authorization {
-	case "user1":
+	case "user2":
 		o.AddError("You do not have the permission")
 	case "user3":
 		o.AddError("You do not have the permission")
@@ -67,6 +67,25 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 }
 
 func srvSalOrder(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+	so := &struct {
+		DealerName string
+		IDShipAddr int64
+		Price      float64
+	}{}
+
+	i := ioxer.NewIOXer()
+	i.PutObj(so)
+
+	if err := i.Decode(r.Body); err != nil {
+		o.AddError(err.Error())
+		return
+	}
+
+	log.Printf("SQLDealerName: %s", i.GetData("SQLDealerName"))
+	log.Printf("SQLIDShipAddr: %d", int(i.GetData("SQLIDShipAddr").(float64)))
+	log.Printf("SQLPrice: %f", i.GetData("SQLPrice"))
+	log.Printf("JSON: %s", i.EncodePretty())
+
 	vars := mux.Vars(r)
 	IDSalOrder := vars["IDSalOrder"]
 
@@ -83,7 +102,9 @@ func srvNews(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 		Author:  "Jun",
 		Body:    "This is a Hello World message",
 	}
+
 	o.PutObj(news)
+
 }
 
 func srvNoChecking(mh ...MyHandlerV3) http.HandlerFunc {
@@ -119,9 +140,11 @@ func main() {
 	//
 	r := mux.NewRouter()
 
+	// 404 not found handler
 	//r.NotFoundHandler = http.HandlerFunc(srvNotFound)
 	r.NotFoundHandler = srvNoChecking(srvNotFound)
 
+	//
 	r.HandleFunc("/", srvHome)
 
 	// This will serve files under http://localhost:8000/static/<filename>
@@ -133,7 +156,7 @@ func main() {
 	s.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularChecking(srvSalOrder))
 
 	//
-	s2 := r.Host("news.local").Subrouter()
+	s2 := r.Host("erp.local").Subrouter()
 	s2.HandleFunc("/News", srvNoChecking(srvNews))
 
 	//
