@@ -1,12 +1,39 @@
 package main
 
 import (
+	"flag"
+	"github.com/NYTimes/gziphandler"
+	"github.com/evolutiontechnologies/gorillaerp/module/ioxer"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"time"
 )
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
+type (
+	MyHandlerV3 func(http.ResponseWriter, *http.Request, *ioxer.IOXer)
+)
+
+func homeHTML() string {
+	return `
+		<html>
+			<head>
+				<script src="https://code.jquery.com/jquery-2.x-git.min.js"></script>
+				<script src="static/debug.js"></script>
+			</head>
+			<body>
+				<select id="User">
+					<option value="user1">User1</option>
+					<option value="user2">User2</option>
+					<option value="user3">User3</option>
+				</select>
+				<button id="SalOrderBtn">SalOrder</button>
+			</body>
+		</html>
+`
+}
+
+func srvHome(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Host: %v", r.Host)
 	// r.URL.Scheme will be empty if you're accessing the HTTP server not from an HTTP proxy,
 	// a browser can issue a relative HTTP request instead of a absolute URL.
@@ -16,51 +43,79 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Scheme: %v", r.URL.Scheme)
 	log.Printf("IsAbs: %v", r.URL.IsAbs())
 
-	if _, err := w.Write([]byte("Gorilla!\n")); err != nil {
+	if _, err := w.Write([]byte(homeHTML())); err != nil {
+		log.Printf("w.Write: %v", err.Error())
 	}
 }
 
-func HmmHandler(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("Hmm!\n")); err != nil {
+func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+	Authorization := r.Header.Get("Authorization")
+
+	log.Printf("Authorization: %v", Authorization)
+
+	switch Authorization {
+	case "user1":
+		o.AddError("You do not have the permission")
+	case "user3":
+		o.AddError("You do not have the permission")
 	}
 }
 
-func SalOrderHandler(w http.ResponseWriter, r *http.Request) {
+func srvSalOrder(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	vars := mux.Vars(r)
 	IDSalOrder := vars["IDSalOrder"]
 
-	if _, err := w.Write([]byte("SalOrder: " + IDSalOrder + "\n")); err != nil {
-	}
+	o.PutData("IDSalOrder", IDSalOrder)
 }
 
-func shared() {
+func srvRegularChecking(mh ...MyHandlerV3) http.HandlerFunc {
+	return handlerLoopV3(append([]MyHandlerV3{srvUserAuthentication}, mh...))
+}
+
+func handlerLoopV3(myhandlers []MyHandlerV3) http.HandlerFunc {
+	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		o := ioxer.NewIOXer()
+
+		for _, myhandler := range myhandlers {
+			if myhandler(w, r, o); o.ErrCount > 0 {
+				o.Echo(w)
+				return
+			}
+		}
+
+		o.Echo(w)
+	})).(http.HandlerFunc)
 }
 
 func main() {
+	//
+	var dir string
+
+	flag.StringVar(&dir, "dir", "./static", "the directory to serve files from. Defaults to the static dir under the current dir")
+	flag.Parse()
+
+	//
 	r := mux.NewRouter()
 
+	r.HandleFunc("/", srvHome)
+
+	// This will serve files under http://localhost:8000/static/<filename>
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+
 	// Only matches if domain is "www.example.com".
-	s := r.Host("erp.local").
-		MatcherFunc(func(r *http.Request, rm *mux.RouteMatch) bool {
-			log.Printf("act: %v", r.FormValue("act"))
+	s := r.Host("erp.local").Subrouter()
 
-			if r.FormValue("act") == "test" {
-				log.Printf("It is TRUE")
-				return true
-			} else {
-				log.Printf("It is FALSE")
-				return false
-			}
-		}).
-		Subrouter()
-	s.HandleFunc("/SalOrder/{IDSalOrder}", SalOrderHandler)
-	s.HandleFunc("/SalOrder", SalOrderHandler)
+	s.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularChecking(srvSalOrder))
 
-	r.HandleFunc("/", HomeHandler)
-	r.HandleFunc("/hmm", HmmHandler)
+	//
+	srv := &http.Server{
+		Handler: r,
+		Addr:    "0.0.0.0:8080",
+		// Good practice: enforce timeouts for servers you create!
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
 
-	//http.Handle("/", s)
-
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 	}
 }
