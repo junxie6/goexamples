@@ -44,7 +44,7 @@ func SubmitSignupForm(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(retjson)
 
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -72,7 +72,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(user)
 
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
