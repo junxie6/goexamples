@@ -275,6 +275,7 @@ func srvRegularChecking(mh ...MyHandlerV3) http.HandlerFunc {
 }
 
 func handlerLoopV3(myhandlers []MyHandlerV3) http.HandlerFunc {
+	// TODO: benchmark returning http.Handler vs http.HandlerFunc
 	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 

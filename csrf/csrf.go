@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	HTTP_PORT     = ":80"
-	CSRF_AUTH_KEY = "31-byte-long-auth-key"
+	HTTP_PORT     = ":8080"
+	CSRF_AUTH_KEY = "31-byte-long-auth-key----------"
 	STATIC_DIR    = "/static/"
 )
 
@@ -28,8 +28,18 @@ type User struct {
 func RootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	w.Write([]byte("<script src='/static/scripts/jquery-2.2.2.min.js'></script>" +
-		"<script src='/static/scripts/test_form.js'></script>"))
+	w.Write([]byte(`<html>
+	<head>
+		<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+		<script src="/static/debug.js"></script>
+	</head>
+	<body>
+		JWToken: <input type="text" id="JWToken" />
+		<br>X-CSRF-Token: <input type="text" id="X-CSRF-Token" />
+		<br><button id="LoginBtn">Login</button>
+	</body>
+</html>
+	`))
 }
 
 func SubmitSignupForm(w http.ResponseWriter, r *http.Request) {
@@ -57,8 +67,6 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	uid := mux.Vars(r)["uid"] // variable name is case sensitive
 
 	uid2, err := strconv.Atoi(uid)
-
-	fmt.Printf("main(): %s\n", err)
 
 	// Authenticate the request, get the id from the route params,
 	// and fetch the user from the DB, etc.
