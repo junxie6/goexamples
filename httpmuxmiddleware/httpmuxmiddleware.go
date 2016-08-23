@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	staticDir  = flag.String("staticDir", "./static", "the directory to serve files from. Defaults to the static dir of the current dir")
+	staticDir  = flag.String("staticDir", "/static/", "the directory to serve files from. Defaults to the static dir of the current dir")
 	sessionDir = flag.String("sessionDir", "./session", "the directory to store sessions to. Defaults to the session dir of the current dir")
 )
 
@@ -314,7 +314,7 @@ func main() {
 	r.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularChecking(srvSalOrder))
 
 	// This will serve files under http://localhost:8000/static/<filename>
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(*staticDir))))
+	r.PathPrefix(*staticDir).Handler(http.StripPrefix(*staticDir, http.FileServer(http.Dir("."+*staticDir))))
 
 	// Subrouter. Only matches if domain is "www.example.com".
 	//s := r.Host("erp.local").Subrouter()
