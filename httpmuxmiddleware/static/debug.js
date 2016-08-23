@@ -25,6 +25,7 @@ $(document).ready(function() {
 	BindSalOrder();
 	BindNews();
 	BindLogin();
+	BindLogout();
 });
 
 function BindSalOrder() {
@@ -86,6 +87,27 @@ function BindLogin() {
 		};
 
 		$.ajax({url: '/Login', data: JSON.stringify(optObj),
+			headers: {
+				Authorization: $('#User').val(),
+			},
+		}).done(function(dataObj){
+			console.log(dataObj);
+		}).fail(function(dataObj){
+		}).always(function(dataObj) {
+		});
+	});
+}
+
+function BindLogout() {
+	$('#LogoutBtn').on('click', function(event){
+		event.preventDefault();
+
+		var optObj = {
+			Data: {
+			},
+		};
+
+		$.ajax({url: '/Logout', data: JSON.stringify(optObj),
 			headers: {
 				Authorization: $('#User').val(),
 			},

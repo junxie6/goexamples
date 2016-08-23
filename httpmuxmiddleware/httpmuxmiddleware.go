@@ -36,6 +36,7 @@ func homeHTML() string {
 				<br><button id="SalOrderBtn">SalOrder</button>
 				<br><button id="NewsBtn">News</button>
 				<br><button id="LoginBtn">Login</button>
+				<br><button id="LogoutBtn">Logout</button>
 			</body>
 		</html>
 `
@@ -74,7 +75,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 
 	if err != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
-		w.WriteHeader(http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
 		o.AddError(err.Error())
 		return
 	}
@@ -83,7 +84,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 		Path:     "/",
 		Domain:   "erp.local",
 		MaxAge:   86400 * 3, // 7 Days
-		Secure:   false,     // TODO
+		Secure:   false,     // TODO: set to true once applied the SSL certificate.
 		HttpOnly: true,
 	}
 
@@ -105,6 +106,31 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	o.PutData("username", username)
 }
 
+func srvLogout(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+	// Get a session. Get() always returns a session, even if empty.
+	session, err := store.Get(r, "MySession")
+
+	if err != nil {
+		//http.Error(w, err.Error(), http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
+		o.AddError(err.Error())
+		return
+	}
+
+	session.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   "erp.local",
+		MaxAge:   -1,    // means delete cookie now.
+		Secure:   false, // TODO: set to true once applied the SSL certificate.
+		HttpOnly: true,
+	}
+
+	// Save it before we write to the response/return from the handler.
+	session.Save(r, w)
+
+	o.PutData("msg", "cookie has been deleted from server")
+}
+
 func srvNotFound(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	o.AddError("custom 404 page not found")
 }
@@ -118,7 +144,7 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 
 	if err != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
-		w.WriteHeader(http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
 		o.AddError(err.Error())
 		return
 	}
@@ -126,7 +152,7 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 	// TODO: need a way to check if session exists.
 
 	if s, ok := session.Values["Username"]; !ok {
-		w.WriteHeader(http.StatusForbidden)
+		//w.WriteHeader(http.StatusForbidden)
 		o.AddError("You do not have the permission")
 		return
 	} else {
@@ -232,9 +258,12 @@ func main() {
 
 	//
 	r.HandleFunc("/", srvHome)
+
 	r.HandleFunc("/Login", srvNoChecking(srvLogin))
-	r.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularChecking(srvSalOrder))
+	r.HandleFunc("/Logout", srvNoChecking(srvLogout))
 	r.HandleFunc("/News", srvNoChecking(srvNews))
+
+	r.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularChecking(srvSalOrder))
 
 	// This will serve files under http://localhost:8000/static/<filename>
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
