@@ -80,6 +80,9 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 		return
 	}
 
+	// TODO: add a logic to continue only when session.IsNew is true
+	log.Printf("IsNew Session: %v", session.IsNew)
+
 	session.Options = &sessions.Options{
 		Path:     "/",
 		Domain:   "erp.local",
@@ -117,6 +120,9 @@ func srvLogout(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 		return
 	}
 
+	// TODO: add a logic to continue only when session.IsNew is false
+	log.Printf("IsNew Session: %v", session.IsNew)
+
 	session.Options = &sessions.Options{
 		Path:     "/",
 		Domain:   "erp.local",
@@ -148,6 +154,9 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 		o.AddError(err.Error())
 		return
 	}
+
+	// TODO: add a logic to continue only when session.IsNew is false
+	log.Printf("IsNew Session: %v", session.IsNew)
 
 	// TODO: need a way to check if session exists.
 
