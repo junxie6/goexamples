@@ -168,6 +168,7 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 		o.PutData("welcome", "Welcom, "+s.(string))
 	}
 
+	// TODO: Add a logic to support both session/cookie and Header/Authorization
 	/*
 		Authorization := r.Header.Get("Authorization")
 
