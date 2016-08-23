@@ -24,6 +24,7 @@ $(document).ready(function() {
 	//
 	BindSalOrder();
 	BindNews();
+	BindLogin();
 });
 
 function BindSalOrder() {
@@ -62,6 +63,29 @@ function BindNews() {
 		};
 
 		$.ajax({url: '/News', data: JSON.stringify(optObj),
+			headers: {
+				Authorization: $('#User').val(),
+			},
+		}).done(function(dataObj){
+			console.log(dataObj);
+		}).fail(function(dataObj){
+		}).always(function(dataObj) {
+		});
+	});
+}
+
+function BindLogin() {
+	$('#LoginBtn').on('click', function(event){
+		event.preventDefault();
+
+		var optObj = {
+			Data: {
+				SQLUsername: $('#Username').val(),
+				SQLPassword: $('#Password').val(),
+			},
+		};
+
+		$.ajax({url: '/Login', data: JSON.stringify(optObj),
 			headers: {
 				Authorization: $('#User').val(),
 			},
