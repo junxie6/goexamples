@@ -163,7 +163,10 @@ func srvLogout(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	}
 
 	log.Printf("ID: %v", session.ID)
-	os.Remove("./session/session_" + session.ID)
+
+	if err := os.Remove("./session/session_" + session.ID); err != nil {
+		//
+	}
 
 	o.PutData("msg", "cookie has been deleted from server")
 }
@@ -193,13 +196,13 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 
 	// TODO: need a way to check if session exists.
 
-	if s, ok := session.Values["Username"]; !ok {
+	if _, ok := session.Values["Username"]; !ok {
 		//w.WriteHeader(http.StatusForbidden)
 		o.AddError("You do not have the permission")
 		return
-	} else {
-		o.PutData("welcome", "Welcom, "+s.(string))
 	}
+
+	o.PutData("welcome", "Welcom, "+session.Values["Username"].(string))
 
 	// TODO: Add a logic to support both session/cookie and Header/Authorization
 	/*
