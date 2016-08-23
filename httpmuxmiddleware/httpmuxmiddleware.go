@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// TODO: integrate with Redis. Store session in Redis.
 // store session on server side.
 var store = sessions.NewFilesystemStore("./session", []byte("something-very-secret"))
 
@@ -155,7 +156,7 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 		return
 	}
 
-	// TODO: add a logic to continue only when session.IsNew is false
+	// TODO: add a logic to continue only when session.IsNew is false (can be true too when the session is expired)
 	log.Printf("IsNew Session: %v", session.IsNew)
 
 	// TODO: need a way to check if session exists.
@@ -263,7 +264,7 @@ func main() {
 	r.Host("erp.local:8080")
 
 	// custom 404 not found handler
-	//r.NotFoundHandler = http.HandlerFunc(srvNotFound)
+	//r.NotFoundHandler = http.HandlerFunc(srvNotFound) // NOTE: standware way.
 	r.NotFoundHandler = srvNoChecking(srvNotFound)
 
 	//
