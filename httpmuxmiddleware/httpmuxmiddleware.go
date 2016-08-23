@@ -8,12 +8,26 @@ import (
 	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
+	"os"
 	"time"
+)
+
+const (
+	sessionSecret = "something-very-secret"
+	sessionName   = "MySession"
+	srvAddr       = "192.168.5.21:8080"
+)
+
+var (
+	staticDir  = flag.String("staticDir", "./static", "the directory to serve files from. Defaults to the static dir of the current dir")
+	sessionDir = flag.String("sessionDir", "./session", "the directory to store sessions to. Defaults to the session dir of the current dir")
 )
 
 // TODO: integrate with Redis. Store session in Redis.
 // store session on server side.
-var store = sessions.NewFilesystemStore("./session", []byte("something-very-secret"))
+var (
+	store = sessions.NewFilesystemStore(*sessionDir, []byte(sessionSecret))
+)
 
 type (
 	// MyHandlerV3 ...
@@ -73,7 +87,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	log.Printf("JSON: %s", i.EncodePretty())
 
 	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, "MySession")
+	session, err := store.Get(r, sessionName)
 
 	if err != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -88,7 +102,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	session.Options = &sessions.Options{
 		Path:     "/",
 		Domain:   "erp.local",
-		MaxAge:   86400 * 3, // 7 Days
+		MaxAge:   86400 * 1, // 3 Days
 		Secure:   false,     // TODO: set to true once applied the SSL certificate.
 		HttpOnly: true,
 	}
@@ -116,7 +130,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 
 func srvLogout(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, "MySession")
+	session, err := store.Get(r, sessionName)
 
 	if err != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -128,7 +142,8 @@ func srvLogout(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	// TODO: add a logic to continue only when session.IsNew is false
 	log.Printf("IsNew Session: %v", session.IsNew)
 
-	log.Printf("MaxAge: %v", session.Options.MaxAge)
+	log.Printf("Domain: %v", session.Options.Domain)
+	log.Printf("MaxAge Before: %v", session.Options.MaxAge)
 
 	session.Options = &sessions.Options{
 		Path:     "/",
@@ -138,11 +153,17 @@ func srvLogout(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 		HttpOnly: true,
 	}
 
+	log.Printf("Domain: %v", session.Options.Domain)
+	log.Printf("MaxAge After: %v", session.Options.MaxAge)
+
 	// Save it before we write to the response/return from the handler.
 	if err := session.Save(r, w); err != nil {
 		o.AddError(err.Error())
 		return
 	}
+
+	log.Printf("ID: %v", session.ID)
+	os.Remove("./session/session_" + session.ID)
 
 	o.PutData("msg", "cookie has been deleted from server")
 }
@@ -156,7 +177,7 @@ func getSession() {
 
 func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, "MySession")
+	session, err := store.Get(r, sessionName)
 
 	if err != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -164,6 +185,8 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 		o.AddError(err.Error())
 		return
 	}
+
+	// TODO: how to determine whether a session is expired?
 
 	// TODO: add a logic to continue only when session.IsNew is false (can be true too when the session is expired)
 	log.Printf("IsNew Session: %v", session.IsNew)
@@ -262,9 +285,6 @@ func handlerLoopV3(myhandlers []MyHandlerV3) http.HandlerFunc {
 
 func main() {
 	//
-	var dir string
-
-	flag.StringVar(&dir, "dir", "./static", "the directory to serve files from. Defaults to the static dir under the current dir")
 
 	flag.Parse()
 
@@ -286,7 +306,7 @@ func main() {
 	r.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularChecking(srvSalOrder))
 
 	// This will serve files under http://localhost:8000/static/<filename>
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(*staticDir))))
 
 	// Subrouter. Only matches if domain is "www.example.com".
 	//s := r.Host("erp.local").Subrouter()
@@ -299,7 +319,7 @@ func main() {
 	//
 	srv := &http.Server{
 		Handler: r,
-		Addr:    "192.168.5.21:8080",
+		Addr:    srvAddr,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
