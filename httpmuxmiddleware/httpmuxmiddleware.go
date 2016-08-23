@@ -16,6 +16,7 @@ import (
 var store = sessions.NewFilesystemStore("./session", []byte("something-very-secret"))
 
 type (
+	// MyHandlerV3 ...
 	MyHandlerV3 func(http.ResponseWriter, *http.Request, *ioxer.IOXer)
 )
 
@@ -97,7 +98,10 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 		session.Values["Username"] = i.GetData("SQLUsername")
 
 		// Save it before we write to the response/return from the handler.
-		session.Save(r, w)
+		if err := session.Save(r, w); err != nil {
+			o.AddError(err.Error())
+			return
+		}
 	}
 
 	username := "init name"
@@ -124,6 +128,8 @@ func srvLogout(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	// TODO: add a logic to continue only when session.IsNew is false
 	log.Printf("IsNew Session: %v", session.IsNew)
 
+	log.Printf("MaxAge: %v", session.Options.MaxAge)
+
 	session.Options = &sessions.Options{
 		Path:     "/",
 		Domain:   "erp.local",
@@ -133,7 +139,10 @@ func srvLogout(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	}
 
 	// Save it before we write to the response/return from the handler.
-	session.Save(r, w)
+	if err := session.Save(r, w); err != nil {
+		o.AddError(err.Error())
+		return
+	}
 
 	o.PutData("msg", "cookie has been deleted from server")
 }
