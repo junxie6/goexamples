@@ -13,9 +13,11 @@ import (
 )
 
 const (
-	sessionSecret = "something-very-secret"
-	sessionName   = "MySession"
-	srvAddr       = "192.168.5.21:8080"
+	sessionSecret   = "something-very-secret"
+	sessionName     = "MySession"
+	srvAddr         = "192.168.5.21:8080"
+	srvWriteTimeout = 15 * time.Second
+	srvReadTimeout  = 15 * time.Second
 )
 
 var (
@@ -324,10 +326,12 @@ func main() {
 		Handler: r,
 		Addr:    srvAddr,
 		// Good practice: enforce timeouts for servers you create!
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+		WriteTimeout:   srvWriteTimeout,
+		ReadTimeout:    srvReadTimeout,
+		MaxHeaderBytes: 1 << 20,
 	}
 
 	if err := srv.ListenAndServe(); err != nil {
+		log.Printf("srv.ListenAndServe: %v", err.Error())
 	}
 }
