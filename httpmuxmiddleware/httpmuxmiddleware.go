@@ -26,6 +26,8 @@ var (
 	sessionDir = flag.String("sessionDir", "./session", "the directory to store sessions to. Defaults to the session dir of the current dir")
 )
 
+// TODO: include csrf for user authentication
+
 // TODO: integrate with Redis. Store session in Redis.
 // store session on server side.
 var (
