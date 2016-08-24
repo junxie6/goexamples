@@ -6,7 +6,6 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"net/http"
-	"strconv"
 )
 
 const (
@@ -25,7 +24,7 @@ type User struct {
 	Email string
 }
 
-func RootHandler(w http.ResponseWriter, r *http.Request) {
+func srvHome(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	w.Write([]byte(`<html>
@@ -34,24 +33,31 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 		<script src="/static/debug.js"></script>
 	</head>
 	<body>
-		JWToken: <input type="text" id="JWToken" />
-		<br>X-CSRF-Token: <input type="text" id="X-CSRF-Token" />
+		X-CSRF-Token: <input type="text" id="CSRFToken" style="width: 800px;" />
+		<br>Username: <input type="text" id="Username" value="jun" />
+		<br>Password: <input type="text" id="Password" value="junpass" />
+		<br>Response: <textarea id="JSONResponse" style="width: 300px;"></textarea>
+		<br><button id="CSRFBtn">Get CSRF Token</button>
 		<br><button id="LoginBtn">Login</button>
+		<br><button id="SalOrderBtn">SalOrder</button>
 	</body>
 </html>
 	`))
 }
 
-func SubmitSignupForm(w http.ResponseWriter, r *http.Request) {
+func srvLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// We can trust that requests making it this far have satisfied
 	// our CSRF protection requirements.
 
-	retjson := RetJson{}
-	retjson.Status = true
+	o := struct {
+		Status bool
+	}{
+		Status: true,
+	}
 
-	b, err := json.Marshal(retjson)
+	b, err := json.Marshal(o)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -61,23 +67,40 @@ func SubmitSignupForm(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
+func srvCSRFToken(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
-	uid := mux.Vars(r)["uid"] // variable name is case sensitive
-
-	uid2, err := strconv.Atoi(uid)
-
-	// Authenticate the request, get the id from the route params,
-	// and fetch the user from the DB, etc.
-	user := User{Uid: uid2, Name: "Test Name", Email: "test@abc.com"}
 
 	// Get the token and pass it in the CSRF header. Our JSON-speaking client
 	// or JavaScript framework can now read the header and return the token in
 	// in its own "X-CSRF-Token" request header on the subsequent POST.
 	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 
-	b, err := json.Marshal(user)
+	o := struct {
+		Status bool
+	}{
+		Status: true,
+	}
+
+	b, err := json.Marshal(o)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(b)
+}
+
+func srvSalOrder(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	o := struct {
+		Status bool
+	}{
+		Status: true,
+	}
+
+	b, err := json.Marshal(o)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -92,13 +115,15 @@ func main() {
 
 	r.PathPrefix(STATIC_DIR).Handler(http.StripPrefix(STATIC_DIR, http.FileServer(http.Dir("."+STATIC_DIR))))
 
-	r.HandleFunc("/", RootHandler)
+	r.HandleFunc("/", srvHome)
 
 	api := r.PathPrefix("/api").Subrouter()
-	api.HandleFunc("/user/{uid}", GetUser).Methods("GET")
+
+	api.HandleFunc("/GetCSRFToken", srvCSRFToken).Methods("GET")
+	api.HandleFunc("/SalOrder", srvSalOrder).Methods("POST")
 
 	// All POST requests without a valid token will return HTTP 403 Forbidden.
-	api.HandleFunc("/signup/post", SubmitSignupForm).Methods("POST")
+	api.HandleFunc("/Login", srvLogin).Methods("POST")
 
 	// Note: Don't forget to pass csrf.Secure(false) if you're developing locally over plain HTTP (just don't leave it on in production).
 	err := http.ListenAndServe(HTTP_PORT, csrf.Protect([]byte(CSRF_AUTH_KEY), csrf.Secure(false))(r))
