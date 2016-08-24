@@ -63,7 +63,7 @@ function BindNews() {
 			SQLDealerName: 'Not Yet',
 		};
 
-		$.ajax({url: '/News', data: JSON.stringify(optObj),
+		$.ajax({url: '/News1', data: JSON.stringify(optObj),
 			headers: {
 				Authorization: $('#User').val(),
 			},

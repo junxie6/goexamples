@@ -44,7 +44,7 @@ func homeHTML() string {
 		<html>
 			<head>
 				<script src="https://code.jquery.com/jquery-2.x-git.min.js"></script>
-				<script src="static/debug.js"></script>
+				<script src="static/debug.js?time=1"></script>
 			</head>
 			<body>
 				<input type="text" id="Username" value="jun" placeholder="Username" />
@@ -259,22 +259,25 @@ func srvNews(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	}{
 		Subject: "Hello World",
 		Author:  "Jun",
-		Body:    "This is a Hello World message",
+		Body:    "This is a Hello World message" + r.URL.Path,
 	}
 
 	o.PutObj(news)
 
 }
 
-func srvNoChecking(mh ...MyHandlerV3) http.HandlerFunc {
-	return handlerLoopV3(append([]MyHandlerV3{}, mh...))
+// version 1: returning http.HandlerFunc
+func srvNoCheckingHandlerFunc(mh ...MyHandlerV3) http.HandlerFunc {
+	return handlerLoopHandlerFunc(append([]MyHandlerV3{}, mh...))
 }
 
-func srvRegularChecking(mh ...MyHandlerV3) http.HandlerFunc {
-	return handlerLoopV3(append([]MyHandlerV3{srvUserAuthentication}, mh...))
+// version 1: returning http.HandlerFunc
+func srvRegularCheckingHandlerFunc(mh ...MyHandlerV3) http.HandlerFunc {
+	return handlerLoopHandlerFunc(append([]MyHandlerV3{srvUserAuthentication}, mh...))
 }
 
-func handlerLoopV3(myhandlers []MyHandlerV3) http.HandlerFunc {
+// version 1: returning http.HandlerFunc
+func handlerLoopHandlerFunc(myhandlers []MyHandlerV3) http.HandlerFunc {
 	// TODO: benchmark returning http.Handler vs http.HandlerFunc
 	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -292,6 +295,30 @@ func handlerLoopV3(myhandlers []MyHandlerV3) http.HandlerFunc {
 	})).(http.HandlerFunc)
 }
 
+// version 2: returning http.Handler
+func srvNoCheckingHandler(mh ...MyHandlerV3) http.Handler {
+	return handlerLoopHandler(append([]MyHandlerV3{}, mh...))
+}
+
+// version 2: returning http.Handler
+func handlerLoopHandler(myhandlers []MyHandlerV3) http.Handler {
+	// TODO: benchmark returning http.Handler vs http.HandlerFunc
+	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+		o := ioxer.NewIOXer()
+
+		for _, myhandler := range myhandlers {
+			if myhandler(w, r, o); o.ErrCount > 0 {
+				o.Echo(w)
+				return
+			}
+		}
+
+		o.EchoNoSetHeader(w)
+	}))
+}
+
 func main() {
 	//
 
@@ -303,27 +330,29 @@ func main() {
 
 	// custom 404 not found handler
 	//r.NotFoundHandler = http.HandlerFunc(srvNotFound) // NOTE: standware way.
-	r.NotFoundHandler = srvNoChecking(srvNotFound)
+	r.NotFoundHandler = srvNoCheckingHandlerFunc(srvNotFound)
 
 	//
 	r.HandleFunc("/", srvHome)
 
-	r.HandleFunc("/Login", srvNoChecking(srvLogin))
-	r.HandleFunc("/Logout", srvNoChecking(srvLogout))
-	r.HandleFunc("/News", srvNoChecking(srvNews))
+	r.HandleFunc("/Login", srvNoCheckingHandlerFunc(srvLogin))
+	r.HandleFunc("/Logout", srvNoCheckingHandlerFunc(srvLogout))
 
-	r.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularChecking(srvSalOrder))
+	r.HandleFunc("/News1", srvNoCheckingHandlerFunc(srvNews))
+	r.Handle("/News2", srvNoCheckingHandler(srvNews))
+
+	r.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularCheckingHandlerFunc(srvSalOrder))
 
 	// This will serve files under http://localhost:8000/static/<filename>
 	r.PathPrefix(*staticDir).Handler(http.StripPrefix(*staticDir, http.FileServer(http.Dir("."+*staticDir))))
 
 	// Subrouter. Only matches if domain is "www.example.com".
 	//s := r.Host("erp.local").Subrouter()
-	//s.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularChecking(srvSalOrder))
+	//s.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularCheckingHandlerFunc(srvSalOrder))
 
 	// Subrouter.
 	//s2 := r.Host("erp.local").Subrouter()
-	//s2.HandleFunc("/News", srvNoChecking(srvNews))
+	//s2.HandleFunc("/News", srvNoCheckingHandlerFunc(srvNews))
 
 	//
 	srv := &http.Server{

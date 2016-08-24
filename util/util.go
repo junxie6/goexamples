@@ -323,3 +323,18 @@ func Close(c io.Closer) {
 		log.Printf(err.Error())
 	}
 }
+
+// JSONDeepEqual ...
+func JSONDeepEqual(s1 string, s2 string) (bool, error) {
+	var m1, m2 map[string]interface{}
+
+	if err := json.Unmarshal([]byte(s1), &m1); err != nil {
+		return false, err
+	}
+
+	if err := json.Unmarshal([]byte(s2), &m2); err != nil {
+		return false, err
+	}
+
+	return reflect.DeepEqual(m1, m2), nil
+}
