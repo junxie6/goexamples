@@ -45,6 +45,10 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 	`))
 }
 
+func srvNews(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("ok"))
+}
+
 func srvLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -120,13 +124,14 @@ func main() {
 	api := r.PathPrefix("/api").Subrouter()
 
 	api.HandleFunc("/GetCSRFToken", srvCSRFToken).Methods("GET")
+	api.HandleFunc("/News", srvNews).Methods("GET")
 	api.HandleFunc("/SalOrder", srvSalOrder).Methods("POST")
 
 	// All POST requests without a valid token will return HTTP 403 Forbidden.
 	api.HandleFunc("/Login", srvLogin).Methods("POST")
 
 	// Note: Don't forget to pass csrf.Secure(false) if you're developing locally over plain HTTP (just don't leave it on in production).
-	err := http.ListenAndServe(HTTP_PORT, csrf.Protect([]byte(CSRF_AUTH_KEY), csrf.Secure(false))(r))
+	err := http.ListenAndServe(HTTP_PORT, csrf.Protect([]byte(CSRF_AUTH_KEY), csrf.Secure(false), csrf.MaxAge(86400*1))(r))
 
 	if err != nil {
 		fmt.Printf("main(): %s\n", err)
