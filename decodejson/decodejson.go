@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 )
 
@@ -84,6 +85,10 @@ func convJSONToStructV2() error {
 	var b []byte
 	var err error
 
+	c := struct {
+		SrvPort string
+	}{}
+
 	fn := "config/config.json"
 
 	if b, err = ioutil.ReadFile(fn); err != nil {
@@ -93,7 +98,7 @@ func convJSONToStructV2() error {
 	if err := json.NewDecoder(bytes.NewReader(b)).Decode(c); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 

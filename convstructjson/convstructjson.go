@@ -158,7 +158,7 @@ func main() {
 
 	http.HandleFunc("/exampleConvStructToJSONOutputBrowser", exampleConvStructToJSONOutputBrowser)
 
-	if err := http.ListenAndServe(":80", nil); err != nil {
+	if err := http.ListenAndServe(":8080", nil); err != nil {
 		fmt.Printf("main(): %s\n", err)
 		log.Fatal("ListenAndServe: ", err)
 	}
