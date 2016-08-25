@@ -10,7 +10,8 @@ type (
 )
 
 func srvHome(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Home\n"))
+	log.Printf("Home")
+	w.Write([]byte("Home " + r.FormValue("act") + "\n"))
 }
 
 func something() {
