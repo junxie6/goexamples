@@ -295,8 +295,6 @@ func srvRegularCheckingHandlerFunc(mh ...MyHandlerV3) http.HandlerFunc {
 func handlerLoopHandlerFunc(myhandlers []MyHandlerV3) http.HandlerFunc {
 	// TODO: benchmark returning http.Handler vs http.HandlerFunc
 	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
 		o := ioxer.NewIOXer()
 
 		for _, myhandler := range myhandlers {
@@ -306,7 +304,7 @@ func handlerLoopHandlerFunc(myhandlers []MyHandlerV3) http.HandlerFunc {
 			}
 		}
 
-		o.EchoNoSetHeader(w)
+		o.Echo(w)
 	})).(http.HandlerFunc)
 }
 
@@ -321,7 +319,11 @@ func srvGZIPCSRF(h http.Handler) http.Handler {
 }
 
 func srvCSRF(h http.Handler) http.Handler {
-	return csrf.Protect([]byte(CSRF_AUTH_KEY), csrf.Secure(true), csrf.MaxAge(86400*1))(h)
+	return csrf.Protect([]byte(CSRF_AUTH_KEY),
+		csrf.Secure(true),
+		csrf.MaxAge(3600*12),
+		csrf.ErrorHandler(http.HandlerFunc(unauthorizedHandler)),
+	)(h)
 }
 
 func srvGZIP(h http.Handler) http.Handler {
@@ -332,9 +334,6 @@ func srvGZIP(h http.Handler) http.Handler {
 func handlerLoopHandler(myhandlers []MyHandlerV3) http.Handler {
 	// TODO: benchmark returning http.Handler vs http.HandlerFunc
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
 		o := ioxer.NewIOXer()
 
 		for _, myhandler := range myhandlers {
@@ -344,8 +343,16 @@ func handlerLoopHandler(myhandlers []MyHandlerV3) http.Handler {
 			}
 		}
 
-		o.EchoNoSetHeader(w)
+		o.Echo(w)
 	})
+}
+
+//
+func unauthorizedHandler(w http.ResponseWriter, r *http.Request) {
+	o := ioxer.NewIOXer()
+	o.AddError("Forbidden - CSRF token invalid")
+
+	o.Echo(w)
 }
 
 func main() {
