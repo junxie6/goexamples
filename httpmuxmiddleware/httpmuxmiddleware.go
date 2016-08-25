@@ -7,8 +7,6 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
-	//"github.com/txgruppi/werr"
-	"github.com/go-errors/errors"
 	"log"
 	"net/http"
 	"os"
@@ -314,17 +312,26 @@ func handlerLoopHandlerFunc(myhandlers []MyHandlerV3) http.HandlerFunc {
 
 // version 2: returning http.Handler
 func srvNoCheckingHandler(mh ...MyHandlerV3) http.Handler {
-	return srvCSRF(handlerLoopHandler(append([]MyHandlerV3{}, mh...)))
+	//return srvCSRF(handlerLoopHandler(append([]MyHandlerV3{}, mh...)))
+	return srvGZIPCSRF(handlerLoopHandler(append([]MyHandlerV3{}, mh...)))
+}
+
+func srvGZIPCSRF(h http.Handler) http.Handler {
+	return srvGZIP(srvCSRF(h))
 }
 
 func srvCSRF(h http.Handler) http.Handler {
 	return csrf.Protect([]byte(CSRF_AUTH_KEY), csrf.Secure(true), csrf.MaxAge(86400*1))(h)
 }
 
+func srvGZIP(h http.Handler) http.Handler {
+	return gziphandler.GzipHandler(h)
+}
+
 // version 2: returning http.Handler
 func handlerLoopHandler(myhandlers []MyHandlerV3) http.Handler {
 	// TODO: benchmark returning http.Handler vs http.HandlerFunc
-	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -338,15 +345,7 @@ func handlerLoopHandler(myhandlers []MyHandlerV3) http.Handler {
 		}
 
 		o.EchoNoSetHeader(w)
-
-		err := errors.New(errors.Errorf("oh dear"))
-		log.Printf("%v", err.ErrorStack())
-		//err := werr.Wrap(errors.New("test"))
-		//if wrapped, ok := err.(*werr.Wrapper); ok {
-		//	lg, _ := wrapped.Log()
-		//	log.Printf("%v", lg)
-		//}
-	}))
+	})
 }
 
 func main() {
