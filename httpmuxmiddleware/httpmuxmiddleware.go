@@ -4,8 +4,11 @@ import (
 	"flag"
 	"github.com/NYTimes/gziphandler"
 	"github.com/evolutiontechnologies/gorillaerp/module/ioxer"
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	//"github.com/txgruppi/werr"
+	"github.com/go-errors/errors"
 	"log"
 	"net/http"
 	"os"
@@ -15,10 +18,11 @@ import (
 const (
 	sessionSecret     = "something-very-secret"
 	sessionName       = "MySession"
-	srvAddr           = "0.0.0.0:8080"
+	srvAddr           = "0.0.0.0:8443"
 	srvWriteTimeout   = 15 * time.Second
 	srvReadTimeout    = 15 * time.Second
 	srvMaxHeaderBytes = 1 << 20
+	CSRF_AUTH_KEY     = "31-byte-long-auth-key----------"
 )
 
 var (
@@ -44,7 +48,7 @@ func homeHTML() string {
 		<html>
 			<head>
 				<script src="https://code.jquery.com/jquery-2.x-git.min.js"></script>
-				<script src="static/debug.js?time=1"></script>
+				<script src="static/debug.js?time=2"></script>
 			</head>
 			<body>
 				<input type="text" id="Username" value="jun" placeholder="Username" />
@@ -54,8 +58,11 @@ func homeHTML() string {
 					<option value="user2">User2</option>
 					<option value="user3">User3</option>
 				</select>
+				<br><input type="text" id="CSRFToken" style="width: 800px;" />
 				<br><button id="SalOrderBtn">SalOrder</button>
 				<br><button id="NewsBtn">News</button>
+				<br><button id="News3Btn">News 3</button>
+				<br><button id="CSRFBtn">Get CSRF Token</button>
 				<br><button id="LoginBtn">Login</button>
 				<br><button id="LogoutBtn">Logout</button>
 			</body>
@@ -76,6 +83,16 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 	if _, err := w.Write([]byte(homeHTML())); err != nil {
 		log.Printf("w.Write: %v", err.Error())
 	}
+}
+
+func srvCSRFToken(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	// Get the token and pass it in the CSRF header. Our JSON-speaking client
+	// or JavaScript framework can now read the header and return the token in
+	// in its own "X-CSRF-Token" request header on the subsequent POST.
+	w.Header().Set("X-CSRF-Token", csrf.Token(r))
+
 }
 
 func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
@@ -297,13 +314,18 @@ func handlerLoopHandlerFunc(myhandlers []MyHandlerV3) http.HandlerFunc {
 
 // version 2: returning http.Handler
 func srvNoCheckingHandler(mh ...MyHandlerV3) http.Handler {
-	return handlerLoopHandler(append([]MyHandlerV3{}, mh...))
+	return srvCSRF(handlerLoopHandler(append([]MyHandlerV3{}, mh...)))
+}
+
+func srvCSRF(h http.Handler) http.Handler {
+	return csrf.Protect([]byte(CSRF_AUTH_KEY), csrf.Secure(true), csrf.MaxAge(86400*1))(h)
 }
 
 // version 2: returning http.Handler
 func handlerLoopHandler(myhandlers []MyHandlerV3) http.Handler {
 	// TODO: benchmark returning http.Handler vs http.HandlerFunc
 	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 		o := ioxer.NewIOXer()
@@ -316,6 +338,14 @@ func handlerLoopHandler(myhandlers []MyHandlerV3) http.Handler {
 		}
 
 		o.EchoNoSetHeader(w)
+
+		err := errors.New(errors.Errorf("oh dear"))
+		log.Printf("%v", err.ErrorStack())
+		//err := werr.Wrap(errors.New("test"))
+		//if wrapped, ok := err.(*werr.Wrapper); ok {
+		//	lg, _ := wrapped.Log()
+		//	log.Printf("%v", lg)
+		//}
 	}))
 }
 
@@ -323,6 +353,9 @@ func main() {
 	//
 
 	flag.Parse()
+
+	//
+	HelpGenTLSKeys()
 
 	//
 	r := mux.NewRouter()
@@ -351,8 +384,9 @@ func main() {
 	//s.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularCheckingHandlerFunc(srvSalOrder))
 
 	// Subrouter.
-	//s2 := r.Host("erp.local").Subrouter()
-	//s2.HandleFunc("/News", srvNoCheckingHandlerFunc(srvNews))
+	s2 := r.Host("erp.local").Subrouter()
+	s2.Handle("/CSRFToken", srvNoCheckingHandler(srvCSRFToken))
+	s2.Handle("/News3", srvNoCheckingHandler(srvNews))
 
 	//
 	srv := &http.Server{
@@ -364,7 +398,31 @@ func main() {
 		MaxHeaderBytes: srvMaxHeaderBytes,
 	}
 
-	if err := srv.ListenAndServe(); err != nil {
+	//if err := srv.ListenAndServe(); err != nil {
+	if err := srv.ListenAndServeTLS("mydomain.com.crt", "mydomain.com.key"); err != nil {
 		log.Printf("srv.ListenAndServe: %v", err.Error())
 	}
+}
+
+func HelpGenTLSKeys() {
+	str := `
+To generate the private key and the self-signed certificate:
+
+Use this method if you want to use HTTPS (HTTP over TLS) to secure your Apache HTTP or Nginx web server, and you want to use a Certificate Authority (CA) to issue the SSL certificate. The CSR that is generated can be sent to a CA to request the issuance of a CA-signed SSL certificate. If your CA supports SHA-2, add the -sha256 option to sign the CSR with SHA-2.
+
+# openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=mydomain.com" -keyout mydomain.com.key -out mydomain.com.csr
+
+Note: The -newkey rsa:2048 option specifies that the key should be 2048-bit, generated using the RSA algorithm.
+Note: The -nodes option specifies that the private key should not be encrypted with a pass phrase.
+Note: The -new option, which is not included here but implied, indicates that a CSR is being generated.
+
+Generate a Self-Signed Certificate:
+
+Use this method if you want to use HTTPS (HTTP over TLS) to secure your Apache HTTP or Nginx web server, and you do not require that your certificate is signed by a CA.
+
+This command creates a 2048-bit private key (domain.key) and a self-signed certificate (domain.crt) from scratch:
+
+# openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=mydomain.com" -keyout mydomain.com.key -x509 -days 365 -out mydomain.com.crt
+`
+	log.Printf("%v\n", str)
 }

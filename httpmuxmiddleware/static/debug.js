@@ -24,6 +24,8 @@ $(document).ready(function() {
 	//
 	BindSalOrder();
 	BindNews();
+	BindNews3();
+	BindCSRFToken();
 	BindLogin();
 	BindLogout();
 });
@@ -74,6 +76,48 @@ function BindNews() {
 		});
 	});
 }
+
+function BindNews3() {
+	$('#News3Btn').on('click', function(event){
+		event.preventDefault();
+
+		var optObj = {
+			SQLDealerName: 'Not Yet',
+		};
+
+		$.ajax({url: '/News3', data: JSON.stringify(optObj),
+			headers: {
+				Authorization: $('#User').val(),
+				'X-CSRF-Token': $('#CSRFToken').val(),
+			},
+		}).done(function(dataObj){
+			console.log(dataObj);
+		}).fail(function(dataObj){
+		}).always(function(dataObj) {
+		});
+	});
+}
+
+function BindCSRFToken() {
+	$('#CSRFBtn').on('click', function(event){
+		event.preventDefault();
+
+		var optObj = {
+			SQLDealerName: 'Not Yet',
+		};
+
+		$.ajax({url: '/CSRFToken', type: 'GET', data: optObj,
+		}).done(function(dataObj, textStatus, jqXHR){
+			console.log(dataObj);
+			console.log(jqXHR.getResponseHeader('X-CSRF-Token'));
+
+			$('#CSRFToken').val(jqXHR.getResponseHeader('X-CSRF-Token'));
+		}).fail(function(dataObj){
+		}).always(function(dataObj) {
+		});
+	});
+}
+
 
 function BindLogin() {
 	$('#LoginBtn').on('click', function(event){

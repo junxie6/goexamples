@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -80,5 +79,5 @@ This command creates a 2048-bit private key (domain.key) and a self-signed certi
 
 # openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=mydomain.com" -keyout mydomain.com.key -x509 -days 365 -out mydomain.com.crt
 `
-	fmt.Printf("# %v\n", str)
+	log.Printf("%v\n", str)
 }
