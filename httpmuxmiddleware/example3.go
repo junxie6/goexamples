@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/junhsieh/alice"
 	"github.com/junhsieh/iojson"
-	"github.com/junhsieh/middlewarechainer"
 	"log"
 	"net/http"
 	"time"
@@ -89,8 +89,8 @@ func srvNews2(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	chain := middlewarechainer.New(
-		iojson.EchoHandlerV2,
+	chain := alice.New(
+		iojson.EchoHandler,
 		LoggerHandler,
 		mySingleHost,
 	)

@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"github.com/junhsieh/alice"
 	"github.com/junhsieh/goexamples/util"
 	"github.com/junhsieh/iojson"
 	"log"
@@ -196,9 +197,6 @@ func srvNotFound(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	o.AddError("custom 404 page not found")
 }
 
-func getSession() {
-}
-
 func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	// Get a session. Get() always returns a session, even if empty.
 	session, err := store.Get(r, sessionName)
@@ -279,73 +277,6 @@ func srvNews(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	}
 
 	o.AddObj(news)
-
-}
-
-// version 1: returning http.HandlerFunc
-func srvNoCheckingHandlerFunc(mh ...MyHandlerV3) http.HandlerFunc {
-	return handlerLoopHandlerFunc(append([]MyHandlerV3{}, mh...))
-}
-
-// version 1: returning http.HandlerFunc
-func srvRegularCheckingHandlerFunc(mh ...MyHandlerV3) http.HandlerFunc {
-	return handlerLoopHandlerFunc(append([]MyHandlerV3{srvUserAuthentication}, mh...))
-}
-
-// version 1: returning http.HandlerFunc
-func handlerLoopHandlerFunc(myhandlers []MyHandlerV3) http.HandlerFunc {
-	// TODO: benchmark returning http.Handler vs http.HandlerFunc
-	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		o := iojson.NewIOJSON()
-
-		for _, myhandler := range myhandlers {
-			if myhandler(w, r, o); o.ErrCount > 0 {
-				o.Echo(w)
-				return
-			}
-		}
-
-		o.Echo(w)
-	})).(http.HandlerFunc)
-}
-
-// version 2: returning http.Handler
-func srvNoCheckingHandler(mh ...MyHandlerV3) http.Handler {
-	//return srvCSRF(handlerLoopHandler(append([]MyHandlerV3{}, mh...)))
-	return srvGZIPCSRF(handlerLoopHandler(append([]MyHandlerV3{}, mh...)))
-}
-
-func srvGZIPCSRF(h http.Handler) http.Handler {
-	return srvGZIP(srvCSRF(h))
-}
-
-func srvCSRF(h http.Handler) http.Handler {
-	return csrf.Protect([]byte(CSRF_AUTH_KEY),
-		csrf.Secure(true),
-		csrf.MaxAge(3600*12),
-		csrf.ErrorHandler(http.HandlerFunc(unauthorizedHandler)),
-	)(h)
-}
-
-func srvGZIP(h http.Handler) http.Handler {
-	return gziphandler.GzipHandler(h)
-}
-
-// version 2: returning http.Handler
-func handlerLoopHandler(myhandlers []MyHandlerV3) http.Handler {
-	// TODO: benchmark returning http.Handler vs http.HandlerFunc
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		o := iojson.NewIOJSON()
-
-		for _, myhandler := range myhandlers {
-			if myhandler(w, r, o); o.ErrCount > 0 {
-				o.Echo(w)
-				return
-			}
-		}
-
-		o.Echo(w)
-	})
 }
 
 //
@@ -358,46 +289,24 @@ func unauthorizedHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	//
-
 	flag.Parse()
 
 	//
 	util.HelpGenTLSKeys()
 
 	//
-	r := mux.NewRouter()
-	r.Host("erp.local:8080")
-
-	// custom 404 not found handler
-	//r.NotFoundHandler = http.HandlerFunc(srvNotFound) // NOTE: standware way.
-	r.NotFoundHandler = srvNoCheckingHandlerFunc(srvNotFound)
+	chain := alice.New(
+		iojson.EchoHandler,
+		//LoggerHandler,
+		//mySingleHost,
+	)
 
 	//
-	r.HandleFunc("/", srvHome)
-
-	r.HandleFunc("/Login", srvNoCheckingHandlerFunc(srvLogin))
-	r.HandleFunc("/Logout", srvNoCheckingHandlerFunc(srvLogout))
-
-	r.HandleFunc("/News1", srvNoCheckingHandlerFunc(srvNews))
-	r.Handle("/News2", srvNoCheckingHandler(srvNews))
-
-	r.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularCheckingHandlerFunc(srvSalOrder))
-
-	// This will serve files under http://localhost:8000/static/<filename>
-	r.PathPrefix(*staticDir).Handler(http.StripPrefix(*staticDir, http.FileServer(http.Dir("."+*staticDir))))
-
-	// Subrouter. Only matches if domain is "www.example.com".
-	//s := r.Host("erp.local").Subrouter()
-	//s.HandleFunc("/SalOrder/{IDSalOrder}", srvRegularCheckingHandlerFunc(srvSalOrder))
-
-	// Subrouter.
-	s2 := r.Host("erp.local").Subrouter()
-	s2.Handle("/CSRFToken", srvNoCheckingHandler(srvCSRFToken))
-	s2.Handle("/News3", srvNoCheckingHandler(srvNews))
+	mux := http.NewServeMux()
 
 	//
 	srv := &http.Server{
-		Handler: r,
+		Handler: mux,
 		Addr:    srvAddr,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout:   srvWriteTimeout,
