@@ -345,7 +345,7 @@ To generate the private key and the self-signed certificate:
 
 Use this method if you want to use HTTPS (HTTP over TLS) to secure your Apache HTTP or Nginx web server, and you want to use a Certificate Authority (CA) to issue the SSL certificate. The CSR that is generated can be sent to a CA to request the issuance of a CA-signed SSL certificate. If your CA supports SHA-2, add the -sha256 option to sign the CSR with SHA-2.
 
-# openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=mydomain.com" -keyout mydomain.com.key -out mydomain.com.csr
+# openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=erp.local" -keyout erp.local.key -out erp.local.csr
 
 Note: The -newkey rsa:2048 option specifies that the key should be 2048-bit, generated using the RSA algorithm.
 Note: The -nodes option specifies that the private key should not be encrypted with a pass phrase.

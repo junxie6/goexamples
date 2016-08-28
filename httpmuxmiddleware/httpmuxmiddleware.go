@@ -25,8 +25,8 @@ const (
 var (
 	srvDomain     = flag.String("srvDomain", "erp.local", `Server's domain name`)
 	srvPort       = flag.String("srvPort", ":8443", `Server's port number`)
-	certTLS       = flag.String("certTLS", "mydomain.com.crt", `TLS certificate`)
-	keyTLS        = flag.String("keyTLS", "mydomain.com.key", `TLS key`)
+	certTLS       = flag.String("certTLS", "erp.local.crt", `TLS certificate`)
+	keyTLS        = flag.String("keyTLS", "erp.local.key", `TLS key`)
 	staticDir     = flag.String("staticDir", "/static/", `The directory to serve files from. Defaults to the static dir of the current dir`)
 	sessionDir    = flag.String("sessionDir", "./session", `The directory to store sessions to. Defaults to the session dir of the current dir`)
 	sessionName   = flag.String("sessionName", "MySession", `Session name`)
