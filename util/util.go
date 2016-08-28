@@ -357,7 +357,7 @@ Use this method if you want to use HTTPS (HTTP over TLS) to secure your Apache H
 
 This command creates a 2048-bit private key (domain.key) and a self-signed certificate (domain.crt) from scratch:
 
-# openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=mydomain.com" -keyout mydomain.com.key -x509 -days 365 -out mydomain.com.crt
+# openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=erp.local" -keyout erp.local.key -x509 -days 365 -out erp.local.crt
 `
 	log.Printf("%v\n", str)
 }
