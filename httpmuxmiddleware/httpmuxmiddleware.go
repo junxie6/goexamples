@@ -17,19 +17,21 @@ import (
 )
 
 const (
-	sessionSecret     = "something-very-secret"
-	sessionName       = "MySession"
 	srvWriteTimeout   = 15 * time.Second
 	srvReadTimeout    = 15 * time.Second
 	srvMaxHeaderBytes = 1 << 20
-	CSRF_AUTH_KEY     = "31-byte-long-auth-key----------"
 )
 
 var (
-	srvDomain  = flag.String("srvDomain", "erp.local", `Server's domain name`)
-	srvPort    = flag.String("srvPort", ":8443", `Server's port number`)
-	staticDir  = flag.String("staticDir", "/static/", `the directory to serve files from. Defaults to the static dir of the current dir`)
-	sessionDir = flag.String("sessionDir", "./session", `the directory to store sessions to. Defaults to the session dir of the current dir`)
+	srvDomain     = flag.String("srvDomain", "erp.local", `Server's domain name`)
+	srvPort       = flag.String("srvPort", ":8443", `Server's port number`)
+	certTLS       = flag.String("certTLS", "mydomain.com.crt", `TLS certificate`)
+	keyTLS        = flag.String("keyTLS", "mydomain.com.key", `TLS key`)
+	staticDir     = flag.String("staticDir", "/static/", `The directory to serve files from. Defaults to the static dir of the current dir`)
+	sessionDir    = flag.String("sessionDir", "./session", `The directory to store sessions to. Defaults to the session dir of the current dir`)
+	sessionName   = flag.String("sessionName", "MySession", `Session name`)
+	sessionSecret = flag.String("sessionSecret", "something-very-secret", `Session secret`)
+	authCSRFKey   = flag.String("authCSRFKey", "31-byte-long-auth-key----------", `CSRF Auth key`)
 )
 
 // TODO: include csrf for user authentication
@@ -37,7 +39,7 @@ var (
 // TODO: integrate with Redis. Store session in Redis.
 // store session on server side.
 var (
-	store = sessions.NewFilesystemStore(*sessionDir, []byte(sessionSecret))
+	store = sessions.NewFilesystemStore(*sessionDir, []byte(*sessionSecret))
 )
 
 type (
@@ -112,7 +114,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	log.Printf("JSON: %s", i.EncodePretty())
 
 	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, sessionName)
+	session, err := store.Get(r, *sessionName)
 
 	if err != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -155,7 +157,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 
 func srvLogout(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, sessionName)
+	session, err := store.Get(r, *sessionName)
 
 	if err != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -202,7 +204,7 @@ func srvNotFound(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 
 func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, sessionName)
+	session, err := store.Get(r, *sessionName)
 
 	if err != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -331,7 +333,7 @@ func main() {
 	}
 
 	//if err := srv.ListenAndServe(); err != nil {
-	if err := srv.ListenAndServeTLS("mydomain.com.crt", "mydomain.com.key"); err != nil {
+	if err := srv.ListenAndServeTLS(*certTLS, *keyTLS); err != nil {
 		log.Printf("srv.ListenAndServe: %v", err.Error())
 	}
 }
