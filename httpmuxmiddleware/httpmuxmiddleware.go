@@ -2,13 +2,14 @@ package main
 
 import (
 	"flag"
-	"github.com/NYTimes/gziphandler"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/junhsieh/alice"
 	"github.com/junhsieh/goexamples/util"
+	"github.com/junhsieh/gziphandler"
 	"github.com/junhsieh/iojson"
+	"github.com/junhsieh/middleware"
 	"log"
 	"net/http"
 	"os"
@@ -18,7 +19,6 @@ import (
 const (
 	sessionSecret     = "something-very-secret"
 	sessionName       = "MySession"
-	srvAddr           = "0.0.0.0:8443"
 	srvWriteTimeout   = 15 * time.Second
 	srvReadTimeout    = 15 * time.Second
 	srvMaxHeaderBytes = 1 << 20
@@ -26,8 +26,10 @@ const (
 )
 
 var (
-	staticDir  = flag.String("staticDir", "/static/", "the directory to serve files from. Defaults to the static dir of the current dir")
-	sessionDir = flag.String("sessionDir", "./session", "the directory to store sessions to. Defaults to the session dir of the current dir")
+	srvDomain  = flag.String("srvDomain", "erp.local", `Server's domain name`)
+	srvPort    = flag.String("srvPort", ":8443", `Server's port number`)
+	staticDir  = flag.String("staticDir", "/static/", `the directory to serve files from. Defaults to the static dir of the current dir`)
+	sessionDir = flag.String("sessionDir", "./session", `the directory to store sessions to. Defaults to the session dir of the current dir`)
 )
 
 // TODO: include csrf for user authentication
@@ -47,6 +49,7 @@ func homeHTML() string {
 	return `
 		<html>
 			<head>
+				<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
 				<script src="https://code.jquery.com/jquery-2.x-git.min.js"></script>
 				<script src="static/debug.js?time=2"></script>
 			</head>
@@ -123,7 +126,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 
 	session.Options = &sessions.Options{
 		Path:     "/",
-		Domain:   "erp.local",
+		Domain:   *srvDomain,
 		MaxAge:   86400 * 1, // 3 Days
 		Secure:   false,     // TODO: set to true once applied the SSL certificate.
 		HttpOnly: true,
@@ -169,7 +172,7 @@ func srvLogout(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 
 	session.Options = &sessions.Options{
 		Path:     "/",
-		Domain:   "erp.local",
+		Domain:   *srvDomain,
 		MaxAge:   -1,    // means delete cookie now.
 		Secure:   false, // TODO: set to true once applied the SSL certificate.
 		HttpOnly: true,
@@ -287,6 +290,13 @@ func unauthorizedHandler(w http.ResponseWriter, r *http.Request) {
 	o.Echo(w)
 }
 
+func srvHome2(w http.ResponseWriter, r *http.Request) {
+	//log.Printf("Inside home2")
+
+	o := r.Context().Value("iojson").(*iojson.IOJSON)
+	o.AddData("act", "home 2; "+r.FormValue("act"))
+}
+
 func main() {
 	//
 	flag.Parse()
@@ -296,21 +306,24 @@ func main() {
 
 	//
 	chain := alice.New(
+		gziphandler.GzipHandler,
 		iojson.EchoHandler,
-		//LoggerHandler,
-		//mySingleHost,
+		middleware.LoggerHandler,
+		middleware.DomainHandler(*srvDomain+*srvPort),
 	)
 
 	//
 	mux := http.NewServeMux()
 
 	// NOTE: FileServer calls path.Clean() to clean up path.
-	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("." + "/static/"))))
+	mux.Handle(*staticDir, http.StripPrefix(*staticDir, http.FileServer(http.Dir("."+*staticDir))))
+
+	mux.Handle("/Home2", chain.Then(http.HandlerFunc(srvHome2)))
 
 	//
 	srv := &http.Server{
 		Handler: mux,
-		Addr:    srvAddr,
+		Addr:    *srvPort,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout:   srvWriteTimeout,
 		ReadTimeout:    srvReadTimeout,
