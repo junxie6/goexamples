@@ -6,7 +6,7 @@ import (
 )
 
 type (
-//MyHandler func(http.ResponseWriter, *http.Request, *ioxer.IOXer)
+//MyHandler func(http.ResponseWriter, *http.Request, *iojson.IOJSON)
 )
 
 func srvHome(w http.ResponseWriter, r *http.Request) {

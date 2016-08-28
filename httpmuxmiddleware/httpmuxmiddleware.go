@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"github.com/NYTimes/gziphandler"
-	"github.com/evolutiontechnologies/gorillaerp/module/ioxer"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/junhsieh/goexamples/util"
+	"github.com/junhsieh/iojson"
 	"log"
 	"net/http"
 	"os"
@@ -39,7 +39,7 @@ var (
 
 type (
 	// MyHandlerV3 ...
-	MyHandlerV3 func(http.ResponseWriter, *http.Request, *ioxer.IOXer)
+	MyHandlerV3 func(http.ResponseWriter, *http.Request, *iojson.IOJSON)
 )
 
 func homeHTML() string {
@@ -84,7 +84,7 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func srvCSRFToken(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+func srvCSRFToken(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Get the token and pass it in the CSRF header. Our JSON-speaking client
@@ -94,9 +94,9 @@ func srvCSRFToken(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 
 }
 
-func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+func srvLogin(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	// User input
-	i := ioxer.NewIOXer()
+	i := iojson.NewIOJSON()
 
 	if err := i.Decode(r.Body); err != nil {
 		o.AddError(err.Error())
@@ -145,11 +145,11 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 		username = s.(string)
 	}
 
-	o.PutData("test", "very good")
-	o.PutData("username", username)
+	o.AddData("test", "very good")
+	o.AddData("username", username)
 }
 
-func srvLogout(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+func srvLogout(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	// Get a session. Get() always returns a session, even if empty.
 	session, err := store.Get(r, sessionName)
 
@@ -189,17 +189,17 @@ func srvLogout(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 		//
 	}
 
-	o.PutData("msg", "cookie has been deleted from server")
+	o.AddData("msg", "cookie has been deleted from server")
 }
 
-func srvNotFound(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+func srvNotFound(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	o.AddError("custom 404 page not found")
 }
 
 func getSession() {
 }
 
-func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	// Get a session. Get() always returns a session, even if empty.
 	session, err := store.Get(r, sessionName)
 
@@ -223,7 +223,7 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 		return
 	}
 
-	o.PutData("welcome", "Welcom, "+session.Values["Username"].(string))
+	o.AddData("welcome", "Welcom, "+session.Values["Username"].(string))
 
 	// TODO: Add a logic to support both session/cookie and Header/Authorization
 	/*
@@ -241,15 +241,15 @@ func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *ioxer.IOXe
 	*/
 }
 
-func srvSalOrder(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+func srvSalOrder(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	so := &struct {
 		DealerName string
 		IDShipAddr int64
 		Price      float64
 	}{}
 
-	i := ioxer.NewIOXer()
-	i.PutObj(so)
+	i := iojson.NewIOJSON()
+	i.AddObj(so)
 
 	if err := i.Decode(r.Body); err != nil {
 		o.AddError(err.Error())
@@ -264,10 +264,10 @@ func srvSalOrder(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 	vars := mux.Vars(r)
 	IDSalOrder := vars["IDSalOrder"]
 
-	o.PutData("IDSalOrder", IDSalOrder)
+	o.AddData("IDSalOrder", IDSalOrder)
 }
 
-func srvNews(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
+func srvNews(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	news := struct {
 		Subject string
 		Author  string
@@ -278,7 +278,7 @@ func srvNews(w http.ResponseWriter, r *http.Request, o *ioxer.IOXer) {
 		Body:    "This is a Hello World message" + r.URL.Path,
 	}
 
-	o.PutObj(news)
+	o.AddObj(news)
 
 }
 
@@ -296,7 +296,7 @@ func srvRegularCheckingHandlerFunc(mh ...MyHandlerV3) http.HandlerFunc {
 func handlerLoopHandlerFunc(myhandlers []MyHandlerV3) http.HandlerFunc {
 	// TODO: benchmark returning http.Handler vs http.HandlerFunc
 	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		o := ioxer.NewIOXer()
+		o := iojson.NewIOJSON()
 
 		for _, myhandler := range myhandlers {
 			if myhandler(w, r, o); o.ErrCount > 0 {
@@ -335,7 +335,7 @@ func srvGZIP(h http.Handler) http.Handler {
 func handlerLoopHandler(myhandlers []MyHandlerV3) http.Handler {
 	// TODO: benchmark returning http.Handler vs http.HandlerFunc
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		o := ioxer.NewIOXer()
+		o := iojson.NewIOJSON()
 
 		for _, myhandler := range myhandlers {
 			if myhandler(w, r, o); o.ErrCount > 0 {
@@ -350,7 +350,7 @@ func handlerLoopHandler(myhandlers []MyHandlerV3) http.Handler {
 
 //
 func unauthorizedHandler(w http.ResponseWriter, r *http.Request) {
-	o := ioxer.NewIOXer()
+	o := iojson.NewIOJSON()
 	o.AddError("Forbidden - CSRF token invalid")
 
 	o.Echo(w)
