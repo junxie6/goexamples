@@ -304,6 +304,9 @@ func main() {
 	//
 	mux := http.NewServeMux()
 
+	// NOTE: FileServer calls path.Clean() to clean up path.
+	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("." + "/static/"))))
+
 	//
 	srv := &http.Server{
 		Handler: mux,
