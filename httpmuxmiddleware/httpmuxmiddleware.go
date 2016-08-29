@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/junhsieh/alice"
 	"github.com/junhsieh/goexamples/util"
@@ -79,8 +78,15 @@ func homeHTML() string {
 }
 
 func srvHome(w http.ResponseWriter, r *http.Request) {
-	//o := r.Context().Value("iojson").(*iojson.IOJSON)
-	//o.AddData("act", "home; "+r.FormValue("act"))
+	// The "/" pattern matches everything, so we need to check
+	// that we're at the root here.
+	// Reference:
+	// https://golang.org/pkg/net/http/#example_ServeMux_Handle
+	// https://golang.org/pkg/net/http/#ServeMux
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
 
 	if _, err := w.Write([]byte(homeHTML())); err != nil {
 		log.Printf("w.Write: %v", err.Error())
@@ -207,49 +213,9 @@ func srvNotFound(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	o.AddError("custom 404 page not found")
 }
 
-func srvUserAuthentication(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
-	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, *sessionName)
+func srvSalOrder(w http.ResponseWriter, r *http.Request) {
+	o := r.Context().Value("iojson").(*iojson.IOJSON)
 
-	if err != nil {
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
-		//w.WriteHeader(http.StatusInternalServerError)
-		o.AddError(err.Error())
-		return
-	}
-
-	// TODO: how to determine whether a session is expired?
-
-	// TODO: add a logic to continue only when session.IsNew is false (can be true too when the session is expired)
-	log.Printf("IsNew Session: %v", session.IsNew)
-
-	// TODO: need a way to check if session exists.
-
-	if _, ok := session.Values["Username"]; !ok {
-		//w.WriteHeader(http.StatusForbidden)
-		o.AddError("You do not have the permission")
-		return
-	}
-
-	o.AddData("welcome", "Welcom, "+session.Values["Username"].(string))
-
-	// TODO: Add a logic to support both session/cookie and Header/Authorization
-	/*
-		Authorization := r.Header.Get("Authorization")
-
-		log.Printf("Authorization: %v", Authorization)
-
-		switch Authorization {
-		case "user2":
-			w.WriteHeader(http.StatusForbidden)
-			o.AddError("You do not have the permission")
-		case "user3":
-			o.AddError("You do not have the permission")
-		}
-	*/
-}
-
-func srvSalOrder(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	so := &struct {
 		DealerName string
 		IDShipAddr int64
@@ -264,13 +230,12 @@ func srvSalOrder(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 		return
 	}
 
-	log.Printf("SQLDealerName: %s", i.GetData("SQLDealerName"))
-	log.Printf("SQLIDShipAddr: %d", int(i.GetData("SQLIDShipAddr").(float64)))
-	log.Printf("SQLPrice: %f", i.GetData("SQLPrice"))
-	log.Printf("JSON: %s", i.EncodePretty())
+	log.Printf("DEBUG_SALORDER: SQLDealerName: %s", i.GetData("SQLDealerName"))
+	log.Printf("DEBUG_SALORDER: SQLIDShipAddr: %d", int(i.GetData("SQLIDShipAddr").(float64)))
+	log.Printf("DEBUG_SALORDER: SQLPrice: %f", i.GetData("SQLPrice"))
+	log.Printf("DEBUG_SALORDER: JSON: %s", i.EncodePretty())
 
-	vars := mux.Vars(r)
-	IDSalOrder := vars["IDSalOrder"]
+	IDSalOrder := r.FormValue("IDSalOrder")
 
 	o.AddData("IDSalOrder", IDSalOrder)
 }
@@ -298,7 +263,7 @@ func unauthorizedHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func srvHome2(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Inside Home2")
+	log.Printf("DEBUG_HOME2: Inside")
 
 	o := r.Context().Value("iojson").(*iojson.IOJSON)
 	o.AddData("act", "home 2; "+r.FormValue("act"))
@@ -325,7 +290,9 @@ func main() {
 		middleware.DomainHandler(*srvDomain+*srvPort),
 	)
 
-	//stdChain := alice.Append()
+	stdChain := minChain.Append(
+		middleware.AuthUserHandler(store, *sessionName),
+	)
 
 	//
 	mux := http.NewServeMux()
@@ -337,6 +304,8 @@ func main() {
 
 	mux.Handle("/Login", minChain.ThenFunc(srvLogin))
 	mux.Handle("/Logout", minChain.ThenFunc(srvLogout))
+
+	mux.Handle("/SalOrder", stdChain.ThenFunc(srvSalOrder))
 
 	mux.Handle("/Home2", minChain.ThenFunc(srvHome2))
 

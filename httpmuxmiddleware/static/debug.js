@@ -45,7 +45,7 @@ function BindSalOrder() {
 			],
 		};
 
-		$.ajax({url: '/SalOrder/5', data: JSON.stringify(optObj),
+		$.ajax({url: '/SalOrder?IDSalOrder=5', data: JSON.stringify(optObj),
 			headers: {
 				Authorization: $('#User').val(),
 			},
