@@ -293,7 +293,7 @@ func unauthorizedHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func srvHome2(w http.ResponseWriter, r *http.Request) {
-	//log.Printf("Inside home2")
+	log.Printf("Inside Home2")
 
 	o := r.Context().Value("iojson").(*iojson.IOJSON)
 	o.AddData("act", "home 2; "+r.FormValue("act"))
