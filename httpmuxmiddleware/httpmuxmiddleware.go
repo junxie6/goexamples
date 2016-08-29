@@ -62,16 +62,20 @@ func homeHTML() string {
 			<body>
 				Username: <input type="text" id="Username" value="jun" placeholder="Username" />
 				<br>Password: <input type="text" id="Password" value="junpass" placeholder="Password" />
+				<br>
 				<br>User: <select id="User">
 					<option value="user1">User1</option>
 					<option value="user2">User2</option>
 					<option value="user3">User3</option>
 				</select>
 				<br>CSRFToken: <input type="text" id="CSRFToken" style="width: 800px;" />
+				<br>
 				<br><button id="SalOrderBtn">SalOrder</button>
+				<br>
 				<br><button id="NewsBtn">News 1 (no CSRF)</button>
 				<br><button id="News3Btn">News 3 (with CSRF)</button>
 				<br><button id="CSRFBtn">Get CSRF Token</button>
+				<br>
 				<br><button id="LoginBtn">Login</button>
 				<br><button id="LogoutBtn">Logout</button>
 			</body>
