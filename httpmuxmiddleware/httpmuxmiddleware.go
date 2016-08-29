@@ -38,9 +38,8 @@ var (
 	csrfMaxAge      = flag.Int("csrfMaxAge", 3600*12, `CSRF MaxAge`)
 )
 
-// TODO: include csrf for user authentication
-
 // TODO: integrate with Redis. Store session in Redis.
+
 // store session on server side.
 var (
 	store = sessions.NewFilesystemStore(*sessionDir, []byte(*sessionSecret))
@@ -199,14 +198,10 @@ func srvLogout(w http.ResponseWriter, r *http.Request) {
 	log.Printf("DEBUG_LOOUT: ID: %v", session.ID)
 
 	if err := os.Remove("./session/session_" + session.ID); err != nil {
-		//
+		// TODO: do something
 	}
 
 	o.AddData("msg", "cookie has been deleted from server")
-}
-
-func srvNotFound(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
-	o.AddError("custom 404 page not found")
 }
 
 func srvSalOrder(w http.ResponseWriter, r *http.Request) {
