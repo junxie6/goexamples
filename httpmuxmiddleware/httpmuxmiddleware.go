@@ -32,7 +32,7 @@ var (
 	sessionSecret   = flag.String("sessionSecret", "something-very-secret", `Session secret`)
 	sessionMaxAge   = flag.Int("sessionMaxAge", 3600*12, `Session MaxAge`)
 	sessionSecure   = flag.Bool("sessionSecure", true, `Session Secure`)
-	sessionHttpOnly = flag.Bool("sessionHttpOnly", true, `Session HttpOnly`)
+	sessionHTTPOnly = flag.Bool("sessionHTTPOnly", true, `Session HttpOnly`)
 	csrfAuthKey     = flag.String("csrfAuthKey", "31-byte-long-auth-key----------", `CSRF Auth key`)
 	csrfSecure      = flag.Bool("csrfSecure", true, `CSRF Secure`)
 	csrfMaxAge      = flag.Int("csrfMaxAge", 3600*12, `CSRF MaxAge`)
@@ -133,10 +133,12 @@ func srvLogin(w http.ResponseWriter, r *http.Request) {
 		Domain:   *srvDomain,
 		MaxAge:   *sessionMaxAge,
 		Secure:   *sessionSecure, // TODO: set to true once applied the SSL certificate.
-		HttpOnly: *sessionHttpOnly,
+		HttpOnly: *sessionHTTPOnly,
 	}
 
-	if i.GetData("SQLUsername") == "jun" && i.GetData("SQLPassword") == "junpass" {
+	if i.GetData("SQLUsername") != "jun" || i.GetData("SQLPassword") != "junpass" {
+		o.AddError("Invalid user information")
+	} else {
 		// Set some session values.
 		session.Values["Username"] = i.GetData("SQLUsername")
 
@@ -145,16 +147,16 @@ func srvLogin(w http.ResponseWriter, r *http.Request) {
 			o.AddError(err.Error())
 			return
 		}
+
+		username := "init name"
+
+		if s, ok := session.Values["Username"]; ok {
+			username = s.(string)
+		}
+
+		o.AddData("good", "very good")
+		o.AddData("username", username)
 	}
-
-	username := "init name"
-
-	if s, ok := session.Values["Username"]; ok {
-		username = s.(string)
-	}
-
-	o.AddData("good", "very good")
-	o.AddData("username", username)
 }
 
 func srvLogout(w http.ResponseWriter, r *http.Request) {
@@ -183,7 +185,7 @@ func srvLogout(w http.ResponseWriter, r *http.Request) {
 		Domain:   *srvDomain,
 		MaxAge:   -1,             // means delete cookie now.
 		Secure:   *sessionSecure, // TODO: set to true once applied the SSL certificate.
-		HttpOnly: *sessionHttpOnly,
+		HttpOnly: *sessionHTTPOnly,
 	}
 
 	log.Printf("DEBUG_LOOUT: Domain: %v", session.Options.Domain)
