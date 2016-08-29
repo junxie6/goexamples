@@ -33,7 +33,9 @@ var (
 	sessionMaxAge   = flag.Int("sessionMaxAge", 3600*12, `Session MaxAge`)
 	sessionSecure   = flag.Bool("sessionSecure", true, `Session Secure`)
 	sessionHttpOnly = flag.Bool("sessionHttpOnly", true, `Session HttpOnly`)
-	authCSRFKey     = flag.String("authCSRFKey", "31-byte-long-auth-key----------", `CSRF Auth key`)
+	csrfAuthKey     = flag.String("csrfAuthKey", "31-byte-long-auth-key----------", `CSRF Auth key`)
+	csrfSecure      = flag.Bool("csrfSecure", true, `CSRF Secure`)
+	csrfMaxAge      = flag.Int("csrfMaxAge", 3600*12, `CSRF MaxAge`)
 )
 
 // TODO: include csrf for user authentication
@@ -68,7 +70,7 @@ func homeHTML() string {
 				<br>CSRFToken: <input type="text" id="CSRFToken" style="width: 800px;" />
 				<br><button id="SalOrderBtn">SalOrder</button>
 				<br><button id="NewsBtn">News</button>
-				<br><button id="News3Btn">News 3</button>
+				<br><button id="News3Btn">News 3 (with CSRF)</button>
 				<br><button id="CSRFBtn">Get CSRF Token</button>
 				<br><button id="LoginBtn">Login</button>
 				<br><button id="LogoutBtn">Logout</button>
@@ -91,16 +93,6 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 	if _, err := w.Write([]byte(homeHTML())); err != nil {
 		log.Printf("w.Write: %v", err.Error())
 	}
-}
-
-func srvCSRFToken(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
-	// Get the token and pass it in the CSRF header. Our JSON-speaking client
-	// or JavaScript framework can now read the header and return the token in
-	// in its own "X-CSRF-Token" request header on the subsequent POST.
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
-
 }
 
 func srvLogin(w http.ResponseWriter, r *http.Request) {
@@ -240,7 +232,9 @@ func srvSalOrder(w http.ResponseWriter, r *http.Request) {
 	o.AddData("IDSalOrder", IDSalOrder)
 }
 
-func srvNews(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
+func srvNews1(w http.ResponseWriter, r *http.Request) {
+	o := r.Context().Value("iojson").(*iojson.IOJSON)
+
 	news := struct {
 		Subject string
 		Author  string
@@ -254,21 +248,14 @@ func srvNews(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	o.AddObj(news)
 }
 
+func srvCSRFToken(w http.ResponseWriter, r *http.Request) {
+	// Get the token and pass it in the CSRF header. Our JSON-speaking client
+	// or JavaScript framework can now read the header and return the token in
+	// in its own "X-CSRF-Token" request header on the subsequent POST.
+	w.Header().Set("X-CSRF-Token", csrf.Token(r))
+}
+
 //
-func unauthorizedHandler(w http.ResponseWriter, r *http.Request) {
-	o := iojson.NewIOJSON()
-	o.AddError("Forbidden - CSRF token invalid")
-
-	o.Echo(w)
-}
-
-func srvHome2(w http.ResponseWriter, r *http.Request) {
-	log.Printf("DEBUG_HOME2: Inside")
-
-	o := r.Context().Value("iojson").(*iojson.IOJSON)
-	o.AddData("act", "home 2; "+r.FormValue("act"))
-}
-
 func main() {
 	//
 	flag.Parse()
@@ -290,8 +277,16 @@ func main() {
 		middleware.DomainHandler(*srvDomain+*srvPort),
 	)
 
-	stdChain := minChain.Append(
+	authChain := minChain.Append(
 		middleware.AuthUserHandler(store, *sessionName),
+	)
+
+	stdChain := authChain.Append(
+		csrf.Protect([]byte(*csrfAuthKey),
+			csrf.Secure(*csrfSecure),
+			csrf.MaxAge(*csrfMaxAge),
+			csrf.ErrorHandler(iojson.ErrorHandler("Forbidden - CSRF token invalid")),
+		),
 	)
 
 	//
@@ -307,7 +302,10 @@ func main() {
 
 	mux.Handle("/SalOrder", stdChain.ThenFunc(srvSalOrder))
 
-	mux.Handle("/Home2", minChain.ThenFunc(srvHome2))
+	mux.Handle("/News1", minChain.ThenFunc(srvNews1))
+
+	mux.Handle("/News3", stdChain.ThenFunc(srvNews1)) // with CSRF
+	mux.Handle("/CSRFToken", authChain.ThenFunc(srvCSRFToken))
 
 	//
 	srv := &http.Server{
