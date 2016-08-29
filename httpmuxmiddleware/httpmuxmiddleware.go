@@ -57,7 +57,7 @@ func homeHTML() string {
 			<head>
 				<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
 				<script src="https://code.jquery.com/jquery-2.x-git.min.js"></script>
-				<script src="static/debug.js?time=4"></script>
+				<script src="static/debug.js?time=5"></script>
 			</head>
 			<body>
 				Username: <input type="text" id="Username" value="jun" placeholder="Username" />
@@ -69,7 +69,7 @@ func homeHTML() string {
 				</select>
 				<br>CSRFToken: <input type="text" id="CSRFToken" style="width: 800px;" />
 				<br><button id="SalOrderBtn">SalOrder</button>
-				<br><button id="NewsBtn">News</button>
+				<br><button id="NewsBtn">News 1 (no CSRF)</button>
 				<br><button id="News3Btn">News 3 (with CSRF)</button>
 				<br><button id="CSRFBtn">Get CSRF Token</button>
 				<br><button id="LoginBtn">Login</button>
@@ -206,6 +206,8 @@ func srvNotFound(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 }
 
 func srvSalOrder(w http.ResponseWriter, r *http.Request) {
+	log.Printf("DEBUG_SalOrder: Inside")
+
 	o := r.Context().Value("iojson").(*iojson.IOJSON)
 
 	so := &struct {
@@ -249,6 +251,8 @@ func srvNews1(w http.ResponseWriter, r *http.Request) {
 }
 
 func srvCSRFToken(w http.ResponseWriter, r *http.Request) {
+	log.Printf("DEBUG_CSRFToken: Inside")
+
 	// Get the token and pass it in the CSRF header. Our JSON-speaking client
 	// or JavaScript framework can now read the header and return the token in
 	// in its own "X-CSRF-Token" request header on the subsequent POST.
@@ -277,12 +281,10 @@ func main() {
 		middleware.DomainHandler(*srvDomain+*srvPort),
 	)
 
-	authChain := minChain.Append(
+	stdChain := minChain.Append(
 		middleware.AuthUserHandler(store, *sessionName),
-	)
-
-	stdChain := authChain.Append(
 		csrf.Protect([]byte(*csrfAuthKey),
+			csrf.Domain(*srvDomain),
 			csrf.Secure(*csrfSecure),
 			csrf.MaxAge(*csrfMaxAge),
 			csrf.ErrorHandler(iojson.ErrorHandler("Forbidden - CSRF token invalid")),
@@ -305,7 +307,7 @@ func main() {
 	mux.Handle("/News1", minChain.ThenFunc(srvNews1))
 
 	mux.Handle("/News3", stdChain.ThenFunc(srvNews1)) // with CSRF
-	mux.Handle("/CSRFToken", authChain.ThenFunc(srvCSRFToken))
+	mux.Handle("/CSRFToken", stdChain.ThenFunc(srvCSRFToken))
 
 	//
 	srv := &http.Server{

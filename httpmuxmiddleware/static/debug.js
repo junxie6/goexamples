@@ -48,6 +48,7 @@ function BindSalOrder() {
 		$.ajax({url: '/SalOrder?IDSalOrder=5', data: JSON.stringify(optObj),
 			headers: {
 				Authorization: $('#User').val(),
+				'X-CSRF-Token': $('#CSRFToken').val(),
 			},
 		}).done(function(dataObj){
 			console.log(dataObj);
