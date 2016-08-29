@@ -23,15 +23,18 @@ const (
 )
 
 var (
-	srvDomain     = flag.String("srvDomain", "erp.local", `Server's domain name`)
-	srvPort       = flag.String("srvPort", ":8443", `Server's port number`)
-	certTLS       = flag.String("certTLS", "erp.local.crt", `TLS certificate`)
-	keyTLS        = flag.String("keyTLS", "erp.local.key", `TLS key`)
-	staticDir     = flag.String("staticDir", "/static/", `The directory to serve files from. Defaults to the static dir of the current dir`)
-	sessionDir    = flag.String("sessionDir", "./session", `The directory to store sessions to. Defaults to the session dir of the current dir`)
-	sessionName   = flag.String("sessionName", "MySession", `Session name`)
-	sessionSecret = flag.String("sessionSecret", "something-very-secret", `Session secret`)
-	authCSRFKey   = flag.String("authCSRFKey", "31-byte-long-auth-key----------", `CSRF Auth key`)
+	srvDomain       = flag.String("srvDomain", "erp.local", `Server's domain name`)
+	srvPort         = flag.String("srvPort", ":8443", `Server's port number`)
+	certTLS         = flag.String("certTLS", "erp.local.crt", `TLS certificate`)
+	keyTLS          = flag.String("keyTLS", "erp.local.key", `TLS key`)
+	staticDir       = flag.String("staticDir", "/static/", `The directory to serve files from. Defaults to the static dir of the current dir`)
+	sessionDir      = flag.String("sessionDir", "./session", `The directory to store sessions to. Defaults to the session dir of the current dir`)
+	sessionName     = flag.String("sessionName", "MySession", `Session name`)
+	sessionSecret   = flag.String("sessionSecret", "something-very-secret", `Session secret`)
+	sessionMaxAge   = flag.Int("sessionMaxAge", 3600*12, `Session MaxAge`)
+	sessionSecure   = flag.Bool("sessionSecure", true, `Session Secure`)
+	sessionHttpOnly = flag.Bool("sessionHttpOnly", true, `Session HttpOnly`)
+	authCSRFKey     = flag.String("authCSRFKey", "31-byte-long-auth-key----------", `CSRF Auth key`)
 )
 
 // TODO: include csrf for user authentication
@@ -53,17 +56,17 @@ func homeHTML() string {
 			<head>
 				<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
 				<script src="https://code.jquery.com/jquery-2.x-git.min.js"></script>
-				<script src="static/debug.js?time=2"></script>
+				<script src="static/debug.js?time=4"></script>
 			</head>
 			<body>
-				<input type="text" id="Username" value="jun" placeholder="Username" />
-				<br><input type="text" id="Password" value="junpass" placeholder="Password" />
-				<br><select id="User">
+				Username: <input type="text" id="Username" value="jun" placeholder="Username" />
+				<br>Password: <input type="text" id="Password" value="junpass" placeholder="Password" />
+				<br>User: <select id="User">
 					<option value="user1">User1</option>
 					<option value="user2">User2</option>
 					<option value="user3">User3</option>
 				</select>
-				<br><input type="text" id="CSRFToken" style="width: 800px;" />
+				<br>CSRFToken: <input type="text" id="CSRFToken" style="width: 800px;" />
 				<br><button id="SalOrderBtn">SalOrder</button>
 				<br><button id="NewsBtn">News</button>
 				<br><button id="News3Btn">News 3</button>
@@ -76,14 +79,8 @@ func homeHTML() string {
 }
 
 func srvHome(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Host: %v", r.Host)
-	// r.URL.Scheme will be empty if you're accessing the HTTP server not from an HTTP proxy,
-	// a browser can issue a relative HTTP request instead of a absolute URL.
-	// Additionally, you could check in the server/handler whether you get a
-	// relative or absolute URL in the request by calling the IsAbs() method.
-	// Reference: http://stackoverflow.com/questions/6899069/why-are-request-url-host-and-scheme-blank-in-the-development-server
-	log.Printf("Scheme: %v", r.URL.Scheme)
-	log.Printf("IsAbs: %v", r.URL.IsAbs())
+	//o := r.Context().Value("iojson").(*iojson.IOJSON)
+	//o.AddData("act", "home; "+r.FormValue("act"))
 
 	if _, err := w.Write([]byte(homeHTML())); err != nil {
 		log.Printf("w.Write: %v", err.Error())
@@ -100,7 +97,9 @@ func srvCSRFToken(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 
 }
 
-func srvLogin(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
+func srvLogin(w http.ResponseWriter, r *http.Request) {
+	o := r.Context().Value("iojson").(*iojson.IOJSON)
+
 	// User input
 	i := iojson.NewIOJSON()
 
@@ -129,9 +128,9 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	session.Options = &sessions.Options{
 		Path:     "/",
 		Domain:   *srvDomain,
-		MaxAge:   86400 * 1, // 3 Days
-		Secure:   false,     // TODO: set to true once applied the SSL certificate.
-		HttpOnly: true,
+		MaxAge:   *sessionMaxAge,
+		Secure:   *sessionSecure, // TODO: set to true once applied the SSL certificate.
+		HttpOnly: *sessionHttpOnly,
 	}
 
 	if i.GetData("SQLUsername") == "jun" && i.GetData("SQLPassword") == "junpass" {
@@ -151,7 +150,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 		username = s.(string)
 	}
 
-	o.AddData("test", "very good")
+	o.AddData("good", "very good")
 	o.AddData("username", username)
 }
 
@@ -307,20 +306,32 @@ func main() {
 	util.HelpGenTLSKeys()
 
 	//
-	chain := alice.New(
+	homeChain := alice.New(
+		gziphandler.GzipHandler,
+		middleware.LoggerHandler,
+		middleware.DomainHandler(*srvDomain+*srvPort),
+	)
+
+	minChain := alice.New(
 		gziphandler.GzipHandler,
 		iojson.EchoHandler,
 		middleware.LoggerHandler,
 		middleware.DomainHandler(*srvDomain+*srvPort),
 	)
 
+	//stdChain := alice.Append()
+
 	//
 	mux := http.NewServeMux()
 
 	// NOTE: FileServer calls path.Clean() to clean up path.
-	mux.Handle(*staticDir, http.StripPrefix(*staticDir, http.FileServer(http.Dir("."+*staticDir))))
+	mux.Handle(*staticDir, gziphandler.GzipHandler(http.StripPrefix(*staticDir, http.FileServer(http.Dir("."+*staticDir)))))
 
-	mux.Handle("/Home2", chain.Then(http.HandlerFunc(srvHome2)))
+	mux.Handle("/", homeChain.ThenFunc((srvHome)))
+
+	mux.Handle("/Login", minChain.ThenFunc(srvLogin))
+
+	mux.Handle("/Home2", minChain.ThenFunc(srvHome2))
 
 	//
 	srv := &http.Server{
