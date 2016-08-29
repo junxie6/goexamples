@@ -303,8 +303,7 @@ func main() {
 
 	mux.Handle("/SalOrder", stdChain.ThenFunc(srvSalOrder))
 
-	mux.Handle("/News1", minChain.ThenFunc(srvNews1))
-
+	mux.Handle("/News1", minChain.ThenFunc(srvNews1)) // no CSRF
 	mux.Handle("/News3", stdChain.ThenFunc(srvNews1)) // with CSRF
 	mux.Handle("/CSRFToken", stdChain.ThenFunc(srvCSRFToken))
 
