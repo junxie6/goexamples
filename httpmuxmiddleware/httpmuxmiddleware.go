@@ -98,6 +98,8 @@ func srvCSRFToken(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 }
 
 func srvLogin(w http.ResponseWriter, r *http.Request) {
+	log.Printf("DEBUG_LOGIN: Inside")
+
 	o := r.Context().Value("iojson").(*iojson.IOJSON)
 
 	// User input
@@ -108,9 +110,9 @@ func srvLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Username: %s", i.GetData("SQLUsername"))
-	log.Printf("Password: %s", i.GetData("SQLPassword"))
-	log.Printf("JSON: %s", i.EncodePretty())
+	log.Printf("DEBUG_LOGIN: Username: %s", i.GetData("SQLUsername"))
+	log.Printf("DEBUG_LOGIN: Password: %s", i.GetData("SQLPassword"))
+	log.Printf("DEBUG_LOGIN: JSON: %s", i.EncodePretty())
 
 	// Get a session. Get() always returns a session, even if empty.
 	session, err := store.Get(r, *sessionName)
@@ -123,7 +125,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: add a logic to continue only when session.IsNew is true
-	log.Printf("IsNew Session: %v", session.IsNew)
+	log.Printf("DEBUG_LOGIN: IsNew Session: %v", session.IsNew)
 
 	session.Options = &sessions.Options{
 		Path:     "/",
@@ -154,7 +156,11 @@ func srvLogin(w http.ResponseWriter, r *http.Request) {
 	o.AddData("username", username)
 }
 
-func srvLogout(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
+func srvLogout(w http.ResponseWriter, r *http.Request) {
+	log.Printf("DEBUG_LOOUT: Inside")
+
+	o := r.Context().Value("iojson").(*iojson.IOJSON)
+
 	// Get a session. Get() always returns a session, even if empty.
 	session, err := store.Get(r, *sessionName)
 
@@ -166,21 +172,21 @@ func srvLogout(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 	}
 
 	// TODO: add a logic to continue only when session.IsNew is false
-	log.Printf("IsNew Session: %v", session.IsNew)
+	log.Printf("DEBUG_LOOUT: IsNew Session: %v", session.IsNew)
 
-	log.Printf("Domain: %v", session.Options.Domain)
-	log.Printf("MaxAge Before: %v", session.Options.MaxAge)
+	log.Printf("DEBUG_LOOUT: Domain: %v", session.Options.Domain)
+	log.Printf("DEBUG_LOOUT: MaxAge Before: %v", session.Options.MaxAge)
 
 	session.Options = &sessions.Options{
 		Path:     "/",
 		Domain:   *srvDomain,
-		MaxAge:   -1,    // means delete cookie now.
-		Secure:   false, // TODO: set to true once applied the SSL certificate.
-		HttpOnly: true,
+		MaxAge:   -1,             // means delete cookie now.
+		Secure:   *sessionSecure, // TODO: set to true once applied the SSL certificate.
+		HttpOnly: *sessionHttpOnly,
 	}
 
-	log.Printf("Domain: %v", session.Options.Domain)
-	log.Printf("MaxAge After: %v", session.Options.MaxAge)
+	log.Printf("DEBUG_LOOUT: Domain: %v", session.Options.Domain)
+	log.Printf("DEBUG_LOOUT: MaxAge After: %v", session.Options.MaxAge)
 
 	// Save it before we write to the response/return from the handler.
 	if err := session.Save(r, w); err != nil {
@@ -188,7 +194,7 @@ func srvLogout(w http.ResponseWriter, r *http.Request, o *iojson.IOJSON) {
 		return
 	}
 
-	log.Printf("ID: %v", session.ID)
+	log.Printf("DEBUG_LOOUT: ID: %v", session.ID)
 
 	if err := os.Remove("./session/session_" + session.ID); err != nil {
 		//
@@ -330,6 +336,7 @@ func main() {
 	mux.Handle("/", homeChain.ThenFunc((srvHome)))
 
 	mux.Handle("/Login", minChain.ThenFunc(srvLogin))
+	mux.Handle("/Logout", minChain.ThenFunc(srvLogout))
 
 	mux.Handle("/Home2", minChain.ThenFunc(srvHome2))
 
