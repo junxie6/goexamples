@@ -2,17 +2,23 @@ package main
 
 import (
 	"flag"
-	"github.com/gorilla/csrf"
-	"github.com/gorilla/sessions"
-	"github.com/junhsieh/alice"
-	"github.com/junhsieh/goexamples/util"
-	"github.com/junhsieh/gziphandler"
-	"github.com/junhsieh/iojson"
-	"github.com/junhsieh/middleware"
 	"log"
 	"net/http"
 	"os"
 	"time"
+)
+
+import (
+	"github.com/gorilla/csrf"
+	"github.com/gorilla/sessions"
+	"github.com/junhsieh/alice"
+	"github.com/junhsieh/gziphandler"
+)
+
+import (
+	"github.com/junhsieh/goexamples/util"
+	"github.com/junhsieh/iojson"
+	"github.com/junhsieh/middleware"
 )
 
 const (
