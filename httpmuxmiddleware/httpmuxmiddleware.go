@@ -108,7 +108,7 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 func srvLogin(w http.ResponseWriter, r *http.Request) {
 	log.Printf("DEBUG_LOGIN: Inside")
 
-	o := r.Context().Value("iojson").(*iojson.IOJSON)
+	o := r.Context().Value(iojson.CKey).(*iojson.IOJSON)
 
 	// User input
 	i := iojson.NewIOJSON()
@@ -169,7 +169,7 @@ func srvLogin(w http.ResponseWriter, r *http.Request) {
 func srvLogout(w http.ResponseWriter, r *http.Request) {
 	log.Printf("DEBUG_LOOUT: Inside")
 
-	o := r.Context().Value("iojson").(*iojson.IOJSON)
+	o := r.Context().Value(iojson.CKey).(*iojson.IOJSON)
 
 	// Get a session. Get() always returns a session, even if empty.
 	session, err := store.Get(r, *sessionName)
@@ -216,7 +216,7 @@ func srvLogout(w http.ResponseWriter, r *http.Request) {
 func srvSalOrder(w http.ResponseWriter, r *http.Request) {
 	log.Printf("DEBUG_SalOrder: Inside")
 
-	o := r.Context().Value("iojson").(*iojson.IOJSON)
+	o := r.Context().Value(iojson.CKey).(*iojson.IOJSON)
 
 	so := &struct {
 		DealerName string
@@ -243,7 +243,7 @@ func srvSalOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func srvNews1(w http.ResponseWriter, r *http.Request) {
-	o := r.Context().Value("iojson").(*iojson.IOJSON)
+	o := r.Context().Value(iojson.CKey).(*iojson.IOJSON)
 
 	news := struct {
 		Subject string
@@ -261,7 +261,7 @@ func srvNews1(w http.ResponseWriter, r *http.Request) {
 }
 
 func srvNews1More(r *http.Request) {
-	o := r.Context().Value("iojson").(*iojson.IOJSON)
+	o := r.Context().Value(iojson.CKey).(*iojson.IOJSON)
 	o.AddData("News1", "More")
 }
 
