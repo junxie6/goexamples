@@ -9,6 +9,7 @@ import (
 )
 
 import (
+	"github.com/gorilla/context"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/sessions"
 	"github.com/junhsieh/alice"
@@ -255,6 +256,13 @@ func srvNews1(w http.ResponseWriter, r *http.Request) {
 	}
 
 	o.AddObj(news)
+
+	srvNews1More(r)
+}
+
+func srvNews1More(r *http.Request) {
+	o := r.Context().Value("iojson").(*iojson.IOJSON)
+	o.AddData("News1", "More")
 }
 
 func srvCSRFToken(w http.ResponseWriter, r *http.Request) {
@@ -282,6 +290,7 @@ func main() {
 	)
 
 	minChain := alice.New(
+		context.ClearHandler, // NOTE: according to gorilla/sessions, If you aren't using gorilla/mux, you need to wrap your handlers with context.ClearHandler as or else you will leak memory!
 		gziphandler.GzipHandler,
 		iojson.EchoHandler,
 		middleware.LoggerHandler,
