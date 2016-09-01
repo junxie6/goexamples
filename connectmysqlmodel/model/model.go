@@ -2,14 +2,17 @@ package model
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"errors"
+	"fmt"
 )
 
 var (
-	db *sql.DB
+	// Conn ...
+	Conn *sql.DB
 )
 
-func InitDB(dsn string) (*sql.DB, error) {
+// Init ...
+func Init(dsn string) (*sql.DB, error) {
 	var err error
 
 	// The database/sql package manages the connection pooling automatically for you.
@@ -19,15 +22,15 @@ func InitDB(dsn string) (*sql.DB, error) {
 	//db, err = sql.Open("mysql", dsn)
 	//db, err = sql.Open("mysql", "MyUser:MyPassword@tcp(localhost:3306)/MyDB?tx_isolation='READ-COMMITTED'") // optional
 
-	if db, err = sql.Open("mysql", dsn); err != nil {
+	if Conn, err = sql.Open("mysql", dsn); err != nil {
 		// Error on initializing database connection.
 		return nil, err
-	} else if err := db.Ping(); err != nil {
+	} else if err := Conn.Ping(); err != nil {
 		// Error on opening database connection.
 		return nil, err
 	}
 
-	return db, nil
+	return Conn, nil
 }
 
 // txEnd handles the transaction Rollback and Commit logic by checking errors.
@@ -41,14 +44,14 @@ func txEnd(tx *sql.Tx, errArrPtr *[]error) {
 	}
 }
 
-// txWrapper usage example:
+// TXWrapper usage example:
 //so := SO{}
 //
 //ifArr := []interface{}{
 //	&so,
 //}
 //
-//err := txWrapper(func(tx *sql.Tx, ifArr []interface{}) error {
+//err := TXWrapper(func(tx *sql.Tx, ifArr []interface{}) error {
 //	if err := ifArr[0].(*SO).lockSO(tx); err != nil {
 //		return err
 //	}
@@ -56,8 +59,9 @@ func txEnd(tx *sql.Tx, errArrPtr *[]error) {
 //	return nil
 //}, ifArr)
 
-func txWrapper(txFunc func(*sql.Tx, []interface{}) error, ifArr []interface{}) (retErr error) {
-	tx, retErr := db.Begin()
+// TXWrapper ...
+func TXWrapper(txFunc func(*sql.Tx, []interface{}) error, ifArr []interface{}) (retErr error) {
+	tx, retErr := Conn.Begin()
 
 	if retErr != nil {
 		return
@@ -80,7 +84,7 @@ func txWrapper(txFunc func(*sql.Tx, []interface{}) error, ifArr []interface{}) (
 			case string:
 				retErr = errors.New(v)
 			default:
-				retErr = fmt.Errorf("%v", v)
+				retErr = fmt.Errorf("%v", v) // we use fmt.Errorf instead of errors.New because v could be anything.
 			}
 		}
 

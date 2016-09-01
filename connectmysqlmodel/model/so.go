@@ -3,7 +3,6 @@ package model
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/junhsieh/goexamples/util"
 	"log"
 	"strings"
@@ -82,6 +81,7 @@ type SOLine struct {
 	Changed      string
 }
 
+// Insert ...
 func (so *SO) Insert(tx *sql.Tx, errArrPtr *[]error) {
 	so.Status = 1
 
@@ -90,7 +90,7 @@ func (so *SO) Insert(tx *sql.Tx, errArrPtr *[]error) {
 	if err != nil {
 		log.Printf("Error: %v", err)
 	} else {
-		defer stmt.Close()
+		defer util.Close(stmt)
 
 		if rs, err := stmt.Exec(so.Status); err != nil {
 			log.Printf("Error: %v", err)
@@ -106,11 +106,11 @@ func (so *SO) Insert(tx *sql.Tx, errArrPtr *[]error) {
 	}
 }
 
-// editSO runs the queries in transaction.
+// EditSO runs the queries in transaction.
 func (so *SO) EditSO() []error {
 	errArr := []error{}
 
-	if tx, err := db.Begin(); err != nil {
+	if tx, err := Conn.Begin(); err != nil {
 		errArr = append(errArr, err)
 	} else {
 		// Lock SO - considering whether to add "locked IDOrder rows" checking as well.
@@ -169,7 +169,7 @@ func (so *SO) lockSORaw(tx *sql.Tx, errArrPtr *[]error) []int {
 	if rs, err := tx.Query(sql, param...); err != nil {
 		*errArrPtr = append(*errArrPtr, err)
 	} else {
-		defer rs.Close()
+		defer util.Close(rs)
 
 		var sqlField = struct {
 			IDOrder int
