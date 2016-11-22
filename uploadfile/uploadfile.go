@@ -116,8 +116,8 @@ func uploadHandlerV2(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.uploadHandlerV1("/upload1", uploadHandler)
-	http.uploadHandlerV2("/upload2", uploadHandler)
+	http.HandleFunc("/upload1", uploadHandlerV1)
+	http.HandleFunc("/upload2", uploadHandlerV2)
 
 	//Listen on port 8080
 	http.ListenAndServe(":8080", nil)
