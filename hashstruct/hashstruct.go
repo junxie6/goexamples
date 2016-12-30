@@ -11,6 +11,8 @@ type Foo struct {
 	B string
 }
 
+// Reference:
+// http://stackoverflow.com/questions/16330490/in-go-how-can-i-convert-a-struct-to-a-byte-array
 func main() {
 	h256 := sha256.New()
 	foo := Foo{A: 1, B: "bar1"}
