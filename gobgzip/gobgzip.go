@@ -107,14 +107,25 @@ func GzipCompress(data []byte) ([]byte, error) {
 }
 
 // GzipUncompress ...
-func GzipUncompress(data *bytes.Reader) ([]byte, error) {
-	gz, _ := gzip.NewReader(data)
-	gz.Close()
+func GzipUncompress(data io.Reader) ([]byte, error) {
+	var gz *gzip.Reader
+	var err error
 
-	// to standard output
-	network := new(bytes.Buffer)
-	_, _ = io.Copy(network, gz)
-	return network.Bytes(), nil
+	if gz, err = gzip.NewReader(data); err != nil {
+		return nil, err
+	}
+
+	if err := gz.Close(); err != nil {
+		return nil, err
+	}
+
+	b := new(bytes.Buffer)
+
+	if _, err := io.Copy(b, gz); err != nil {
+		return nil, err
+	}
+
+	return b.Bytes(), nil
 }
 
 // GobEncode ...
