@@ -10,14 +10,35 @@ import (
 
 // Person ...
 type Person struct {
-	Name string
-	Age  int
+	Name   string
+	Age    int
+	Money  float64
+	Houses []House
+}
+
+type House struct {
+	StreetNum     int
+	StreetName    string
+	PropertyValue float64
 }
 
 func main() {
 	person := Person{
-		Name: "AAA",
-		Age:  123,
+		Name:  "AAA",
+		Age:   123,
+		Money: 123456.789,
+		Houses: []House{
+			House{
+				StreetNum:     111,
+				StreetName:    "Hello 111",
+				PropertyValue: 123456.789,
+			},
+			House{
+				StreetNum:     222,
+				StreetName:    "Hello 222",
+				PropertyValue: 987654.321,
+			},
+		},
 	}
 
 	var encodedData []byte
@@ -146,7 +167,7 @@ func GobEncode(obj interface{}) ([]byte, error) {
 }
 
 // GobDecode ...
-func GobDecode(data *bytes.Reader, obj interface{}) error {
+func GobDecode(data io.Reader, obj interface{}) error {
 	dec := gob.NewDecoder(data) // Will read from network.
 
 	// Decode (receive) the value.
