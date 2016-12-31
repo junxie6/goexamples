@@ -63,13 +63,24 @@ func main() {
 // GzipCompress ...
 func GzipCompress(data []byte) ([]byte, error) {
 	b := new(bytes.Buffer)
-	gz := gzip.NewWriter(b)
+
+	var gz *gzip.Writer
+	var err error
+
+	//gz := gzip.NewWriter(b)
+
+	if gz, err = gzip.NewWriterLevel(b, gzip.DefaultCompression); err != nil {
+		return nil, err
+	}
 
 	if _, err := gz.Write(data); err != nil {
 		return nil, err
 	}
 
-	// Note: One more thing is that Flush() only writes the current data to the buffer.
+	// Note: Writer will not actually write the compressed bytes to the buffer until gz.Flush() is called.
+	// The flush is also called with gz.Close().
+	//
+	// One more thing is that Flush() only writes the current data to the buffer.
 	// It doesn't finish off the whole GZIP format.
 	// So, in this case, it's pretty useless, since what's written on the last line is not a valid GZIP structure.
 	// You need to call Close() before you do anything with the buffer.
@@ -81,6 +92,7 @@ func GzipCompress(data []byte) ([]byte, error) {
 	// Just to add a bit, using defer to close the compressed Writer can lead to subtle bugs where
 	// the buffer is being used before being closed.
 	// This can result in unexpected EOF errors when reading the compressed data. Watch out!
+	//
 	// Reference:
 	// http://stackoverflow.com/questions/19197874/how-can-i-use-gzip-on-a-string-in-golang
 	if err := gz.Flush(); err != nil {
