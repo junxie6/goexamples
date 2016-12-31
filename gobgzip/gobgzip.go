@@ -56,6 +56,8 @@ func main() {
 	}
 
 	fmt.Printf("Note: for some data, the compressed data is actually bigger than the original data.\n")
+	fmt.Printf("Consider whether to gbo + gzip + base64 before storing into database.\n")
+	fmt.Printf("Go base64: b64.StdEncoding.EncodeToString.\n")
 }
 
 // GzipCompress ...
