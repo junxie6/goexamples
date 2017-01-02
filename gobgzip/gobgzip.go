@@ -47,7 +47,7 @@ func main() {
 	var err error
 
 	// encoding data to gob
-	if encodedData, err = GobEncode(person); err != nil {
+	if encodedData, err = GobEncode(&person); err != nil {
 		fmt.Printf("err: %v\n", err)
 	} else {
 		fmt.Printf("encodedData: %v\n\n", encodedData)
