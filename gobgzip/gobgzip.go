@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
+	"log"
 )
 
 // Person ...
@@ -137,13 +138,15 @@ func GzipUncompress(data io.Reader) ([]byte, error) {
 		return nil, err
 	}
 
+	defer func() {
+		if err := gz.Close(); err != nil {
+			log.Printf("err: %v\n", err)
+		}
+	}()
+
 	b := new(bytes.Buffer)
 
 	if _, err := io.Copy(b, gz); err != nil {
-		return nil, err
-	}
-
-	if err := gz.Close(); err != nil {
 		return nil, err
 	}
 

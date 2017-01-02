@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
+	"log"
 )
 
 // Person ...
@@ -93,11 +94,13 @@ func UngzipDecodeGob(data io.Reader, obj interface{}) error {
 		return err
 	}
 
-	if err := gob.NewDecoder(gz).Decode(obj); err != nil {
-		return err
-	}
+	defer func() {
+		if err := gz.Close(); err != nil {
+			log.Printf("err: %v\n", err)
+		}
+	}()
 
-	if err := gz.Close(); err != nil {
+	if err := gob.NewDecoder(gz).Decode(obj); err != nil {
 		return err
 	}
 
