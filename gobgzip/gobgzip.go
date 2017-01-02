@@ -16,6 +16,7 @@ type Person struct {
 	Houses []House
 }
 
+// House ...
 type House struct {
 	StreetNum     int
 	StreetName    string

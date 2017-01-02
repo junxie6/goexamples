@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/gob"
-	"encoding/json"
 	"fmt"
 	"io"
 )
@@ -17,6 +16,7 @@ type Person struct {
 	Houses []House
 }
 
+// House ...
 type House struct {
 	StreetNum     int
 	StreetName    string
@@ -46,12 +46,15 @@ func main() {
 
 	person2 := Person{}
 
-	UngzipDecodeGob(bytes.NewReader(b), &person2)
-
-	fmt.Printf("gob encoded: %v\n\n", b)
-	fmt.Printf("person2: %#v\n\n", person2)
+	if err := UngzipDecodeGob(bytes.NewReader(b), &person2); err != nil {
+		fmt.Printf("err: %v\n\n", err)
+	} else {
+		fmt.Printf("gob encoded: %v\n\n", b)
+		fmt.Printf("person2: %#v\n\n", person2)
+	}
 }
 
+// EncodeGobGzip ...
 func EncodeGobGzip(obj interface{}) ([]byte, error) {
 	b := new(bytes.Buffer)
 
@@ -81,6 +84,7 @@ func EncodeGobGzip(obj interface{}) ([]byte, error) {
 	return b2.Bytes(), nil
 }
 
+// UngzipDecodeGob ...
 func UngzipDecodeGob(data io.Reader, obj interface{}) error {
 	//b := new(bytes.Buffer)
 	var gz *gzip.Reader
@@ -90,24 +94,13 @@ func UngzipDecodeGob(data io.Reader, obj interface{}) error {
 		return err
 	}
 
-	if err := gz.Close(); err != nil {
-		return err
-	}
+	//if err := gz.Close(); err != nil {
+	//	return err
+	//}
 
-	dec := gob.NewDecoder(gz) // Will read from network.
-
-	// Decode (receive) the value.
-	if err := dec.Decode(obj); err != nil {
+	if err := gob.NewDecoder(gz).Decode(obj); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func LoadGzippedJSON(r io.Reader, v interface{}) error {
-	raw, err := gzip.NewReader(r)
-	if err != nil {
-		return err
-	}
-	return json.NewDecoder(raw).Decode(&v)
 }
