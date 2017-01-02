@@ -1,5 +1,13 @@
 package gobgzipv2
 
+import (
+	"bytes"
+	"compress/gzip"
+	"encoding/gob"
+	"io"
+	"log"
+)
+
 // EncodeGobThenGzip ...
 func EncodeGobThenGzip(obj interface{}) (io.Reader, error) {
 	var gz *gzip.Writer

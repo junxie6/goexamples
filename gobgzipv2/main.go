@@ -1,16 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"compress/gzip"
-	"encoding/gob"
 	"fmt"
-	"io"
-	"log"
 )
 
 import (
-	"github.com/junhsieh/goexamples/gobgzipv2"
+	"github.com/junhsieh/goexamples/gobgzipv2/gobgzipv2"
 )
 
 // Person ...
