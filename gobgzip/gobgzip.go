@@ -25,23 +25,7 @@ type House struct {
 }
 
 func main() {
-	person := Person{
-		Name:  "AAA",
-		Age:   123,
-		Money: 123456.789,
-		Houses: []House{
-			House{
-				StreetNum:     111,
-				StreetName:    "Hello 111",
-				PropertyValue: 123456.789,
-			},
-			House{
-				StreetNum:     222,
-				StreetName:    "Hello 222",
-				PropertyValue: 987654.321,
-			},
-		},
-	}
+	person := GetPerson()
 
 	var encodedData []byte
 	var gzippedData []byte
@@ -81,6 +65,26 @@ func main() {
 	fmt.Printf("Note: for some data, the compressed data is actually bigger than the original data.\n")
 	fmt.Printf("Consider whether to gbo + gzip + base64 before storing into database.\n")
 	fmt.Printf("Go base64: b64.StdEncoding.EncodeToString.\n")
+}
+
+func GetPerson() Person {
+	return Person{
+		Name:  "AAA",
+		Age:   123,
+		Money: 123456.789,
+		Houses: []House{
+			House{
+				StreetNum:     111,
+				StreetName:    "Hello 111",
+				PropertyValue: 123456.789,
+			},
+			House{
+				StreetNum:     222,
+				StreetName:    "Hello 222",
+				PropertyValue: 987654.321,
+			},
+		},
+	}
 }
 
 // GzipCompress ...
@@ -160,10 +164,9 @@ func GobEncode(obj interface{}) ([]byte, error) {
 	// run in different processes.
 	//var network bytes.Buffer        // Stand-in for a network connection
 	network := new(bytes.Buffer)
-	enc := gob.NewEncoder(network) // Will write to network.
 
 	// Encode (send) the value.
-	if err := enc.Encode(obj); err != nil {
+	if err := gob.NewEncoder(network).Encode(obj); err != nil {
 		return nil, err
 	}
 
@@ -172,10 +175,8 @@ func GobEncode(obj interface{}) ([]byte, error) {
 
 // GobDecode ...
 func GobDecode(data io.Reader, obj interface{}) error {
-	dec := gob.NewDecoder(data) // Will read from network.
-
 	// Decode (receive) the value.
-	if err := dec.Decode(obj); err != nil {
+	if err := gob.NewDecoder(data).Decode(obj); err != nil {
 		return err
 	}
 	return nil
