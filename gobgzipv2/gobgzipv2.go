@@ -43,11 +43,11 @@ func main() {
 		},
 	}
 
-	b, _ := EncodeGobGzip(&person)
+	b, _ := EncodeGobThenGzip(&person)
 
 	person2 := Person{}
 
-	if err := UngzipDecodeGob(bytes.NewReader(b), &person2); err != nil {
+	if err := UngzipThenDecodeGob(bytes.NewReader(b), &person2); err != nil {
 		fmt.Printf("err: %v\n\n", err)
 	} else {
 		fmt.Printf("gob encoded: %v\n\n", b)
@@ -55,38 +55,35 @@ func main() {
 	}
 }
 
-// EncodeGobGzip ...
-func EncodeGobGzip(obj interface{}) ([]byte, error) {
-	b := new(bytes.Buffer)
-
-	enc := gob.NewEncoder(b)
-
-	if err := enc.Encode(obj); err != nil {
-		return nil, err
-	}
-
-	//
+// EncodeGobThenGzip ...
+func EncodeGobThenGzip(obj interface{}) ([]byte, error) {
 	var gz *gzip.Writer
 	var err error
-	b2 := new(bytes.Buffer)
+	b := new(bytes.Buffer)
 
-	if gz, err = gzip.NewWriterLevel(b2, gzip.DefaultCompression); err != nil {
+	if gz, err = gzip.NewWriterLevel(b, gzip.DefaultCompression); err != nil {
 		return nil, err
 	}
 
-	if _, err := gz.Write(b.Bytes()); err != nil {
+	if err := gob.NewEncoder(gz).Encode(obj); err != nil {
 		return nil, err
 	}
 
+	// Note: gzip Writer must be closed before the bufer is being used.
+	// using defer to close the compressed Writer can lead to subtle bugs where the buffer is being used before being closed.
+	// This can result in unexpected EOF errors when reading the compressed data. Watch out!
+	//
+	// Reference:
+	// http://stackoverflow.com/questions/19197874/how-can-i-use-gzip-on-a-string-in-golang
 	if err := gz.Close(); err != nil {
 		return nil, err
 	}
 
-	return b2.Bytes(), nil
+	return b.Bytes(), nil
 }
 
-// UngzipDecodeGob ...
-func UngzipDecodeGob(data io.Reader, obj interface{}) error {
+// UngzipThenDecodeGob ...
+func UngzipThenDecodeGob(data io.Reader, obj interface{}) error {
 	var gz *gzip.Reader
 	var err error
 
