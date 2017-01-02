@@ -30,7 +30,7 @@ func main() {
 
 	if b, err := EncodeGobThenGzip(&person); err != nil {
 		fmt.Printf("err: %v\n\n", err)
-	} else if err := UngzipThenDecodeGob(bytes.NewReader(b), &person2); err != nil {
+	} else if err := UngzipThenDecodeGob(b, &person2); err != nil {
 		fmt.Printf("err: %v\n\n", err)
 	} else {
 		fmt.Printf("gob encoded: %v\n\n", b)
@@ -59,7 +59,7 @@ func GetPerson() Person {
 }
 
 // EncodeGobThenGzip ...
-func EncodeGobThenGzip(obj interface{}) ([]byte, error) {
+func EncodeGobThenGzip(obj interface{}) (io.Reader, error) {
 	var gz *gzip.Writer
 	var err error
 	b := new(bytes.Buffer)
@@ -79,19 +79,20 @@ func EncodeGobThenGzip(obj interface{}) ([]byte, error) {
 	// Reference:
 	// http://stackoverflow.com/questions/19197874/how-can-i-use-gzip-on-a-string-in-golang
 	// https://www.datadoghq.com/blog/crossing-streams-love-letter-gos-io-reader/
+	// https://medium.com/@matryer/golang-advent-calendar-day-seventeen-io-reader-in-depth-6f744bb4320b#.erh651rjt
 	if err := gz.Close(); err != nil {
 		return nil, err
 	}
 
-	return b.Bytes(), nil
+	return b, nil
 }
 
 // UngzipThenDecodeGob ...
-func UngzipThenDecodeGob(data io.Reader, obj interface{}) error {
+func UngzipThenDecodeGob(r io.Reader, obj interface{}) error {
 	var gz *gzip.Reader
 	var err error
 
-	if gz, err = gzip.NewReader(data); err != nil {
+	if gz, err = gzip.NewReader(r); err != nil {
 		return err
 	}
 

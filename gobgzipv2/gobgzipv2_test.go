@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 )
@@ -13,7 +12,7 @@ func BenchmarkGobGzipV2(b *testing.B) {
 
 		if b, err := EncodeGobThenGzip(&person); err != nil {
 			fmt.Printf("err: %v\n\n", err)
-		} else if err := UngzipThenDecodeGob(bytes.NewReader(b), &person2); err != nil {
+		} else if err := UngzipThenDecodeGob(b, &person2); err != nil {
 			fmt.Printf("err: %v\n\n", err)
 		}
 	}
