@@ -58,3 +58,23 @@ func UngzipThenDecodeGob(r io.Reader, obj interface{}) error {
 
 	return nil
 }
+
+// EncodeGob ...
+func EncodeGob(obj interface{}) (io.Reader, error) {
+	b := new(bytes.Buffer)
+
+	if err := gob.NewEncoder(b).Encode(obj); err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
+
+// DecodeGob ...
+func DecodeGob(r io.Reader, obj interface{}) error {
+	if err := gob.NewDecoder(r).Decode(obj); err != nil {
+		return err
+	}
+
+	return nil
+}
