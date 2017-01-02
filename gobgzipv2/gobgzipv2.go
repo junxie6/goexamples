@@ -25,7 +25,21 @@ type House struct {
 }
 
 func main() {
-	person := Person{
+	person := GetPerson()
+	person2 := Person{}
+
+	if b, err := EncodeGobThenGzip(&person); err != nil {
+		fmt.Printf("err: %v\n\n", err)
+	} else if err := UngzipThenDecodeGob(bytes.NewReader(b), &person2); err != nil {
+		fmt.Printf("err: %v\n\n", err)
+	} else {
+		fmt.Printf("gob encoded: %v\n\n", b)
+		fmt.Printf("person2: %#v\n\n", person2)
+	}
+}
+
+func GetPerson() Person {
+	return Person{
 		Name:  "AAA",
 		Age:   123,
 		Money: 123456.789,
@@ -41,17 +55,6 @@ func main() {
 				PropertyValue: 987654.321,
 			},
 		},
-	}
-
-	b, _ := EncodeGobThenGzip(&person)
-
-	person2 := Person{}
-
-	if err := UngzipThenDecodeGob(bytes.NewReader(b), &person2); err != nil {
-		fmt.Printf("err: %v\n\n", err)
-	} else {
-		fmt.Printf("gob encoded: %v\n\n", b)
-		fmt.Printf("person2: %#v\n\n", person2)
 	}
 }
 
@@ -75,6 +78,7 @@ func EncodeGobThenGzip(obj interface{}) ([]byte, error) {
 	//
 	// Reference:
 	// http://stackoverflow.com/questions/19197874/how-can-i-use-gzip-on-a-string-in-golang
+	// https://www.datadoghq.com/blog/crossing-streams-love-letter-gos-io-reader/
 	if err := gz.Close(); err != nil {
 		return nil, err
 	}
