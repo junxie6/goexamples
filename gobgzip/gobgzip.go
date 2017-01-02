@@ -137,13 +137,13 @@ func GzipUncompress(data io.Reader) ([]byte, error) {
 		return nil, err
 	}
 
-	if err := gz.Close(); err != nil {
-		return nil, err
-	}
-
 	b := new(bytes.Buffer)
 
 	if _, err := io.Copy(b, gz); err != nil {
+		return nil, err
+	}
+
+	if err := gz.Close(); err != nil {
 		return nil, err
 	}
 

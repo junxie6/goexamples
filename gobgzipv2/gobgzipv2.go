@@ -86,7 +86,6 @@ func EncodeGobGzip(obj interface{}) ([]byte, error) {
 
 // UngzipDecodeGob ...
 func UngzipDecodeGob(data io.Reader, obj interface{}) error {
-	//b := new(bytes.Buffer)
 	var gz *gzip.Reader
 	var err error
 
@@ -94,11 +93,11 @@ func UngzipDecodeGob(data io.Reader, obj interface{}) error {
 		return err
 	}
 
-	//if err := gz.Close(); err != nil {
-	//	return err
-	//}
-
 	if err := gob.NewDecoder(gz).Decode(obj); err != nil {
+		return err
+	}
+
+	if err := gz.Close(); err != nil {
 		return err
 	}
 
