@@ -16,7 +16,8 @@ import (
 
 type client struct {
 	name string
-	ch   chan string
+	ip   string
+	ch   chan<- string
 }
 
 var (
@@ -51,12 +52,14 @@ func broadcaster() {
 
 func handleConn(conn net.Conn) {
 	cli := client{}
-	cli.ch = make(chan string) // outgoing client messages
+	ch := make(chan string) // outgoing client messages
 
-	go clientWriter(conn, cli.ch)
+	go clientWriter(conn, ch)
 
-	who := conn.RemoteAddr().String()
-	cli.ch <- "You are " + who
+	cli.ip = conn.RemoteAddr().String()
+	cli.ch = ch
+
+	cli.ch <- "You are " + cli.ip
 
 	cli.ch <- "Please enter your name:"
 	input2 := bufio.NewScanner(conn)
@@ -67,7 +70,7 @@ func handleConn(conn net.Conn) {
 	}
 
 	//
-	messaging <- cli.name + "@" + who + " has arrived."
+	messaging <- cli.name + "@" + cli.ip + " has arrived."
 	entering <- cli
 
 	input := bufio.NewScanner(conn)
@@ -77,7 +80,7 @@ func handleConn(conn net.Conn) {
 	// NOTE: ignoring potential errors from input.Err()
 
 	leaving <- cli
-	messaging <- who + " has left."
+	messaging <- cli.name + "@" + cli.ip + " has left."
 
 	conn.Close()
 }
