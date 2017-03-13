@@ -6,10 +6,10 @@ import (
 )
 
 func main() {
-	fmt.Printf("Demoing timer1\n")
+	fmt.Printf("Demoing timer1:\n")
 	timer1()
 
-	fmt.Printf("Demoing timer2\n")
+	fmt.Printf("Demoing timer2:\n")
 	timer2()
 }
 
