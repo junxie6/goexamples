@@ -4,9 +4,12 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sync"
 	"text/template"
+
+	"github.com/junhsieh/goexamples/trace"
 )
 
 type templateHandler struct {
@@ -32,6 +35,7 @@ func main() {
 	flag.Parse() // parse the flags
 
 	room := newRoom()
+	room.tracer = trace.New(os.Stdout)
 
 	http.Handle("/", &templateHandler{filename: "chat.html"})
 	http.Handle("/room", room)
