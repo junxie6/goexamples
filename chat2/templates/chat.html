@@ -32,7 +32,7 @@ $(function(){
 	if (!window["WebSocket"]) {
 		alert("Error: Your browser does not support web sockets.")
 	} else {
-		socket = new WebSocket("ws://192.168.6.10:8080/room");
+		socket = new WebSocket("ws://{{.Host}}/room");
 		socket.onclose = function() {
 			alert("Connection has been closed.");
 		}

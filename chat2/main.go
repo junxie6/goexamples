@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -18,7 +19,7 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
 	})
-	t.templ.Execute(w, nil)
+	t.templ.Execute(w, r)
 }
 
 func main() {
@@ -26,6 +27,9 @@ func main() {
 	//	w.Write([]byte(`
 	//	`))
 	//})
+
+	var addr = flag.String("addr", ":8080", "The addr of the application.")
+	flag.Parse() // parse the flags
 
 	room := newRoom()
 
@@ -35,7 +39,8 @@ func main() {
 	go room.run()
 
 	// start the web server
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	log.Println("Starting web server on", *addr)
+	if err := http.ListenAndServe(*addr, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 }
