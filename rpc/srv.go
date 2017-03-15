@@ -12,6 +12,7 @@ import (
 type Myfunc int
 
 // The first argument and the second argument can be marshaled by encoding/gob.
+// Reference: https://golang.org/pkg/net/rpc/
 func (m *Myfunc) Echo(line []byte, ack *[]byte) error {
 	//time.Sleep(5 * time.Second)
 
