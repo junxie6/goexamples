@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	client, err := rpc.Dial("tcp", "localhost:8080")
+	conn, err := rpc.Dial("tcp", "localhost:8080")
 
 	if err != nil {
 		log.Fatal(err)
@@ -26,7 +26,7 @@ func main() {
 
 		reply := new([]byte)
 
-		err = client.Call("Myfunc.Echo", line, reply)
+		err = conn.Call("Myfunc.Echo", line, reply)
 
 		// If an error is returned, the reply parameter will not be sent back to the client.
 		if err != nil {
@@ -35,4 +35,6 @@ func main() {
 
 		fmt.Printf("Replied: %#v\n", string(*reply))
 	}
+
+	conn.Close()
 }
