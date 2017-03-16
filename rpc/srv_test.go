@@ -3,6 +3,7 @@ package srv_test
 import (
 	"log"
 	"net/rpc"
+	"runtime"
 	"testing"
 )
 
@@ -31,9 +32,9 @@ func BenchmarkConnection1(b *testing.B) {
 func BenchmarkConnection2(b *testing.B) {
 	jobs := make(chan bool, 0)
 
-	// This starts up 3 workers, initially blocked
+	// This starts up N workers (depends on the number of CPUs, initially blocked
 	// because there are no jobs yet.
-	for w := 1; w <= 500; w++ {
+	for w := 0; w <= runtime.NumCPU(); w++ {
 		go worker(jobs)
 	}
 

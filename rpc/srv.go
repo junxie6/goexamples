@@ -31,8 +31,16 @@ func main() {
 	}
 
 	rpc.Register(new(Myfunc))
+	//rpc.Accept(listener)
 
-	rpc.Accept(listener)
+	done := make(chan bool)
+
+	go func() {
+		rpc.Accept(listener)
+		done <- true
+	}()
+
+	<-done
 
 	// If you want to execute some other behaviour in-between the request being accepted and it being served)
 	// you can change the code as follows to swap out rpc.Accept(listener) above.
