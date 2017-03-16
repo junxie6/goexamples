@@ -16,6 +16,8 @@ import (
 //!+
 func main() {
 	conn, err := net.Dial("tcp", "localhost:8000")
+	//conn, err := net.DialTimeout("tcp", "localhost:8000", 30 * time.Second)
+
 	if err != nil {
 		log.Fatal(err)
 	}
