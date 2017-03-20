@@ -24,7 +24,7 @@ func init() {
 }
 
 // go test -run=^$ -bench="EncodeGoB"
-func BenchmarkEncodeGoB(b *testing.B) {
+func BenchmarkEncodeGoB1(b *testing.B) {
 	N := int32(b.N)
 	procs := runtime.NumCPU()
 
@@ -36,7 +36,7 @@ func BenchmarkEncodeGoB(b *testing.B) {
 	for p := 0; p < procs; p++ {
 		go func() {
 			for atomic.AddInt32(&N, -1) >= 0 {
-				workerGoB()
+				encodeDecodeStruct()
 			}
 			wg.Done()
 		}()
@@ -44,7 +44,38 @@ func BenchmarkEncodeGoB(b *testing.B) {
 	wg.Wait()
 }
 
-func workerGoB() {
+func BenchmarkEncodeGoB2(b *testing.B) {
+	var wg sync.WaitGroup
+	jobs := make(chan bool, 1000)
+	procs := runtime.NumCPU()
+
+	// This starts up 3 workers, initially blocked
+	// because there are no jobs yet.
+	for w := 0; w < procs; w++ {
+		wg.Add(1)
+
+		go func() {
+			worker(jobs)
+			wg.Done()
+		}()
+	}
+
+	for i := 0; i < b.N; i++ {
+		jobs <- true
+	}
+
+	close(jobs)
+
+	wg.Wait()
+}
+
+func worker(jobs <-chan bool) {
+	for range jobs {
+		encodeDecodeStruct()
+	}
+}
+
+func encodeDecodeStruct() {
 	p1 := Person{Name: "Jun", Age: 19}
 	p2 := Person{}
 
