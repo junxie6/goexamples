@@ -46,7 +46,7 @@ func BenchmarkEncodeGoB1(b *testing.B) {
 
 func BenchmarkEncodeGoB2(b *testing.B) {
 	var wg sync.WaitGroup
-	jobs := make(chan bool, 1000)
+	jobs := make(chan bool, 4096)
 	procs := runtime.NumCPU()
 
 	// This starts up 3 workers, initially blocked

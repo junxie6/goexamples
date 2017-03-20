@@ -1,3 +1,6 @@
+// Reference:
+// https://elithrar.github.io/article/using-buffer-pools-with-go/
+// https://golang.org/pkg/sync/#Pool
 package main
 
 import (
