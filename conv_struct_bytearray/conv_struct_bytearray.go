@@ -1,6 +1,7 @@
 // Reference:
 // https://elithrar.github.io/article/using-buffer-pools-with-go/
 // https://golang.org/pkg/sync/#Pool
+// https://www.reddit.com/r/golang/comments/2ap67l/when_to_use_syncpool_and_when_not_to/
 package main
 
 import (
