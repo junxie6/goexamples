@@ -12,16 +12,30 @@ type Person struct {
 	Age  int
 }
 
-type People []Person
+// PersonSortByName
+type PersonSortByName []Person
 
-func (p People) Len() int {
+func (p PersonSortByName) Len() int {
 	return len(p)
 }
 
-func (p People) Less(j int, k int) bool {
+func (p PersonSortByName) Less(j int, k int) bool {
 	// sort by name only
-	//return p[j].Name < p[k].Name
+	return p[j].Name < p[k].Name
+}
 
+func (p PersonSortByName) Swap(j int, k int) {
+	p[j], p[k] = p[k], p[j]
+}
+
+// PersonSortByNameAge
+type PersonSortByNameAge []Person
+
+func (p PersonSortByNameAge) Len() int {
+	return len(p)
+}
+
+func (p PersonSortByNameAge) Less(j int, k int) bool {
 	// sort by name, then age
 	if p[j].Name < p[k].Name {
 		return true
@@ -32,7 +46,7 @@ func (p People) Less(j int, k int) bool {
 	return p[j].Age < p[k].Age
 }
 
-func (p People) Swap(j int, k int) {
+func (p PersonSortByNameAge) Swap(j int, k int) {
 	p[j], p[k] = p[k], p[j]
 }
 
@@ -44,7 +58,7 @@ type Child struct {
 
 func main() {
 	// Old way - implment the sort interface.
-	p := People{
+	p := []Person{
 		Person{Name: "aaa", Age: 22},
 		Person{Name: "bbb", Age: 19},
 		Person{Name: "aaa", Age: 23},
@@ -59,12 +73,16 @@ func main() {
 		Person{Name: "ccc", Age: 20},
 	}
 
-	fmt.Printf("Old sorting method (ASC):\n")
-	sort.Sort(p)
+	fmt.Printf("Old sorting method (ASC) - sort by name:\n")
+	sort.Sort(PersonSortByName(p))
 	outputPeople(p)
 
-	fmt.Printf("Old sorting method (DESC):\n")
-	sort.Sort(sort.Reverse(p))
+	fmt.Printf("Old sorting method (DESC) - sort by name:\n")
+	sort.Sort(sort.Reverse(PersonSortByName(p)))
+	outputPeople(p)
+
+	fmt.Printf("Old sorting method (ASC) - sort by name then age:\n")
+	sort.Sort(PersonSortByNameAge(p))
 	outputPeople(p)
 
 	// New way as of Go 1.8
@@ -83,7 +101,7 @@ func main() {
 		Child{Name: "ccc", Age: 20},
 	}
 
-	fmt.Printf("New sorting method (ASC):\n")
+	fmt.Printf("New sorting method (ASC) - sort by name then age:\n")
 	sort.Slice(children, func(i, j int) bool {
 		switch strings.Compare(children[i].Name, children[j].Name) {
 		case -1:
@@ -97,7 +115,7 @@ func main() {
 	outputChildren(children)
 }
 
-func outputPeople(p People) {
+func outputPeople(p []Person) {
 	for _, v := range p {
 		fmt.Printf("%s %d\n", v.Name, v.Age)
 	}
