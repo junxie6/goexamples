@@ -27,7 +27,7 @@ func (p People) Less(j int, k int) bool {
 		return true
 	}
 	if p[j].Name > p[k].Name {
-		return true
+		return false
 	}
 	return p[j].Age < p[k].Age
 }
@@ -48,10 +48,15 @@ func main() {
 		Person{Name: "aaa", Age: 22},
 		Person{Name: "bbb", Age: 19},
 		Person{Name: "aaa", Age: 23},
+		Person{Name: "aaa", Age: 100},
 		Person{Name: "ccc", Age: 19},
 		Person{Name: "aaa", Age: 19},
 		Person{Name: "aaa", Age: 21},
 		Person{Name: "aaa", Age: 20},
+		Person{Name: "bbb", Age: 20},
+		Person{Name: "ccc", Age: 21},
+		Person{Name: "bbb", Age: 21},
+		Person{Name: "ccc", Age: 20},
 	}
 
 	fmt.Printf("Old sorting method (ASC):\n")
@@ -67,10 +72,15 @@ func main() {
 		Child{Name: "aaa", Age: 22},
 		Child{Name: "bbb", Age: 19},
 		Child{Name: "aaa", Age: 23},
+		Child{Name: "aaa", Age: 100},
 		Child{Name: "ccc", Age: 19},
 		Child{Name: "aaa", Age: 19},
 		Child{Name: "aaa", Age: 21},
 		Child{Name: "aaa", Age: 20},
+		Child{Name: "bbb", Age: 20},
+		Child{Name: "ccc", Age: 21},
+		Child{Name: "bbb", Age: 21},
+		Child{Name: "ccc", Age: 20},
 	}
 
 	fmt.Printf("New sorting method (ASC):\n")
