@@ -1,3 +1,4 @@
+// Reference: https://golang.org/pkg/sort/#example_Interface
 package main
 
 import (
