@@ -45,7 +45,7 @@ func main() {
 
 	fmt.Printf("Single: %#v\n", person1)
 
-	// select multiple records
+	// select multiple records by regular expression
 	personArr := []Person{}
 
 	// The option 'i' of bson.RegEx is for case insensitive matching.
