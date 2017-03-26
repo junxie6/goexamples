@@ -3,6 +3,7 @@ package conv_struct_bytearray_test
 import (
 	"encoding/gob"
 	//"fmt"
+	"bytes"
 	"github.com/oxtoacart/bpool"
 	"runtime"
 	"sync"
@@ -87,4 +88,46 @@ func encodeDecodeStruct() {
 	//fmt.Printf("HERE %#v\n", p2)
 
 	gBuf.Put(buf)
+}
+
+func BenchmarkEncodeGoBEncode1(b *testing.B) {
+	buf := new(bytes.Buffer)
+	p1 := Person{Name: "Jun", Age: 19}
+
+	for i := 0; i < b.N; i++ {
+		gob.NewEncoder(buf).Encode(p1)
+	}
+}
+
+func BenchmarkEncodeGoBEncode2(b *testing.B) {
+	buf := new(bytes.Buffer)
+	en := gob.NewEncoder(buf)
+	p1 := Person{Name: "Jun", Age: 19}
+
+	for i := 0; i < b.N; i++ {
+		en.Encode(p1)
+	}
+}
+
+func BenchmarkEncodeGoBDecode1(b *testing.B) {
+	buf := new(bytes.Buffer)
+	en := gob.NewEncoder(buf)
+	p1 := Person{Name: "Jun", Age: 19}
+	en.Encode(p1)
+
+	for i := 0; i < b.N; i++ {
+		gob.NewDecoder(buf).Decode(&p1)
+	}
+}
+
+func BenchmarkEncodeGoBDecode2(b *testing.B) {
+	buf := new(bytes.Buffer)
+	en := gob.NewEncoder(buf)
+	p1 := Person{Name: "Jun", Age: 19}
+	en.Encode(p1)
+	de := gob.NewDecoder(buf)
+
+	for i := 0; i < b.N; i++ {
+		de.Decode(&p1)
+	}
 }
