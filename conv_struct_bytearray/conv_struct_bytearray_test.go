@@ -1,9 +1,10 @@
 package conv_struct_bytearray_test
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/gob"
 	//"fmt"
-	"bytes"
 	"github.com/oxtoacart/bpool"
 	"runtime"
 	"sync"
@@ -109,6 +110,18 @@ func BenchmarkEncodeGoBEncode2(b *testing.B) {
 	}
 }
 
+func BenchmarkEncodeGoBEncode3(b *testing.B) {
+	bb := new(bytes.Buffer)
+	buf := bufio.NewWriter(bb)
+	en := gob.NewEncoder(buf)
+	p1 := Person{Name: "Jun", Age: 19}
+
+	for i := 0; i < b.N; i++ {
+		en.Encode(p1)
+		buf.Flush()
+	}
+}
+
 func BenchmarkEncodeGoBDecode1(b *testing.B) {
 	buf := new(bytes.Buffer)
 	en := gob.NewEncoder(buf)
@@ -126,6 +139,18 @@ func BenchmarkEncodeGoBDecode2(b *testing.B) {
 	p1 := Person{Name: "Jun", Age: 19}
 	en.Encode(p1)
 	de := gob.NewDecoder(buf)
+
+	for i := 0; i < b.N; i++ {
+		de.Decode(&p1)
+	}
+}
+
+func BenchmarkEncodeGoBDecode3(b *testing.B) {
+	buf := new(bytes.Buffer)
+	en := gob.NewEncoder(buf)
+	p1 := Person{Name: "Jun", Age: 19}
+	en.Encode(p1)
+	de := gob.NewDecoder(bytes.NewReader(buf.Bytes()))
 
 	for i := 0; i < b.N; i++ {
 		de.Decode(&p1)
