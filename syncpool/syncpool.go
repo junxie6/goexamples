@@ -39,6 +39,10 @@ func (m *myPool) Put(b []byte) {
 	// will have to do reallocation while it grows.
 	//b = []byte{}
 
+	// Reset buffer - third method
+	// will release the underlying memory to the garbage collector.
+	//b = nil
+
 	m.Pool.Put(b)
 }
 
