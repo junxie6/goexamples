@@ -31,8 +31,9 @@ func (m *myPool) Get() []byte {
 
 func (m *myPool) Put(b []byte) {
 	// Reset buffer - first method
-	// will reuse the already allocated capacity of the underlying array
-	//b = b[:0]
+	// will reuse the already allocated capacity of the underlying array.
+	// http://stackoverflow.com/questions/16971741/how-do-you-clear-a-slice-in-go
+	//b = b[0:0]
 
 	// Reset buffer - second method
 	// will have to do reallocation while it grows.
