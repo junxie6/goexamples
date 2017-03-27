@@ -7,7 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"runtime"
+	//"runtime"
 	"sync"
 	"time"
 )
@@ -30,7 +30,14 @@ func (m *myPool) Get() []byte {
 }
 
 func (m *myPool) Put(b []byte) {
-	// Reset buffer here
+	// Reset buffer - first method
+	// will reuse the already allocated capacity of the underlying array
+	//b = b[:0]
+
+	// Reset buffer - second method
+	// will have to do reallocation while it grows.
+	//b = []byte{}
+
 	m.Pool.Put(b)
 }
 
