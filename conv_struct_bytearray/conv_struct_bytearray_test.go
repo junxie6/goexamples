@@ -1,3 +1,11 @@
+// However, use of the atomic package is heavily discouraged:
+// We generally don’t want sync/atomic to be used at all…
+// Experience has shown us again and again that very very few people are capable of writing correct code that uses atomic operations…
+// If we had thought of internal packages when we added the sync/atomic package,
+// perhaps we would have used that. Now we can’t remove the package because of the Go 1 guarantee.
+// Reference:
+// http://bravenewgeek.com/so-you-wanna-go-fast/
+// https://groups.google.com/forum/#!msg/golang-nuts/AoO3aivfA_E/zFjhu8XvngMJ
 package conv_struct_bytearray_test
 
 import (
