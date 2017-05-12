@@ -39,19 +39,19 @@ func example_httppost() *cookiejar.Jar {
 	}
 
 	// Declare post data
-	postData := make(url.Values)
-	//postData := url.Values{}
+	formData := make(url.Values)
+	//formData := url.Values{}
 	//PostData := strings.NewReader("act=set&name=bot")
 
-	postData.Set("act", "set")
-	postData.Set("name", "bot")
+	formData.Set("act", "set")
+	formData.Set("name", "bot")
 
 	// Declare HTTP Method and Url
 	var postURL = "http://erp.local:8080/"
 
 	// TODO: Is strings.NewReader() faster than bytes.NewBufferString()?
-	req, err := http.NewRequest("POST", postURL, strings.NewReader(postData.Encode()))
-	//req, err := http.NewRequest("POST", postURL, bytes.NewBufferString(postData.Encode()))
+	req, err := http.NewRequest("POST", postURL, strings.NewReader(formData.Encode()))
+	//req, err := http.NewRequest("POST", postURL, bytes.NewBufferString(formData.Encode()))
 
 	if err != nil {
 		log.Printf("http.NewRequest: %v", err.Error())
@@ -59,7 +59,7 @@ func example_httppost() *cookiejar.Jar {
 
 	// Must set Content-Type. Otherwise, web server will not pick up the data.
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded; param=value")
-	req.Header.Add("Content-Length", strconv.Itoa(len(postData.Encode())))
+	req.Header.Add("Content-Length", strconv.Itoa(len(formData.Encode())))
 
 	// Set cookie
 	//req.Header.Set("Cookie", "name=MySession; count=1")
@@ -86,7 +86,7 @@ func example_httpget(jar *cookiejar.Jar) {
 	}
 
 	// Declare post data
-	//postData := make(url.Values)
+	//formData := make(url.Values)
 
 	// Declare HTTP Method and Url
 	var postURL = "http://erp.local:8080/"
