@@ -39,6 +39,10 @@ func example1() {
 		log.Printf("%v", err)
 	}
 
+	if resp.StatusCode != http.StatusOK {
+		// do something
+	}
+
 	fmt.Printf("%v\t%s", resp.Status, body)
 }
 
@@ -82,6 +86,10 @@ func example2() {
 		log.Printf("%v", err)
 	}
 
+	if resp.StatusCode != http.StatusOK {
+		// do something
+	}
+
 	fmt.Printf("%v\t%v\n", resp.Status, resp.Header)
 	fmt.Printf("%s\n", body)
 }
@@ -116,6 +124,10 @@ func example3() {
 
 	if err != nil {
 		log.Printf("%v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		// do something
 	}
 
 	fmt.Printf("%v\t%v\n", resp.Status, resp.Header)
