@@ -13,9 +13,7 @@ import (
 )
 
 // example1 - Simple
-func example1() {
-	var postURL = "http://127.0.0.1/"
-
+func example1(postURL string) {
 	//
 	formData := url.Values{"action": {"createOrder"}}
 	//formData := make(url.Values)
@@ -47,9 +45,7 @@ func example1() {
 }
 
 // example2 - Advanced
-func example2() {
-	var postURL = "http://127.0.0.1/"
-
+func example2(postURL string) {
 	formData := url.Values{"action": {"createOrder"}}
 	//formData := make(url.Values)
 
@@ -95,9 +91,7 @@ func example2() {
 }
 
 // example3 - Advanced - post JSON
-func example3() {
-	postURL := "http://127.0.0.1:8080/so?act=SaveSO"
-
+func example3(postURL string) {
 	var jsonStr = `{"Status":true,"Data":{"so":{"IDOrder":1,"Status":1,"Created":"123","Changed":"456"}}}`
 
 	// TODO: Is strings.NewReader() faster than bytes.NewBufferString()?
@@ -135,7 +129,9 @@ func example3() {
 }
 
 func main() {
-	//example1()
-	//example2()
-	example3()
+	postURL := "http://127.0.0.1/"
+
+	//example1(postURL)
+	//example2(postURL)
+	example3("http://127.0.0.1:8080/so?act=SaveSO")
 }
