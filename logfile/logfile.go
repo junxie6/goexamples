@@ -42,6 +42,9 @@ func logfile_example2(fileName string) (*os.File, error) {
 	return f, nil
 }
 
+// Reference:
+// http://stackoverflow.com/questions/19965795/go-golang-write-log-to-file
+// http://stackoverflow.com/questions/24809287/how-do-you-get-a-golang-program-to-print-the-line-number-of-the-error-it-just-ca
 func main() {
 	fileName := "test.log"
 
