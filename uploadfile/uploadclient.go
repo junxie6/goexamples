@@ -47,15 +47,16 @@ func Upload(url, file string) (err error) {
 
 	// Submit the request
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return
 	}
 
 	// Check the response
-	if res.StatusCode != http.StatusOK {
-		err = fmt.Errorf("bad status: %s", res.Status)
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("bad status: %s", resp.Status)
 	}
+
 	return
 }
 

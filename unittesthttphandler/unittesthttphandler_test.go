@@ -26,22 +26,22 @@ func TestSrvHello(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 
 	// create a new ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
-	rr := httptest.NewRecorder()
+	resp := httptest.NewRecorder()
 
 	handler := http.HandlerFunc(SrvHello)
 
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(rr, req)
+	handler.ServeHTTP(resp, req)
 
 	// Check the status code is what we expect.
-	if status := rr.Code; status != http.StatusOK {
+	if resp.Code != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
 	// Check the response body is what we expect.
 	expected := `{"Status":true,"ErrArr":null,"ErrCount":0,"ObjArr":null,"Data":{"name":"bot"}}`
-	out := strings.TrimRight(rr.Body.String(), "\n")
+	out := strings.TrimRight(resp.Body.String(), "\n")
 
 	if ok, err := JSONDeepEqual(expected, out); err != nil {
 		t.Error(err.Error())

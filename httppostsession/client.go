@@ -66,10 +66,19 @@ func example_httppost() *cookiejar.Jar {
 
 	resp, err := client.Do(req)
 
+	if err != nil {
+		// do something
+	}
+
 	// Read response
 	if data, err := ioutil.ReadAll(resp.Body); err != nil {
 		fmt.Printf("error = %s \n", err)
 	} else {
+		// Check the response
+		if resp.StatusCode != http.StatusOK {
+			// do something
+		}
+
 		// Print response
 		log.Printf("Response = %s", string(data))
 
