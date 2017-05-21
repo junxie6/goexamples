@@ -56,6 +56,11 @@ func decompress(fileName string) ([]byte, error) {
 	return buf, nil
 }
 
+// Read Git objects in python:
+// python -c "import zlib,sys;print repr(zlib.decompress(sys.stdin.read()))" < .git/objects/44/47914e3de190ea086be520e52cf445d9b9cdff
+// UTF8:
+// python -c "import zlib,sys;print(zlib.decompress(sys.stdin.buffer.read()).decode('utf8'))" < .git/objects/44/47914e3de190ea086be520e52cf445d9b9cdff
+
 func main() {
 	flag.Parse() // get the arguments from command line
 
