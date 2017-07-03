@@ -1,5 +1,12 @@
 package gomap
 
+// Reference:
+// https://golang.org/src/runtime/hashmap.go
+// http://wudaijun.com/2016/09/go-notes-1-datastructures/index.html
+// http://www.jianshu.com/p/32b839e99289
+// http://qkxue.net/info/175966/golang-map
+// http://www.jianshu.com/p/c34e3a787de4
+
 import (
 	//"fmt"
 	"hash/fnv"
