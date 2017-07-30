@@ -15,7 +15,8 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-// UseStdLibExample uses Go's stdlib io.TeeReader
+// UseStdLibExample uses Go's stdlib io.TeeReader()
+// Also checkout io.MultiWriter()
 // https://golang.org/pkg/io/#TeeReader
 func UseStdLibExample() {
 	var src io.Reader // Source file/url/etc
@@ -84,7 +85,7 @@ func UseCustomStruct() {
 }
 
 func main() {
-	// Use Go's stdlib io.TeeReader
+	// Use Go's stdlib io.TeeReader()
 	UseStdLibExample()
 
 	// Use a custom struct
