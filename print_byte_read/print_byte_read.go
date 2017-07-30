@@ -27,15 +27,18 @@ func UseStdLibExample() {
 	//
 	src = io.TeeReader(src, &debugBuf)
 
-	dst, err := ioutil.ReadAll(src)
+	ReadBytesAndPrint(src, &debugBuf)
+}
+
+func ReadBytesAndPrint(rd io.Reader, debugBuf *bytes.Buffer) {
+	b, err := ioutil.ReadAll(rd)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s\n\n", dst)
-
-	spew.Dump(debugBuf.Bytes())
+	fmt.Printf("%s\n\n", b)
+	spew.Dump((*debugBuf).Bytes())
 }
 
 // PrintRead wraps an existing io.Reader.
@@ -75,15 +78,8 @@ func UseCustomStruct() {
 		reader: src,
 	}
 
-	dst, err := ioutil.ReadAll(pr)
+	ReadBytesAndPrint(pr, &pr.debugBuf)
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("%s\n\n", dst)
-
-	spew.Dump((*pr).debugBuf.Bytes())
 	fmt.Printf("Total bytes: %d\n", (*pr).total)
 }
 
