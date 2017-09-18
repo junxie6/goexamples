@@ -76,10 +76,19 @@ func main() {
 		"AddressArr": [
 			{
 				"ID": 1,
-				"CreatedAt": "2017-09-18T23:14:30.13441959-07:00",
+				"CreatedAt": "2017-09-10T23:14:30.13441959-07:00",
 				"UpdatedAt": "2017-09-16T23:14:30.13441959-07:00",
 				"DeletedAt": null,
-				"Street1": "123 abc street"
+				"IDUser": 1,
+				"Street1": "123 cdef street"
+			},
+			{
+				"ID": 2,
+				"CreatedAt": "2017-09-10T23:14:30.13441959-07:00",
+				"UpdatedAt": "2017-09-16T23:14:30.13441959-07:00",
+				"DeletedAt": null,
+				"IDUser": 1,
+				"Street1": "123 cdef street"
 			}
 		]
 	}
@@ -92,7 +101,12 @@ func main() {
 		return
 	}
 
-	db.Debug().Omit("CreatedAt", "addresses.CreatedAt").Save(&person1)
+	db.Debug().Omit("CreatedAt").Save(&person1.AddressArr[0])
+	db.Debug().Omit("CreatedAt").Save(&person1.AddressArr[1])
+
+	person1.AddressArr = nil
+
+	db.Debug().Omit("CreatedAt").Save(&person1)
 
 	fmt.Printf("Person: %#v\n", person1)
 
