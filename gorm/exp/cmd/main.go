@@ -68,11 +68,17 @@ func main() {
 	personStr := `
 	{
 		"ID": 1,
+		"CreatedAt": "2017-09-18T23:14:30.13441959-07:00",
+		"UpdatedAt": "2017-09-16T23:14:30.13441959-07:00",
+		"DeletedAt": null,
 		"FirstName": "Jun",
 		"Lastname": "Hsieh",
 		"AddressArr": [
 			{
 				"ID": 1,
+				"CreatedAt": "2017-09-18T23:14:30.13441959-07:00",
+				"UpdatedAt": "2017-09-16T23:14:30.13441959-07:00",
+				"DeletedAt": null,
 				"Street1": "123 abc street"
 			}
 		]
@@ -86,7 +92,7 @@ func main() {
 		return
 	}
 
-	db.Debug().Omit("created_at").Save(&person1)
+	db.Debug().Omit("CreatedAt", "addresses.CreatedAt").Save(&person1)
 
 	fmt.Printf("Person: %#v\n", person1)
 
