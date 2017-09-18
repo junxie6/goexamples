@@ -42,7 +42,7 @@ import (
 )
 
 import (
-	"github.com/junhsieh/tmp/orm/hasone"
+	"github.com/junhsieh/goexamples/gorm/hasone"
 )
 
 var (
