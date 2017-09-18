@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -49,17 +50,43 @@ func main() {
 	//	Country:  "Canada",
 	//}
 
-	person1 := model.Person{
-		FirstName: "Jun",
-		LastName:  "Hsieh",
-		//AddressArr: []model.Address{address1, address2},
-	}
+	//person1 := model.Person{
+	//	FirstName: "Jun",
+	//	LastName:  "Hsieh",
+	//	//AddressArr: []model.Address{address1, address2},
+	//}
 
 	// Create
 	//db.Create(&person1)
 
 	// Insert ot udpate
-	db.Where(model.Person{FirstName: "Jun"}).Assign(model.Person{LastName: "Hsieh 2"}).FirstOrCreate(&person1)
+	//db.Where(model.Person{FirstName: "Jun"}).Assign(model.Person{LastName: "Hsieh 2"}).FirstOrCreate(&person1)
+
+	//fmt.Printf("Person: %#v\n", person1)
+
+	// === Save person
+	personStr := `
+	{
+		"ID": 1,
+		"FirstName": "Jun",
+		"Lastname": "Hsieh",
+		"AddressArr": [
+			{
+				"ID": 1,
+				"Street1": "123 abc street"
+			}
+		]
+	}
+	`
+	person1 := model.Person{}
+	err = json.Unmarshal([]byte(personStr), &person1)
+
+	if err != nil {
+		fmt.Printf("Err: %s\n", err.Error())
+		return
+	}
+
+	db.Debug().Omit("created_at").Save(&person1)
 
 	fmt.Printf("Person: %#v\n", person1)
 
