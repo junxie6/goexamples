@@ -8,6 +8,7 @@ import (
 	"github.com/junhsieh/goexamples/exp-sqlx/model"
 )
 
+// User > Role > Permission > Project
 func main() {
 	var err error
 
