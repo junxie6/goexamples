@@ -16,7 +16,7 @@ var (
 
 func Open() error {
 	var err error
-	db, err = sqlx.Connect("mysql", "exp:exp@tcp(localhost:3306)/exp")
+	db, err = sqlx.Connect("mysql", "exp:exp@tcp(localhost:3306)/exp?parseTime=true")
 
 	if err != nil {
 		return err

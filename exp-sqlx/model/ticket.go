@@ -3,13 +3,15 @@ package model
 import (
 	"database/sql"
 	//"fmt"
+	"time"
 )
 
 type Ticket struct {
-	IDTicket  uint   `db:"IDTicket"`
-	IDProject uint   `db:"IDProject"`
-	IDUser    uint   `db:"IDUser"`
-	Subject   string `db:"Subject"`
+	IDTicket  uint      `db:"IDTicket"`
+	IDProject uint      `db:"IDProject"`
+	IDUser    uint      `db:"IDUser"`
+	Subject   string    `db:"Subject"`
+	Changed   time.Time `db:"Changed"`
 }
 
 func ListTicket() ([]Ticket, error) {
@@ -21,6 +23,7 @@ func ListTicket() ([]Ticket, error) {
 	sq += ", IDProject "
 	sq += ", IDUser "
 	sq += ", Subject "
+	sq += ", Changed "
 	sq += "FROM ticket "
 
 	err = db.Select(&ticketArr, sq)
@@ -45,6 +48,7 @@ func ListTicket() ([]Ticket, error) {
 //	sq += ", IDProject "
 //	sq += ", IDUser "
 //	sq += ", Subject "
+//	sq += ", Changed "
 //	sq += "FROM ticket "
 //
 //	rows, err = db.Queryx(sq)
