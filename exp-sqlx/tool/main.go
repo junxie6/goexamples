@@ -1,3 +1,4 @@
+// User > Role > Permission > Project
 package main
 
 import (
@@ -8,18 +9,8 @@ import (
 	"github.com/junhsieh/goexamples/exp-sqlx/model"
 )
 
-// User > Role > Permission > Project
-func main() {
+func GetTicketList() {
 	var err error
-
-	if err = model.Open(); err != nil {
-		fmt.Printf("Err: %s\n", err.Error())
-		return
-	}
-
-	defer model.Close()
-
-	//
 	var ticketArr []model.Ticket
 
 	ticketArr, err = model.ListTicket()
@@ -32,4 +23,53 @@ func main() {
 	for _, ticket := range ticketArr {
 		fmt.Printf("%#v\n", ticket)
 	}
+}
+
+func GetProjectList() {
+	var err error
+	var projectArr []model.Project
+
+	projectArr, err = model.ListProject()
+
+	if err != nil {
+		fmt.Printf("Err: %s\n", err.Error())
+		return
+	}
+
+	for _, project := range projectArr {
+		fmt.Printf("%#v\n", project)
+	}
+}
+
+func GenerateTicket() {
+	var err error
+	var projectArr []model.Project
+
+	projectArr, err = model.ListProject()
+
+	if err != nil {
+		fmt.Printf("Err: %s\n", err.Error())
+		return
+	}
+
+	for _, project := range projectArr {
+		fmt.Printf("%#v\n", project)
+	}
+}
+
+func main() {
+	var err error
+
+	if err = model.Open(); err != nil {
+		fmt.Printf("Err: %s\n", err.Error())
+		return
+	}
+
+	defer model.Close()
+
+	//
+	//GetTicketList()
+
+	// Generate tickets
+	GenerateTicket()
 }
