@@ -2,11 +2,20 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type User struct {
 	IDUser   uint   `db:"IDUser"`
 	Username string `db:"Username"`
+}
+
+func (u *User) Validate() error {
+	if len(u.Username) < 3 {
+		return fmt.Errorf("Username must be greater than or equal to three characters.")
+	}
+
+	return nil
 }
 
 func (u *User) Load() error {

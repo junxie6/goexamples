@@ -80,6 +80,11 @@ func SrvSaveUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err = user.Validate(); err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"ErrMsg":"%s"}`, err.Error())))
+		return
+	}
+
 	if err = user.Load(); err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"ErrMsg":"%s"}`, err.Error())))
 		return

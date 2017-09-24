@@ -1,6 +1,9 @@
 var userWindow = (function () {
 	var source = {
-		localdata: [],
+		//localdata: [],
+		url: '/ListUser',
+		//id: 'IDUser',
+		root: 'Data',
 		datatype: 'json',
 		datafields: [
 			{ name: 'IDUser', type: 'number' },
@@ -59,7 +62,7 @@ var userWindow = (function () {
 	function _createWindow() {
 		$('[id="userWindow"]').jqxWindow({
 			title: 'Manage User',
-			//autoOpen: false,
+			autoOpen: true,
 			position: 'center',
 			showCollapseButton: false,
 			showCloseButton: true,
@@ -117,6 +120,8 @@ var userWindow = (function () {
 			notYet: null,
 		},
 		init: function () {
+			//$('[id="userWindow"]').jqxWindow('isOpen');
+
 			$('body').append(_appendHTML());
 
 			//Creating all jqxWindgets except the window
