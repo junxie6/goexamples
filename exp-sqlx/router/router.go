@@ -89,14 +89,20 @@ func SrvSaveUser(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(fmt.Sprintf(`{"ErrMsg":"%s"}`, err.Error())))
 			return
 		}
-
-		if err = user.Load(); err != nil {
-			w.Write([]byte(fmt.Sprintf(`{"ErrMsg":"%s"}`, err.Error())))
-			return
-		}
 	}
 
-	bodyByteArr, err = json.Marshal(&user)
+	//
+	var userArr []model.User
+
+	if userArr, err = model.ListUser(); err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"ErrMsg":"%s"}`, err.Error())))
+		return
+	}
+
+	bodyByteArr, err = json.Marshal(map[string]interface{}{
+		"Status": true,
+		"Data":   userArr,
+	})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

@@ -26,7 +26,6 @@ var userWindow = (function () {
 				data: JSON.stringify(obj),
 			}).done(function(data, textStatus, jqXHR) {
 				console.log(data);
-				//$('#debugTextArea').val(JSON.stringify(data, null, 2));
 			}).fail(function(jqXHR, textStatus, errorThrown) {
 			}).always(function(data, textStatus, errorThrown) {
 			});

@@ -40,3 +40,23 @@ func (u *User) Save() error {
 
 	return err
 }
+
+func ListUser() ([]User, error) {
+	var err error
+	userArr := make([]User, 0)
+
+	sq := "SELECT "
+	sq += "  IDUser "
+	sq += ", Username "
+	sq += "FROM user "
+
+	err = db.Select(&userArr, sq)
+
+	if err == sql.ErrNoRows {
+		return userArr, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	return userArr, nil
+}
