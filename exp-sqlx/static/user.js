@@ -13,8 +13,23 @@ var userWindow = (function () {
 			$(this).remove();
 		});
 
-		$('[id="userFormSubmit"]').on('close', function(event) {
-			$('[id="userWindow"]').remove();
+		$('[id="userFormSubmit"]').on('click', function(event) {
+			event.preventDefault();
+
+			var obj = {
+				Username: $('[id="Username"]').val(),
+			};
+
+			$.ajax({
+				url: '/SaveUser',
+				method: 'POST',
+				data: JSON.stringify(obj),
+			}).done(function(data, textStatus, jqXHR) {
+				console.log(data);
+				//$('#debugTextArea').val(JSON.stringify(data, null, 2));
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+			}).always(function(data, textStatus, errorThrown) {
+			});
 		});
 	}
 
@@ -31,8 +46,8 @@ var userWindow = (function () {
 		$('[id="userGrid"]').jqxGrid({
 			width: '100%',
 			source: dataAdapter,
-			columnsresize: true,
-			sortable: true,
+			columnsresize: false,
+			sortable: false,
 			columns: [
 				{ text: 'IDUser', datafield: 'IDUser', width: 200 },
 				{ text: 'Username', datafield: 'Username', width: 150 },
@@ -67,12 +82,12 @@ var userWindow = (function () {
 			<div style="overflow: hidden;" id="userWindowContent">
 				<div class="row">
 					<!-- left column -->
-					<div class="col-lg-5">
+					<div class="col-lg-4">
 						<form class="form-horizontal">
 							<!-- Username -->
 							<div class="form-group">
-								<label for="Username" class="col-lg-3 control-label">Username</label>
-								<div class="col-lg-9">
+								<label for="Username" class="col-lg-4 control-label">Username</label>
+								<div class="col-lg-8">
 									<input type="text" class="form-control" id="Username" placeholder="Username">
 								</div>
 							</div>
@@ -80,7 +95,7 @@ var userWindow = (function () {
 						</form>
 					</div>
 					<!-- right column -->
-					<div class="col-lg-7">
+					<div class="col-lg-8">
 						<div class="row">
 							<div class="col-lg-12">
 								<div id="userGrid">
