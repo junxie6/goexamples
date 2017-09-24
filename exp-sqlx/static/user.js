@@ -34,6 +34,7 @@ var userWindow = (function () {
 			</div>
 			<div style="overflow: hidden;" id="userWindowContent">
 				<div class="row">
+					<!-- left column -->
 					<div class="col-lg-5">
 						<form class="form-horizontal">
 							<!-- Username -->
@@ -43,25 +44,11 @@ var userWindow = (function () {
 									<input type="text" class="form-control" id="Username" placeholder="Username">
 								</div>
 							</div>
-							<!-- Email -->
-							<div class="form-group">
-								<label for="Email" class="col-lg-3 control-label">Email</label>
-								<div class="col-lg-9">
-									<input type="text" class="form-control" id="Email" placeholder="Email">
-								</div>
-							</div>
 							<br /><input type="submit" class="btn btn-default" id="userFormSubmit" value="Submit">
 						</form>
 					</div>
+					<!-- right column -->
 					<div class="col-lg-7">
-						<div class="row">
-							<div class="col-lg-12">
-								<form>
-									<textarea class="form-control" rows="12" id="debugTextArea"></textarea>
-									<br /><input type="submit" class="btn btn-default" id="debugFormSubmit" value="Submit">
-								</form>
-							</div>
-						</div>
 						<div class="row">
 							<div class="col-lg-12">
 								List
