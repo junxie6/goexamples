@@ -25,7 +25,9 @@ var userWindow = (function () {
 				method: 'POST',
 				data: JSON.stringify(obj),
 			}).done(function(data, textStatus, jqXHR) {
-				console.log(data);
+				if (data.Status == true) {
+					refreshGridData(data.Data);
+				}
 			}).fail(function(jqXHR, textStatus, errorThrown) {
 			}).always(function(data, textStatus, errorThrown) {
 			});
