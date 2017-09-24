@@ -1,70 +1,34 @@
 package main
 
 import (
-	//"database/sql"
 	"fmt"
 )
 
 import (
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
+	"github.com/junhsieh/goexamples/exp-sqlx/model"
 )
-
-var (
-	db *sqlx.DB
-)
-
-type Ticket struct {
-	IDTicket  uint   `db:"IDTicket"`
-	IDProject uint   `db:"IDProject"`
-	IDUser    uint   `db:"IDUser"`
-	Subject   string `db:"Subject"`
-}
-
-func GetTicket() {
-	var err error
-	var rows *sqlx.Rows
-
-	ticket := Ticket{}
-
-	sq := "SELECT "
-	sq += "  IDTicket "
-	sq += ", IDProject "
-	sq += ", IDUser "
-	sq += ", Subject "
-	sq += "FROM ticket "
-
-	rows, err = db.Queryx(sq)
-
-	if err != nil {
-		fmt.Printf("Err: %s\n", err.Error())
-		return
-	}
-
-	for rows.Next() {
-		err := rows.StructScan(&ticket)
-
-		if err != nil {
-			fmt.Printf("Err: %s\n", err.Error())
-			return
-		}
-
-		fmt.Printf("%#v\n", ticket)
-	}
-}
 
 func main() {
 	var err error
 
-	db, err = sqlx.Connect("mysql", "exp:exp@tcp(localhost:3306)/exp")
+	if err = model.Open(); err != nil {
+		fmt.Printf("Err: %s\n", err.Error())
+		return
+	}
+
+	defer model.Close()
+
+	//
+	var ticketArr []model.Ticket
+
+	ticketArr, err = model.ListTicket()
 
 	if err != nil {
 		fmt.Printf("Err: %s\n", err.Error())
 		return
 	}
 
-	defer db.Close()
-
-	//
-	GetTicket()
+	for _, ticket := range ticketArr {
+		fmt.Printf("%#v\n", ticket)
+	}
 }

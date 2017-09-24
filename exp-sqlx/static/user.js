@@ -53,7 +53,7 @@ var userWindow = (function () {
 			columnsresize: false,
 			sortable: false,
 			columns: [
-				{ text: 'IDUser', datafield: 'IDUser', width: 200 },
+				{ text: 'IDUser', datafield: 'IDUser', width: 80 },
 				{ text: 'Username', datafield: 'Username', width: 150 },
 			]
 		});
