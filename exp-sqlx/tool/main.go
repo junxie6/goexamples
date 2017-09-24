@@ -42,22 +42,6 @@ func GetProjectList() {
 	}
 }
 
-func GenerateTicket() {
-	var err error
-	var projectArr []model.Project
-
-	projectArr, err = model.ListProject()
-
-	if err != nil {
-		fmt.Printf("Err: %s\n", err.Error())
-		return
-	}
-
-	for _, project := range projectArr {
-		fmt.Printf("%#v\n", project)
-	}
-}
-
 func main() {
 	var err error
 
@@ -72,5 +56,5 @@ func main() {
 	//GetTicketList()
 
 	// Generate tickets
-	GenerateTicket()
+	model.GenerateTicket()
 }

@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+import (
+	"github.com/jmoiron/sqlx"
+)
+
 type Ticket struct {
 	IDTicket  uint      `db:"IDTicket"`
 	IDProject uint      `db:"IDProject"`
@@ -35,6 +39,37 @@ func ListTicket() ([]Ticket, error) {
 	}
 
 	return ticketArr, nil
+}
+
+func GenerateTicket() {
+	var err error
+	var projectArr []model.Project
+
+	projectArr, err = model.ListProject()
+
+	if err != nil {
+		fmt.Printf("Err: %s\n", err.Error())
+		return
+	}
+
+	for _, project := range projectArr {
+		fmt.Printf("%#v\n", project)
+	}
+
+	//
+	var stmt *sqlx.Stmt
+
+	sq := "INSERT INTO ticket (IDProject, IDUser, Subject, Changed) "
+	sq += "VALUES (?, ?, ?, ?) "
+
+	stmt, err = db.Preparex(sq)
+
+	if err != nil {
+		fmt.Printf("Err: %s\n", err.Error())
+		return
+	}
+
+	stmt.Exec()
 }
 
 //func GetTicket() {
