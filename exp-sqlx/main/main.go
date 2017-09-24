@@ -70,11 +70,17 @@ func SrvRoot(w http.ResponseWriter, r *http.Request) {
 			<script src="/static/jqwidgets/jqxcore.js"></script>
 			<script src="/static/jqwidgets/jqxwindow.js"></script>
 			<script src="/static/jqwidgets/jqxbuttons.js"></script>
+			<script src="/static/user.js?%d"></script>
+			<script src="/static/project.js?%d"></script>
+			<script src="/static/role.js?%d"></script>
+			<script src="/static/permission.js?%d"></script>
 			<script src="/static/main.js?%d"></script>
 		</head>
 		<body>
 		</body>
 	</html>
 	`
-	w.Write([]byte(fmt.Sprintf(html, time.Now().Unix())))
+	now := time.Now().Unix()
+
+	w.Write([]byte(fmt.Sprintf(html, now, now, now, now, now)))
 }

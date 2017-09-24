@@ -5,10 +5,6 @@ var basicDemo = (function () {
 			$('#window').jqxWindow('open');
 		});
 
-		$('#hideWindowButton').click(function () {
-			$('#window').jqxWindow('close');
-		});
-
 		$('#userFormSubmit').on('click', function(event){
 			event.preventDefault();
 
@@ -70,32 +66,9 @@ var basicDemo = (function () {
 			}
 		});
 	};
-	return {
-		config: {
-			dragArea: null
-		},
-		init: function () {
-			//Creating all jqxWindgets except the window
-			_createElements();
-			//Attaching event listeners
-			_addEventListeners();
-			//Adding jqxWindow
-			_createWindow();
-		}
-	};
-} ());
 
-$( document ).ready(function() {
-	// global setting
-	$.ajaxSetup({
-		dataType: 'json',
-		contentType: 'application/json; charset=utf-8',
-	});
-
-	var html = `
-		<input class="btn btn-default" value="Open" id="showWindowButton" />
-		<input class="btn btn-default" value="Close" id="hideWindowButton" style="margin-left: 5px" />
-
+	function getHTML() {
+		return `
 		<div id="window">
 			<div id="windowHeader">
 			</div>
@@ -138,10 +111,77 @@ $( document ).ready(function() {
 				</div>
 			</div>
 		</div>
+			`;
+	}
+
+	return {
+		config: {
+			notYet: null,
+		},
+		init: function () {
+			//Creating all jqxWindgets except the window
+			_createElements();
+			//Attaching event listeners
+			_addEventListeners();
+			//Adding jqxWindow
+			_createWindow();
+		},
+	};
+} ());
+
+var mainWindow = (function () {
+	function _addEventListeners() {
+	}
+
+	function _createElements() {
+	}
+
+	function _createWindow() {
+	}
+
+	return {
+		config: {
+			notYet: null,
+		},
+		init: function () {
+			//Creating all jqxWindgets except the window
+			_createElements();
+			//Attaching event listeners
+			_addEventListeners();
+			//Adding jqxWindow
+			_createWindow();
+		},
+	};
+} ());
+
+
+function bindMainButtons() {
+	$('[id="manageUserBtn"]').on('click', function(event){
+		event.preventDefault();
+
+		userWindow.init();
+		console.log('hi');
+	});
+}
+
+$( document ).ready(function() {
+	// global setting
+	$.ajaxSetup({
+		dataType: 'json',
+		contentType: 'application/json; charset=utf-8',
+	});
+
+	var html = `
+		<input class="btn btn-default" value="Manage user" id="manageUserBtn" />
+		<input class="btn btn-default" value="Manage project" id="manageProjectBtn" />
+		<input class="btn btn-default" value="Manage role" id="manageRoleBtn" />
+		<input class="btn btn-default" value="Manage permission" id="managePermissionBtn" />
+		<input class="btn btn-default" value="List ticket" id="listTicketBtn" />
 	`;
+
 	$('body').append(html);
 
-	basicDemo.init();
+	bindMainButtons();
 });
 
 
