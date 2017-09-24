@@ -14,6 +14,7 @@ import (
 
 func RegisterRoute() {
 	http.HandleFunc("/", SrvRoot)
+	http.HandleFunc("/ListUser", SrvListUser)
 	http.HandleFunc("/SaveUser", SrvSaveUser)
 	http.Handle("/static/", http.FileServer(http.Dir(".")))
 }
@@ -90,6 +91,13 @@ func SrvSaveUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	http.Redirect(w, r, "/ListUser", http.StatusMovedPermanently)
+}
+
+func SrvListUser(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var bodyByteArr []byte
 
 	//
 	var userArr []model.User

@@ -1,7 +1,7 @@
 var userWindow = (function () {
 	var source = {
 		localdata: [],
-		datatype: 'array',
+		datatype: 'json',
 		datafields: [
 			{ name: 'IDUser', type: 'number' },
 			{ name: 'Username', type: 'string' },
