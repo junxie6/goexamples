@@ -1,11 +1,43 @@
 var userWindow = (function () {
+	var source = {
+		localdata: [],
+		datatype: 'array',
+		datafields: [
+			{ name: 'IDUser', type: 'number' },
+			{ name: 'Username', type: 'string' },
+		],
+	};
+
 	function _addEventListeners() {
 		$('[id="userWindow"]').on('close', function(event) {
+			$(this).remove();
+		});
+
+		$('[id="userFormSubmit"]').on('close', function(event) {
 			$('[id="userWindow"]').remove();
 		});
 	}
 
+	function refreshGridData(data) {
+		source.localdata = data;
+
+		// passing "cells" to the 'updatebounddata' method will refresh only the cells values when the new rows count is equal to the previous rows count.
+		$('[id="userGrid"]').jqxGrid('updatebounddata', 'cells');
+	}
+
 	function _createElements() {
+		var dataAdapter = new $.jqx.dataAdapter(source);
+
+		$('[id="userGrid"]').jqxGrid({
+			width: '100%',
+			source: dataAdapter,
+			columnsresize: true,
+			sortable: true,
+			columns: [
+				{ text: 'IDUser', datafield: 'IDUser', width: 200 },
+				{ text: 'Username', datafield: 'Username', width: 150 },
+			]
+		});
 	}
 
 	function _createWindow() {
@@ -51,7 +83,8 @@ var userWindow = (function () {
 					<div class="col-lg-7">
 						<div class="row">
 							<div class="col-lg-12">
-								List
+								<div id="userGrid">
+								</div>
 							</div>
 						</div>
 					</div>

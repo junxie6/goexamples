@@ -66,10 +66,21 @@ func SrvRoot(w http.ResponseWriter, r *http.Request) {
 		<head>
 			<link rel="stylesheet" href="/static/bootstrap/bootstrap.min.css" type="text/css" />
 			<link rel="stylesheet" href="/static/jqwidgets/styles/jqx.base.css" type="text/css" />
+
 			<script src="/static/jquery-2.2.4.min.js"></script>
+
 			<script src="/static/jqwidgets/jqxcore.js"></script>
 			<script src="/static/jqwidgets/jqxwindow.js"></script>
 			<script src="/static/jqwidgets/jqxbuttons.js"></script>
+			<script src="/static/jqwidgets/jqxgrid.js"></script>
+			<script src="/static/jqwidgets/jqxdata.js"></script>
+			<script src="/static/jqwidgets/jqxscrollbar.js"></script>
+			<script src="/static/jqwidgets/jqxmenu.js"></script>
+			<script src="/static/jqwidgets/jqxgrid.pager.js"></script>
+			<script src="/static/jqwidgets/jqxgrid.selection.js"></script>
+			<script src="/static/jqwidgets/jqxgrid.columnsresize.js"></script>
+			<script src="/static/jqwidgets/jqxgrid.sort.js"></script>
+
 			<script src="/static/user.js?%d"></script>
 			<script src="/static/project.js?%d"></script>
 			<script src="/static/role.js?%d"></script>
