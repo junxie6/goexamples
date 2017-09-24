@@ -1,5 +1,9 @@
 package model
 
+import (
+	"database/sql"
+)
+
 type User struct {
 	IDUser   uint   `db:"IDUser"`
 	Username string `db:"Username"`
@@ -13,11 +17,17 @@ func (u *User) Load() error {
 	sq += ", Username "
 	sq += "FROM user "
 	sq += "WHERE "
-	sq += "Username = $1 "
+	sq += "Username = ? "
 
 	err = db.Get(u, sq, u.Username)
 
-	return err
+	if err == sql.ErrNoRows {
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (u *User) Save() error {
