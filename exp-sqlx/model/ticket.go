@@ -2,12 +2,13 @@ package model
 
 import (
 	"database/sql"
-	//"fmt"
+	"fmt"
 	"time"
 )
 
 import (
 	"github.com/jmoiron/sqlx"
+	"github.com/junhsieh/util"
 )
 
 type Ticket struct {
@@ -43,24 +44,25 @@ func ListTicket() ([]Ticket, error) {
 
 func GenerateTicket() {
 	var err error
-	var projectArr []model.Project
+	var projectArr []Project
 
-	projectArr, err = model.ListProject()
+	projectArr, err = ListProject()
 
 	if err != nil {
 		fmt.Printf("Err: %s\n", err.Error())
 		return
 	}
 
-	for _, project := range projectArr {
-		fmt.Printf("%#v\n", project)
-	}
-
-	//
+	// Insert new record
 	var stmt *sqlx.Stmt
+	var IDUser uint
+	var IDProject uint
+	var randomNum int
+	var Subject string
+	numOfProject := len(projectArr)
 
 	sq := "INSERT INTO ticket (IDProject, IDUser, Subject, Changed) "
-	sq += "VALUES (?, ?, ?, ?) "
+	sq += "VALUES (?, ?, ?, NOW()) "
 
 	stmt, err = db.Preparex(sq)
 
@@ -69,7 +71,19 @@ func GenerateTicket() {
 		return
 	}
 
-	stmt.Exec()
+	for i := 0; i < 10; i++ {
+		randomNum = util.RandomNumber(0, numOfProject)
+		IDProject = projectArr[randomNum].IDProject
+		IDUser = uint(util.RandomNumber(1, 10))
+		Subject = fmt.Sprintf("%s did not work due to incorrect handle the function in case of error need to fix it", projectArr[randomNum].Name)
+
+		_, err = stmt.Exec(IDProject, IDUser, Subject)
+
+		if err != nil {
+			fmt.Printf("Err: %s\n", err.Error())
+			return
+		}
+	}
 }
 
 //func GetTicket() {
