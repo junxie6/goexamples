@@ -71,7 +71,7 @@ func GenerateTicket() {
 		return
 	}
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 1000000; i++ {
 		randomNum = util.RandomNumber(0, numOfProject)
 		IDProject = projectArr[randomNum].IDProject
 		IDUser = uint(util.RandomNumber(1, 10))
