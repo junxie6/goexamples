@@ -22,37 +22,46 @@ func GenerateTicketKeyword() {
 	// Insert new record
 	var stmt *sqlx.Stmt
 	var randomNum int
+	var IDTicket uint
 
 	sq := "INSERT INTO ticket_keyword (IDTicket, IDKeyword) "
 	sq += "VALUES (?, ?) "
 
-	tx := db.MustBegin()
+	for c := 1; c < 1000000; {
+		tx := db.MustBegin()
 
-	stmt, err = tx.Preparex(sq)
+		stmt, err = tx.Preparex(sq)
 
-	if err != nil {
-		fmt.Printf("Err: %s\n", err.Error())
-		return
-	}
-
-	for i := 0; i < 10; i++ {
-		IDKeywordMap := make(map[int]bool)
-
-		for kc := 0; kc < 5; kc++ {
-			randomNum = util.RandomNumber(0, 60)
-			IDKeywordMap[randomNum] = true
+		if err != nil {
+			fmt.Printf("Err: %s\n", err.Error())
+			return
 		}
 
-		for IDKeyword, _ := range IDKeywordMap {
-			_, err = stmt.Exec(i, IDKeyword)
+		i := 0
 
-			if err != nil {
-				fmt.Printf("Err: %s\n", err.Error())
-				return
+		for ; i < 1000; i++ {
+			IDTicket = uint(c) + uint(i)
+			IDKeywordMap := make(map[int]bool)
+
+			for kc := 0; kc < 5; kc++ {
+				randomNum = util.RandomNumber(0, 30)
+				IDKeywordMap[randomNum] = true
 			}
+
+			for IDKeyword, _ := range IDKeywordMap {
+				_, err = stmt.Exec(IDTicket, IDKeyword)
+
+				if err != nil {
+					fmt.Printf("Err: %s\n", err.Error())
+					return
+				}
+			}
+
+			//fmt.Printf("%d ", IDTicket)
 		}
 
-	}
+		c += i
 
-	tx.Commit()
+		tx.Commit()
+	}
 }
