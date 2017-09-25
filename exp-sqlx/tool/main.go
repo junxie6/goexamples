@@ -56,5 +56,7 @@ func main() {
 	//GetTicketList()
 
 	// Generate tickets
-	model.GenerateTicket()
+	//model.GenerateTicket()
+
+	model.GenerateTicketKeyword()
 }
