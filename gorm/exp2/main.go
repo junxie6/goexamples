@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
@@ -9,6 +11,17 @@ import (
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+)
+
+// Size constants
+const (
+	KB = 1 << 10
+	MB = 1 << 20
+)
+
+var (
+	// IOLimitReaderSize ...
+	IOLimitReaderSize int64 = 2 * MB
 )
 
 func Connect(dsn string) (*gorm.DB, error) {
@@ -46,6 +59,13 @@ type PGInfo struct {
 }
 
 type Language struct {
+}
+
+type Office struct {
+	PGModel
+	PGInfo         PGInfo
+	Title          string `gorm:"column:Title;type:varchar(32);not null;"`
+	ElectiveStatus uint   `gorm:"column:ElectiveStatus;not null;"`
 }
 
 type User struct {
@@ -96,7 +116,7 @@ func main() {
 	//DropTables()
 
 	// Migrate the schemas
-	//AutoMigrateTables()
+	AutoMigrateTables()
 
 	http.HandleFunc("/", srvHome)
 	http.HandleFunc("/save", srvForm)
@@ -115,9 +135,19 @@ func AutoMigrateTables() {
 	Conn.AutoMigrate(&CreditCard{})
 	Conn.AutoMigrate(&Bag{})
 	Conn.AutoMigrate(&BagItem{})
+	Conn.AutoMigrate(&Office{})
 }
 
 func srvForm(w http.ResponseWriter, r *http.Request) {
+	u1 := User{}
+
+	if err := json.NewDecoder(io.LimitReader(r.Body, IOLimitReaderSize)).Decode(&u1); err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return
+	}
+
+	Conn.Save(&u1)
+	//fmt.Printf("u1: %#v\n", u1)
 }
 
 func srvHome(w http.ResponseWriter, r *http.Request) {
@@ -130,26 +160,50 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 		<form id="myForm" action="/save" method="POST">
 			<br>User.Name: <input type="text" name="User.Name" />
 			<br>User.Age: <input type="text" name="User.Age" />
-			<br>User.CreditCardArr.Number: <input type="text" name="User.CreditCardArr.Number" />
+			<br>User.CreditCardArr.Number: <input type="text" name="User.CreditCardArr.0.Number" />
 			<br>User.Bag.Name<input type="text" name="User.Bag.Name" />
-			<br><input type="submit" />
+			<br><input id="myBtn" type="submit" />
 		</form>
 
 <script>
-document.querySelector('#myForm').addEventListener('submit', (e) => {
-	e.preventDefault();
+(function($) {                                                                                                                    
+	$(document).ready(function(){                                                                                                 
+		//$('#myBtn').on('click', function(e){
+		document.querySelector('#myForm').addEventListener('submit', (e) => {
+			e.preventDefault();
 
-	const formData = new FormData(e.target);
-	var obj = {};
+			const formData = new FormData(e.target);
+			var obj = {};
 
-	for (let pair of formData.entries()) {
-		//console.log(pair[0]+ ', ' + pair[1]); 
+			for (let pair of formData.entries()) {
+				//console.log(pair[0]+ ', ' + pair[1]); 
 
-		stringToObject(pair[0], pair[1], obj);
-	}
+				if (pair[0] == 'User.Age') {
+					pair[1] = parseInt(pair[1]);
+				}
+				stringToObject(pair[0], pair[1], obj);
+			}
 
-	console.log(obj);
-});
+			var jqxhr = $.ajax({
+				method: 'POST',
+				url: '/save',
+				data: JSON.stringify(obj.User),
+				dataType: 'json',
+				contentType: "application/json; charset=utf-8",
+			})
+			.done(function() {
+			})
+			.fail(function() {
+			})
+			.always(function() {
+				console.log('hereeee');
+			});
+			console.log(obj.User);
+			return false;
+		});
+	});                                                                                                                           
+})(jQuery);                                                                                                                       
+           
 
 // Reference:
 // https://stackoverflow.com/questions/22985676/convert-string-with-dot-notation-to-json
@@ -161,7 +215,11 @@ function stringToObject(path, value, obj) {
 
 	while(part = parts.shift()) {
 		if( typeof obj[part] != "object") {
-			obj[part] = {}
+			if (part == 'CreditCardArr') {
+				obj[part] = [];
+			} else {
+				obj[part] = {};
+			}
 		};
 		obj = obj[part]; // update "pointer"
 	}
