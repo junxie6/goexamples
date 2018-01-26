@@ -61,11 +61,10 @@ type PGInfo struct {
 type Language struct {
 }
 
-type Office struct {
+type Profile struct {
 	PGModel
-	PGInfo         PGInfo
-	Title          string `gorm:"column:Title;type:varchar(32);not null;"`
-	ElectiveStatus uint   `gorm:"column:ElectiveStatus;not null;"`
+	PGInfo PGInfo
+	Name   string
 }
 
 type User struct {
@@ -75,6 +74,8 @@ type User struct {
 	Age           uint         `gorm:"column:Age;type:varchar(32);not null;"`
 	CreditCardArr []CreditCard `gorm:"ForeignKey:UserID;"`
 	Bag           Bag          `gorm:"ForeignKey:UserID;"`
+	Profile       Profile      `gorm:"ForeignKey:ProfileRefer"` // use ProfileRefer as foreign key
+	ProfileRefer  uint
 }
 
 type CreditCard struct {
@@ -116,14 +117,17 @@ func main() {
 	//DropTables()
 
 	// Migrate the schemas
-	AutoMigrateTables()
+	//AutoMigrateTables()
 
-	http.HandleFunc("/", srvHome)
-	http.HandleFunc("/save", srvForm)
-	http.ListenAndServe(":8444", nil)
+	//http.HandleFunc("/", srvHome)
+	//http.HandleFunc("/save", srvForm)
+	//http.ListenAndServe(":8444", nil)
+
+	Test()
 }
 
 func DropTables() {
+	Conn.DropTable(&Profile{})
 	Conn.DropTable(&User{})
 	Conn.DropTable(&CreditCard{})
 	Conn.DropTable(&Bag{})
@@ -131,11 +135,45 @@ func DropTables() {
 }
 
 func AutoMigrateTables() {
+	Conn.AutoMigrate(&Profile{})
 	Conn.AutoMigrate(&User{})
 	Conn.AutoMigrate(&CreditCard{})
 	Conn.AutoMigrate(&Bag{})
 	Conn.AutoMigrate(&BagItem{})
-	Conn.AutoMigrate(&Office{})
+}
+
+func ObjectToJSON(u1 User, IsFormat bool) {
+	var byteArr []byte
+	var err error
+
+	if IsFormat == true {
+		byteArr, err = json.MarshalIndent(&u1, "", "    ")
+	} else {
+		byteArr, err = json.Marshal(&u1)
+	}
+
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return
+	}
+
+	fmt.Printf("u1: %s\n", string(byteArr))
+}
+
+func Test() {
+	//u1 := User{}
+	//u1.Profile = Profile{
+	//	Name: "Jun's profile",
+	//}
+
+	//Conn.Save(&u1)
+
+	u2 := User{}
+	u2.ID = 1
+	Conn.Preload("Profile").First(&u2)
+	//fmt.Printf("u2: %#v\n", u2)
+
+	ObjectToJSON(u2, true)
 }
 
 func srvForm(w http.ResponseWriter, r *http.Request) {
@@ -166,8 +204,8 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 		</form>
 
 <script>
-(function($) {                                                                                                                    
-	$(document).ready(function(){                                                                                                 
+(function($) {
+	$(document).ready(function(){
 		//$('#myBtn').on('click', function(e){
 		document.querySelector('#myForm').addEventListener('submit', (e) => {
 			e.preventDefault();
@@ -176,7 +214,7 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 			var obj = {};
 
 			for (let pair of formData.entries()) {
-				//console.log(pair[0]+ ', ' + pair[1]); 
+				//console.log(pair[0]+ ', ' + pair[1]);
 
 				if (pair[0] == 'User.Age') {
 					pair[1] = parseInt(pair[1]);
@@ -201,9 +239,9 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 			console.log(obj.User);
 			return false;
 		});
-	});                                                                                                                           
-})(jQuery);                                                                                                                       
-           
+	});
+})(jQuery);
+
 
 // Reference:
 // https://stackoverflow.com/questions/22985676/convert-string-with-dot-notation-to-json
