@@ -1,5 +1,11 @@
 package main
 
+// Reference:
+// https://stackoverflow.com/questions/19098797/fastest-way-to-flatten-un-flatten-nested-json-objects
+// https://stackoverflow.com/questions/2276463/how-can-i-get-form-data-with-javascript-jquery
+// https://stackoverflow.com/questions/22985676/convert-string-with-dot-notation-to-json
+// https://stackoverflow.com/questions/6393943/convert-javascript-string-in-dot-notation-into-an-object-reference
+
 import (
 	"encoding/json"
 	"fmt"
@@ -63,8 +69,10 @@ type Language struct {
 
 type Profile struct {
 	PGModel
-	PGInfo PGInfo
-	Name   string
+	PGInfo   PGInfo
+	Name     string
+	Date     string
+	Location string
 }
 
 type User struct {
@@ -74,8 +82,8 @@ type User struct {
 	Age           uint         `gorm:"column:Age;type:varchar(32);not null;"`
 	CreditCardArr []CreditCard `gorm:"ForeignKey:UserID;"`
 	Bag           Bag          `gorm:"ForeignKey:UserID;"`
-	Profile       Profile      `gorm:"ForeignKey:ProfileRefer"` // use ProfileRefer as foreign key
-	ProfileRefer  uint
+	//Profile       Profile      `gorm:"ForeignKey:ProfileRefer"` // use ProfileRefer as foreign key
+	//ProfileRefer  uint
 }
 
 type CreditCard struct {
@@ -114,14 +122,16 @@ func main() {
 	defer Conn.Close()
 
 	// Drop the schemas
-	DropTables()
+	//DropTables()
 
 	// Migrate the schemas
-	AutoMigrateTables()
+	//AutoMigrateTables()
 
-	//http.HandleFunc("/", srvHome)
-	//http.HandleFunc("/save", srvForm)
-	//http.ListenAndServe(":8444", nil)
+	http.Handle("/static/", http.FileServer(http.Dir(".")))
+
+	http.HandleFunc("/", srvHome)
+	http.HandleFunc("/save", srvForm)
+	http.ListenAndServe(":8444", nil)
 
 	//Test()
 }
@@ -163,6 +173,42 @@ func ObjectToJSON(u1 User, IsFormat bool) {
 }
 
 func Test() {
+	var err error
+
+	// client - user input
+	// JSON (JavaScript Object Notation)
+	var JSONstr = `{"User":{"Name":"Wu Xu","Age":18,"CreditCardArr":[{"Number":"123"}],"Bag":{"Name":"LV"}}}`
+
+	// server side
+	var u1 = struct {
+		User User
+	}{}
+
+	err = json.Unmarshal([]byte(JSONstr), &u1)
+
+	if err != nil {
+		// do something
+	}
+
+	Conn.Save(&u1.User)
+	//ObjectToJSON(u1.User, true)
+
+	// Instantiate //實體化，实体化
+	//p1 := Profile{
+	//	Name:     "Wu profile",
+	//	Date:     "2018-01-25",
+	//	Location: "Coquitlam",
+	//}
+
+	//p1 := Profile{}
+	//p1.ID = 1
+	//Conn.First(&p1)
+	//ObjectToJSON(p1, true)
+
+	//p1.Name = "Wu super profile"
+
+	//Conn.Save(&p1)
+
 	//u1 := User{}
 	//u1.Profile = Profile{
 	//	Name: "Jun's profile",
@@ -205,7 +251,10 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 			<br><input id="myBtn" type="submit" />
 		</form>
 
+		<script src="/static/dataobject-parser/dataobject-parser.js"></script>
+
 <script>
+
 (function($) {
 	$(document).ready(function(){
 		//$('#myBtn').on('click', function(e){
@@ -213,6 +262,9 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 			e.preventDefault();
 
 			const formData = new FormData(e.target);
+
+			var d = new DataObjectParser();
+
 			var obj = {};
 
 			for (let pair of formData.entries()) {
@@ -222,7 +274,16 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 					pair[1] = parseInt(pair[1]);
 				}
 				stringToObject(pair[0], pair[1], obj);
+
+
+				d.set(pair[0], pair[1]);
 			}
+
+			var obj = d.data();
+
+
+console.log(JSON.stringify(obj));
+			return;
 
 			var jqxhr = $.ajax({
 				method: 'POST',
@@ -245,9 +306,6 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 })(jQuery);
 
 
-// Reference:
-// https://stackoverflow.com/questions/22985676/convert-string-with-dot-notation-to-json
-// https://stackoverflow.com/questions/2276463/how-can-i-get-form-data-with-javascript-jquery
 function stringToObject(path, value, obj) {
 	var parts = path.split(".");
 	var part = '';
