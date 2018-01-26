@@ -153,7 +153,7 @@ func AutoMigrateTables() {
 	Conn.Model(&User{}).AddForeignKey("profile_refer", "profile(id)", "RESTRICT", "RESTRICT")
 }
 
-func ObjectToJSON(u1 User, IsFormat bool) {
+func ObjectToJSON(u1 interface{}, IsFormat bool) {
 	var byteArr []byte
 	var err error
 
@@ -172,16 +172,17 @@ func ObjectToJSON(u1 User, IsFormat bool) {
 }
 
 func Test() {
-	var err error
+	//var err error
 
-	//p1 := Profile{}
-	//p1.ID = 1
-	//Conn.First(&p1)
-	//ObjectToJSON(p1, true)
-
-	//p1.Name = "Wu super profile"
-
+	// Create profile
+	p1 := Profile{
+		Name:     "Jun2 profile",
+		Date:     "2018-01-25",
+		Location: "Vancouver",
+	}
 	//Conn.Save(&p1)
+
+	ObjectToJSON(p1, true)
 
 	//u1 := User{}
 	//u1.Profile = Profile{
