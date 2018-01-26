@@ -175,28 +175,26 @@ func Test() {
 	//var err error
 
 	// Create profile
-	p1 := Profile{
-		Name:     "Jun2 profile",
-		Date:     "2018-01-25",
-		Location: "Vancouver",
-	}
+	//p1 := Profile{
+	//	Name:     "Jun2 profile",
+	//	Date:     "2018-01-25",
+	//	Location: "Vancouver",
+	//}
 	//Conn.Save(&p1)
 
-	ObjectToJSON(p1, true)
-
-	//u1 := User{}
-	//u1.Profile = Profile{
-	//	Name: "Jun's profile",
+	// Create user
+	//u1 := User{
+	//	Name: "Jun 2",
+	//	Age:  18,
 	//}
-
+	//u1.ProfileRefer = 2
 	//Conn.Save(&u1)
 
-	//u2 := User{}
-	//u2.ID = 1
-	//Conn.Preload("Profile").First(&u2)
-	//fmt.Printf("u2: %#v\n", u2)
+	u1 := User{}
+	u1.ID = 1
+	Conn.Preload("Profile").First(&u1)
 
-	//ObjectToJSON(u2, true)
+	ObjectToJSON(u1, true)
 }
 
 func srvForm(w http.ResponseWriter, r *http.Request) {
