@@ -48,7 +48,7 @@ var (
 )
 
 type PGModel struct {
-	ID        uint `gorm:"primary_key"`
+	ID        uint `gorm:"primary_key;"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	//DeletedAt *time.Time `sql:"index"`
@@ -114,16 +114,16 @@ func main() {
 	defer Conn.Close()
 
 	// Drop the schemas
-	//DropTables()
+	DropTables()
 
 	// Migrate the schemas
-	//AutoMigrateTables()
+	AutoMigrateTables()
 
 	//http.HandleFunc("/", srvHome)
 	//http.HandleFunc("/save", srvForm)
 	//http.ListenAndServe(":8444", nil)
 
-	Test()
+	//Test()
 }
 
 func DropTables() {
@@ -140,6 +140,8 @@ func AutoMigrateTables() {
 	Conn.AutoMigrate(&CreditCard{})
 	Conn.AutoMigrate(&Bag{})
 	Conn.AutoMigrate(&BagItem{})
+
+	Conn.Model(&User{}).AddForeignKey("profile_refer", "profile(id)", "RESTRICT", "RESTRICT")
 }
 
 func ObjectToJSON(u1 User, IsFormat bool) {
@@ -168,12 +170,12 @@ func Test() {
 
 	//Conn.Save(&u1)
 
-	u2 := User{}
-	u2.ID = 1
-	Conn.Preload("Profile").First(&u2)
+	//u2 := User{}
+	//u2.ID = 1
+	//Conn.Preload("Profile").First(&u2)
 	//fmt.Printf("u2: %#v\n", u2)
 
-	ObjectToJSON(u2, true)
+	//ObjectToJSON(u2, true)
 }
 
 func srvForm(w http.ResponseWriter, r *http.Request) {
