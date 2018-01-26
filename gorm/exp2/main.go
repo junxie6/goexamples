@@ -82,8 +82,8 @@ type User struct {
 	Age           uint         `gorm:"column:Age;type:varchar(32);not null;"`
 	CreditCardArr []CreditCard `gorm:"ForeignKey:UserID;"`
 	Bag           Bag          `gorm:"ForeignKey:UserID;"`
-	//Profile       Profile      `gorm:"ForeignKey:ProfileRefer"` // use ProfileRefer as foreign key
-	//ProfileRefer  uint
+	Profile       Profile      `gorm:"ForeignKey:ProfileRefer"` // use ProfileRefer as foreign key
+	ProfileRefer  uint
 }
 
 type CreditCard struct {
@@ -127,13 +127,12 @@ func main() {
 	// Migrate the schemas
 	//AutoMigrateTables()
 
-	http.Handle("/static/", http.FileServer(http.Dir(".")))
+	//http.Handle("/static/", http.FileServer(http.Dir(".")))
+	//http.HandleFunc("/", srvHome)
+	//http.HandleFunc("/save", srvForm)
+	//http.ListenAndServe(":8444", nil)
 
-	http.HandleFunc("/", srvHome)
-	http.HandleFunc("/save", srvForm)
-	http.ListenAndServe(":8444", nil)
-
-	//Test()
+	Test()
 }
 
 func DropTables() {
@@ -174,31 +173,6 @@ func ObjectToJSON(u1 User, IsFormat bool) {
 
 func Test() {
 	var err error
-
-	// client - user input
-	// JSON (JavaScript Object Notation)
-	var JSONstr = `{"User":{"Name":"Wu Xu","Age":18,"CreditCardArr":[{"Number":"123"}],"Bag":{"Name":"LV"}}}`
-
-	// server side
-	var u1 = struct {
-		User User
-	}{}
-
-	err = json.Unmarshal([]byte(JSONstr), &u1)
-
-	if err != nil {
-		// do something
-	}
-
-	Conn.Save(&u1.User)
-	//ObjectToJSON(u1.User, true)
-
-	// Instantiate //實體化，实体化
-	//p1 := Profile{
-	//	Name:     "Wu profile",
-	//	Date:     "2018-01-25",
-	//	Location: "Coquitlam",
-	//}
 
 	//p1 := Profile{}
 	//p1.ID = 1
