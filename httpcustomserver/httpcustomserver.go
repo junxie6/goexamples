@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/junhsieh/goexamples/util"
+	"github.com/junxie6/goexamples/util"
 	"log"
 	"net/http"
 	"time"

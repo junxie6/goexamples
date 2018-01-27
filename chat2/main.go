@@ -9,7 +9,7 @@ import (
 	"sync"
 	"text/template"
 
-	"github.com/junhsieh/goexamples/trace"
+	"github.com/junxie6/goexamples/trace"
 
 	"github.com/stretchr/gomniauth"
 	"github.com/stretchr/gomniauth/providers/google"

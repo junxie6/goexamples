@@ -3,7 +3,7 @@ package model
 import (
 	"database/sql"
 	"fmt"
-	"github.com/junhsieh/goexamples/util"
+	"github.com/junxie6/goexamples/util"
 	"log"
 	"strings"
 	"time"

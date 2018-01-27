@@ -12,14 +12,14 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/sessions"
-	"github.com/junhsieh/alice"
-	"github.com/junhsieh/gziphandler"
+	"github.com/junxie6/alice"
+	"github.com/junxie6/gziphandler"
 )
 
 import (
-	"github.com/junhsieh/goexamples/util"
-	"github.com/junhsieh/iojson"
-	"github.com/junhsieh/middleware"
+	"github.com/junxie6/goexamples/util"
+	"github.com/junxie6/iojson"
+	"github.com/junxie6/middleware"
 )
 
 const (

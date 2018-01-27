@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/junhsieh/goexamples/trace"
+	"github.com/junxie6/goexamples/trace"
 	"github.com/stretchr/objx"
 )
 
