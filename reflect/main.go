@@ -16,80 +16,58 @@ type User struct {
 func main() {
 	user := User{
 		Id:    1,
-		Name:  "John Doe",
-		Email: "john@example",
+		Name:  "Jun Xie",
+		Email: "jun@example.com",
 	}
 
-	ShowFieldNameTypeValueTag(&user)
-
-	//rv := reflect.TypeOf(&user)
-
-	//fmt.Printf("HERE: %#v\n", rv.Kind().String())
-
-	////rv := reflect.ValueOf(&user)
-	//for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
-	//	//	fmt.Println(rv.Kind(), rv.Type())
-	//	rv = rv.Elem()
-	//}
-
-	//t := rv
-	//t.Elem()
-
-	//t := reflect.TypeOf(user)
-
-	//fmt.Println("Type:", t.Name())
-	//fmt.Println("Kind:", t.Kind())
-
-	// Iterate over all available fields and read the tag value
-	//for i := 0; i < t.NumField(); i++ {
-	//	// Get the field, returns https://golang.org/pkg/reflect/#StructField
-	//	valueField := t.Field(i)
-	//	typeField := t.Type().Field(i)
-	//	tag := typeField.Tag.Get(tagName)
-
-	//	// Get the field tag value
-	//	//field := t.Field(i)
-	//	//tag := field.Tag.Get(tagName)
-	//	//tag := field.Tag.Get(tagName)
-
-	//	//fmt.Printf("%d. %v (%v): , tag: '%v'\n", i+1, field.Name, field.Type.Name(), tag)
-	//	fmt.Printf("%d. %v (%v): %#v, tag: '%v'\n", i+1, typeField.Name, valueField.Type(), valueField.Interface(), tag)
-	//	//field.Name
-	//	//fmt.Printf("%#v\n", field.Interface())
-	//}
-
-	//rv := reflect.TypeOf(&user)
-	//fmt.Printf("%#v %#v\n", rv.Kind().String(), reflect.Ptr)
-
-	//return
-
-	//rv := reflect.ValueOf(&user)
-	//for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
-	//	//	fmt.Println(rv.Kind(), rv.Type())
-	//	rv = rv.Elem()
-	//}
-
-	//fmt.Println(rv.Kind())
-	//fmt.Println(rv.Kind(), rv.Type())
-
-	//t2 := rv.Type()
-
-	//for i := 0; i < t2.NumField(); i++ {
-	//	field := t.Field(i)
-	//	fmt.Printf("%#v\n", field.Name)
-	//}
+	ShowFieldNameTypeValueTagV1(&user)
 }
 
-func ShowFieldNameTypeValueTag(v interface{}) {
+func ShowFieldNameTypeValueTagV1(v interface{}) {
 	t := reflect.ValueOf(v).Elem()
+
+	fmt.Printf("%#v ============\n", t.Kind().String())
+
+	typeOfT := t.Type()
+
+	for i := 0; i < t.NumField(); i++ {
+		valueField := t.Field(i)
+		typeField := typeOfT.Field(i)
+		tag := typeField.Tag.Get(tagName)
+
+		fmt.Printf("%d. %v (%v): %#v, tag: '%v'\n", i+1, typeField.Name, valueField.Type(), valueField.Interface(), tag)
+	}
+}
+
+func ShowFieldNameTypeValueTagV2(v interface{}) {
+	t := reflect.TypeOf(v)
+
+	for t.Kind() == reflect.Ptr || t.Kind() == reflect.Interface {
+		t = t.Elem()
+	}
 
 	fmt.Printf("%#v ============\n", t.Kind().String())
 
 	for i := 0; i < t.NumField(); i++ {
 		valueField := t.Field(i)
-		typeField := t.Type().Field(i)
-		tag := typeField.Tag.Get(tagName)
+		typeField := valueField.Type
 
-		fmt.Printf("%d. %v (%v): %#v, tag: '%v'\n", i+1, typeField.Name, valueField.Type(), valueField.Interface(), tag)
+		typeName0 := typeField.Name()
+		//typeName1 := typeField.Kind().String()
+		//typeName2 := typeField.String()
+
+		tag := valueField.Tag.Get(tagName)
+
+		fmt.Printf("%d. %v (%v), tag: '%v'\n", i+1, valueField.Name, typeName0, tag)
 	}
+}
+
+func ShowFieldNameTypeValueTagV3(v interface{}) {
+	//rv := reflect.ValueOf(&user)
+}
+
+func ShowFieldNameTypeValueTagV4(v interface{}) {
+	//reflect.Indirect()
+	//fmt.Println("Indirect type is:", reflect.Indirect(reflect.ValueOf(v)).Elem().Type()) // prints main.CustomStruct
+	//fmt.Println("Indirect value type is:", reflect.Indirect(reflect.ValueOf(v)).Elem().Kind()) // prints struct
 }
