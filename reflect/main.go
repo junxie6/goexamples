@@ -25,10 +25,9 @@ func main() {
 
 func ShowFieldNameTypeValueTagV1(v interface{}) {
 	t := reflect.ValueOf(v).Elem()
-
-	fmt.Printf("%#v ============\n", t.Kind().String())
-
 	typeOfT := t.Type()
+
+	fmt.Printf("%#v %#v============\n", t.Kind().String(), typeOfT.Name())
 
 	for i := 0; i < t.NumField(); i++ {
 		valueField := t.Field(i)
