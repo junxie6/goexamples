@@ -2,6 +2,7 @@ package main
 
 // Reference:
 // https://stackoverflow.com/questions/34493062/how-to-reflect-struct-recursive-in-golang
+// https://stackoverflow.com/questions/20496585/reflecting-the-fields-of-a-emptys-slices-underyling-type
 // https://gist.github.com/hvoecking/10772475
 
 import (
