@@ -1,5 +1,8 @@
 package main
 
+// Reference:
+// https://stackoverflow.com/questions/34493062/how-to-reflect-struct-recursive-in-golang
+
 import (
 	"fmt"
 	"reflect"
