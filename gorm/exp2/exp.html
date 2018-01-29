@@ -1,0 +1,16 @@
+<div id="bug">
+    {{ if .form }}
+        {{ .form.RenderStart }}
+
+            {{ (.form.Field "User.MarriageStatus").Render }}
+            {{ (.form.Field "User.ID").Render }}
+            {{ (.form.Field "User.Username").Render }}
+            {{ (.form.Field "User.NotYet").Render }}
+
+            {{ (.form.Field "btn1").Render }}
+
+        {{ .form.RenderEnd }}
+
+    {{ end }}
+</div>
+

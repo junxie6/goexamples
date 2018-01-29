@@ -7,16 +7,21 @@ package main
 // https://stackoverflow.com/questions/6393943/convert-javascript-string-in-dot-notation-into-an-object-reference
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
+	"path"
 	"time"
 )
 
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	"github.com/junxie6/go-form-it"
+	"github.com/junxie6/go-form-it/fields"
 )
 
 // Size constants
@@ -77,20 +82,24 @@ type Profile struct {
 
 type User struct {
 	PGModel
-	PGInfo        PGInfo
-	Name          string       `gorm:"column:Name;type:varchar(32);not null;"`
-	Age           uint         `gorm:"column:Age;type:varchar(32);not null;"`
-	CreditCardArr []CreditCard `gorm:"ForeignKey:UserID;"`
-	Bag           Bag          `gorm:"ForeignKey:UserID;"`
-	Profile       Profile      `gorm:"ForeignKey:ProfileRefer"` // use ProfileRefer as foreign key
-	ProfileRefer  uint
+	PGInfo          PGInfo
+	Username        string       `gorm:"column:Username;type:varchar(32);not null;"`
+	Age             uint         `gorm:"column:Age;type:varchar(32);not null;"`
+	MarriageStatus  uint         `gorm:"column:MarriageStatus;not null;"`
+	PrimaryLanguage uint         `gorm:"column:PrimaryLanguage;not null;"`
+	CreditCardArr   []CreditCard `gorm:"ForeignKey:UserID;"`
+	//Bag           Bag          `gorm:"ForeignKey:UserID;"`
+	//Profile       Profile      `gorm:"ForeignKey:ProfileRefer"` // use ProfileRefer as foreign key
+	//ProfileRefer  uint
 }
 
 type CreditCard struct {
-	PGModel
-	PGInfo PGInfo
-	UserID uint   `gorm:"column:UserID;not null;"`
-	Number string `gorm:"column:Number;type:varchar(32);not null;"`
+	//PGModel
+	PGInfo     PGInfo
+	UserID     uint   `gorm:"primary_key;column:UserID;not null;" sql:"type:int(10) UNSIGNED NOT NULL DEFAULT 0"`
+	Weight     uint   `gorm:"primary_key;column:Weight;not null;" sql:"type:int(10) UNSIGNED NOT NULL DEFAULT 0"`
+	Number     string `gorm:"column:Number;type:varchar(32);not null;"`
+	ExpireDate string `gorm:"column:ExpireDate;type:varchar(32);not null;"`
 }
 
 type Bag struct {
@@ -125,32 +134,32 @@ func main() {
 	//DropTables()
 
 	// Migrate the schemas
-	//AutoMigrateTables()
+	AutoMigrateTables()
 
 	//http.Handle("/static/", http.FileServer(http.Dir(".")))
 	//http.HandleFunc("/", srvHome)
 	//http.HandleFunc("/save", srvForm)
 	//http.ListenAndServe(":8444", nil)
 
-	Test()
+	//Test()
 }
 
 func DropTables() {
-	Conn.DropTable(&Profile{})
 	Conn.DropTable(&User{})
+	Conn.DropTable(&Profile{})
 	Conn.DropTable(&CreditCard{})
 	Conn.DropTable(&Bag{})
 	Conn.DropTable(&BagItem{})
 }
 
 func AutoMigrateTables() {
-	Conn.AutoMigrate(&Profile{})
 	Conn.AutoMigrate(&User{})
 	Conn.AutoMigrate(&CreditCard{})
-	Conn.AutoMigrate(&Bag{})
-	Conn.AutoMigrate(&BagItem{})
+	//Conn.AutoMigrate(&Profile{})
+	//Conn.AutoMigrate(&Bag{})
+	//Conn.AutoMigrate(&BagItem{})
 
-	Conn.Model(&User{}).AddForeignKey("profile_refer", "profile(id)", "RESTRICT", "RESTRICT")
+	//Conn.Model(&User{}).AddForeignKey("profile_refer", "profile(id)", "RESTRICT", "RESTRICT")
 }
 
 func ObjectToJSON(u1 interface{}, IsFormat bool) {
@@ -171,6 +180,17 @@ func ObjectToJSON(u1 interface{}, IsFormat bool) {
 	fmt.Printf("u1: %s\n", string(byteArr))
 }
 
+func JSONToObject(v interface{}, JSONStr string) {
+	var err error
+
+	err = json.Unmarshal([]byte(JSONStr), v)
+
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return
+	}
+}
+
 func Test() {
 	//var err error
 
@@ -183,18 +203,83 @@ func Test() {
 	//Conn.Save(&p1)
 
 	// Create user
-	//u1 := User{
-	//	Name: "Jun 2",
-	//	Age:  18,
+	var u1 User
+
+	//u1 = User{
+	//	PGModel: PGModel{
+	//		ID: 1,
+	//	},
+	//	Username: "Jun 2",
+	//	Age:      18,
 	//}
-	//u1.ProfileRefer = 2
+	//u1.CreditCardArr = []CreditCard{
+	//	CreditCard{
+	//		Number:     "1233",
+	//		ExpireDate: "2018-01-28",
+	//	},
+	//	CreditCard{
+	//		Number:     "4566",
+	//		ExpireDate: "2018-01-28",
+	//	},
+	//}
 	//Conn.Save(&u1)
 
-	u1 := User{}
+	//
+	u1 = User{}
 	u1.ID = 1
-	Conn.Preload("Profile").First(&u1)
+	Conn.Preload("CreditCardArr").First(&u1)
 
 	ObjectToJSON(u1, true)
+	//ObjectToJSON(u1, false)
+
+	var JSONStr = `
+	`
+	u2 := User{}
+	JSONToObject(&u2, JSONStr)
+
+	//Conn.Save(&u2)
+	//ObjectToJSON(u2, true)
+}
+
+func getForm() []byte {
+	opts := []fields.InputChoice{
+		fields.InputChoice{Id: "User.PrimaryLanguage.111", Val: "1", Text: "PHP"},
+		fields.InputChoice{Id: "User.PrimaryLanguage.222", Val: "2", Text: "Go"},
+	}
+
+	form := forms.EmptyForm(forms.POST, "/exp.html").Elements(
+		fields.RadioField("User.MarriageStatus", []fields.InputChoice{
+			fields.InputChoice{Id: "User.MarriageStatus.111", Val: "1", Text: "Single"},
+			fields.InputChoice{Id: "User.MarriageStatus.222", Val: "2", Text: "Married"},
+		}).SetLabel("Marriage Status"),
+		fields.TextField("User.ID").SetLabel("ID").SetValue("asdf"),
+		fields.TextField("User.Username").SetLabel("Username").SetValue("Jun"),
+		fields.TextField("User.Age").SetLabel("Age").SetValue("19"),
+		fields.SelectField("User.PrimaryLanguage", map[string][]fields.InputChoice{
+			"": opts,
+		}).SetLabel("Primary Language"),
+		forms.FieldSet("User.CreditCarddArr",
+			fields.TextField("User.CreditCarddArr[0].ID"),
+			fields.TextField("User.CreditCarddArr[0].Number"),
+			fields.TextField("User.CreditCarddArr[0].ExpireDate"),
+			fields.TextField("User.CreditCarddArr[1].ID"),
+			fields.TextField("User.CreditCarddArr[1].Number"),
+			fields.TextField("User.CreditCarddArr[1].ExpireDate"),
+		),
+		fields.SubmitButton("User.Save", "Save"),
+	)
+
+	var buf bytes.Buffer
+
+	exp2TplPath := "exp.html"
+	exp2Tpl := template.New(path.Base(exp2TplPath))
+	exp2Tpl.ParseFiles(exp2TplPath)
+	exp2Tpl.Execute(&buf, map[string]interface{}{
+		"form": form,
+	})
+
+	//fmt.Printf("%#v\n", buf.String())
+	return buf.Bytes()
 }
 
 func srvForm(w http.ResponseWriter, r *http.Request) {
