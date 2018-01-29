@@ -8,14 +8,19 @@ import (
 const tagName = "validate"
 
 type User struct {
-	Id    int    `validate:"-"`
-	Name  string `validate:"presence,min=2,max=32"`
-	Email string `validate:"email,required"`
+	ID            int          `validate:"-"`
+	Name          string       `validate:"Name,min=2,max=32"`
+	Email         string       `validate:"Email,required"`
+	CreditCardArr []CreditCard `validate:"CreditCardArr"`
+}
+
+type CreditCard struct {
+	Number string `validate:"Number"`
 }
 
 func main() {
 	user := User{
-		Id:    1,
+		ID:    1,
 		Name:  "Jun Xie",
 		Email: "jun@example.com",
 	}
@@ -34,7 +39,7 @@ func ShowFieldNameTypeValueTagV1(v interface{}) {
 		typeField := typeOfT.Field(i)
 		tag := typeField.Tag.Get(tagName)
 
-		fmt.Printf("%d. %v (%v): %#v, tag: '%v'\n", i+1, typeField.Name, valueField.Type(), valueField.Interface(), tag)
+		fmt.Printf("%d. %v (%v|%v): %#v, tag: %v\n", i+1, typeField.Name, valueField.Kind().String(), valueField.Type(), valueField.Interface(), tag)
 	}
 }
 
