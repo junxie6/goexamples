@@ -11,7 +11,12 @@ type User struct {
 	ID            int          `validate:"-"`
 	Name          string       `validate:"Name,min=2,max=32"`
 	Email         string       `validate:"Email,required"`
+	Bag           Bag          `jjj:"Bag"`
 	CreditCardArr []CreditCard `validate:"CreditCardArr"`
+}
+
+type Bag struct {
+	Name string `jjj:"Bag"`
 }
 
 type CreditCard struct {
