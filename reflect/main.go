@@ -36,7 +36,8 @@ type Bag struct {
 }
 
 type CreditCard struct {
-	Number string `validate:"Number"`
+	Number     string `validate:"Number"`
+	ExpireDate string `jjj:"ExpireDate"`
 }
 
 func main() {
@@ -44,13 +45,24 @@ func main() {
 		ID:    1,
 		Name:  "Jun Xie",
 		Email: "jun@example.com",
+		CreditCardArr: []CreditCard{
+			CreditCard{
+				Number:     "123",
+				ExpireDate: "2018-01-29",
+			},
+			CreditCard{
+				Number:     "456",
+				ExpireDate: "2018-01-29",
+			},
+		},
 	}
 
-	translated := translate(&user)
+	//translated := translate(&user)
 	//fmt.Println("original:  ", original, "->", (*original.Payload), "->", (*original.Payload).(B).Ptr)
 	//fmt.Println("translated:", translated, "->", (*translated.(D).Payload), "->", (*(translated.(D).Payload)).(B).Ptr)
-	fmt.Printf("%#v\n", translated)
-	//ShowFieldNameTypeValueTagV1(&user)
+	//fmt.Printf("%#v\n", translated)
+
+	ShowFieldNameTypeValueTagV1(&user)
 }
 
 func ShowFieldNameTypeValueTagV1(v interface{}) {
@@ -69,6 +81,14 @@ func ShowFieldNameTypeValueTagV1(v interface{}) {
 		if valueField.Kind() == reflect.Struct {
 			fieldPtr := valueField.Addr()
 			ShowFieldNameTypeValueTagV1(fieldPtr.Interface())
+		}
+
+		if valueField.Kind() == reflect.Slice || valueField.Kind() == reflect.Array {
+			for ii := 0; ii < valueField.Len(); ii++ {
+				//fmt.Printf("HHHH: %#v\n", valueField.Index(ii).Interface())
+				fieldPtr := valueField.Index(ii).Addr()
+				ShowFieldNameTypeValueTagV1(fieldPtr.Interface())
+			}
 		}
 	}
 }
