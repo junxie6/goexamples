@@ -11,7 +11,7 @@ import (
 )
 
 import (
-	"github.com/junhsieh/goexamples/gorm/hasmany"
+	"github.com/junxie6/goexamples/gorm/hasmany"
 )
 
 var (

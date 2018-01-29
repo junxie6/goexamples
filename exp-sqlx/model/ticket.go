@@ -8,7 +8,7 @@ import (
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/junhsieh/util"
+	"github.com/junxie6/util"
 )
 
 type Ticket struct {

@@ -9,7 +9,7 @@ import (
 
 import (
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/junhsieh/goexamples/fieldbinding/fieldbinding"
+	"github.com/junxie6/goexamples/fieldbinding/fieldbinding"
 )
 
 var (

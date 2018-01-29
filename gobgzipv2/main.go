@@ -5,7 +5,7 @@ import (
 )
 
 import (
-	"github.com/junhsieh/goexamples/gobgzipv2/gobgzipv2"
+	"github.com/junxie6/goexamples/gobgzipv2/gobgzipv2"
 )
 
 // Person ...

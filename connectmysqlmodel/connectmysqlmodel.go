@@ -2,7 +2,7 @@ package main
 
 import (
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/junhsieh/goexamples/connectmysqlmodel/model"
+	"github.com/junxie6/goexamples/connectmysqlmodel/model"
 	"log"
 )
 

@@ -6,8 +6,8 @@ import (
 )
 
 import (
-	"github.com/junhsieh/goexamples/exp-sqlx/model"
-	"github.com/junhsieh/goexamples/exp-sqlx/router"
+	"github.com/junxie6/goexamples/exp-sqlx/model"
+	"github.com/junxie6/goexamples/exp-sqlx/router"
 )
 
 func main() {
