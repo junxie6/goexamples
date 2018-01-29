@@ -134,14 +134,14 @@ func main() {
 	//DropTables()
 
 	// Migrate the schemas
-	AutoMigrateTables()
+	//AutoMigrateTables()
 
 	//http.Handle("/static/", http.FileServer(http.Dir(".")))
 	//http.HandleFunc("/", srvHome)
 	//http.HandleFunc("/save", srvForm)
 	//http.ListenAndServe(":8444", nil)
 
-	//Test()
+	Test()
 }
 
 func DropTables() {
@@ -203,7 +203,7 @@ func Test() {
 	//Conn.Save(&p1)
 
 	// Create user
-	var u1 User
+	//var u1 User
 
 	//u1 = User{
 	//	PGModel: PGModel{
@@ -214,10 +214,12 @@ func Test() {
 	//}
 	//u1.CreditCardArr = []CreditCard{
 	//	CreditCard{
+	//		Weight:     0,
 	//		Number:     "1233",
 	//		ExpireDate: "2018-01-28",
 	//	},
 	//	CreditCard{
+	//		Weight:     1,
 	//		Number:     "4566",
 	//		ExpireDate: "2018-01-28",
 	//	},
@@ -225,23 +227,58 @@ func Test() {
 	//Conn.Save(&u1)
 
 	//
-	u1 = User{}
-	u1.ID = 1
-	Conn.Preload("CreditCardArr").First(&u1)
+	//u1 = User{}
+	//u1.ID = 1
+	//Conn.Preload("CreditCardArr").First(&u1)
 
-	ObjectToJSON(u1, true)
+	//ObjectToJSON(u1, true)
 	//ObjectToJSON(u1, false)
 
 	var JSONStr = `
+{
+    "ID": 1,
+    "CreatedAt": "2018-01-29T05:40:07Z",
+    "UpdatedAt": "2018-01-29T05:40:07Z",
+    "PGInfo": {
+        "ErrorArr": null
+    },
+    "Username": "Jun 2",
+    "Age": 18,
+    "MarriageStatus": 0,
+    "PrimaryLanguage": 0,
+    "CreditCardArr": [
+        {
+            "PGInfo": {
+                "ErrorArr": null
+            },
+            "UserID": 1,
+            "Weight": 0,
+            "Number": "123",
+            "ExpireDate": "2018-01-28"
+        },
+        {
+            "PGInfo": {
+                "ErrorArr": null
+            },
+            "UserID": 1,
+            "Weight": 1,
+            "Number": "456",
+            "ExpireDate": "2018-01-28"
+        }
+    ]
+}
 	`
 	u2 := User{}
 	JSONToObject(&u2, JSONStr)
 
 	//Conn.Save(&u2)
-	//ObjectToJSON(u2, true)
+	ObjectToJSON(u2, true)
+
+	byteArr := GetForm(&u2)
+	fmt.Printf("%s\n", string(byteArr))
 }
 
-func getForm() []byte {
+func GetForm(v interface{}) []byte {
 	opts := []fields.InputChoice{
 		fields.InputChoice{Id: "User.PrimaryLanguage.111", Val: "1", Text: "PHP"},
 		fields.InputChoice{Id: "User.PrimaryLanguage.222", Val: "2", Text: "Go"},
@@ -252,9 +289,9 @@ func getForm() []byte {
 			fields.InputChoice{Id: "User.MarriageStatus.111", Val: "1", Text: "Single"},
 			fields.InputChoice{Id: "User.MarriageStatus.222", Val: "2", Text: "Married"},
 		}).SetLabel("Marriage Status"),
-		fields.TextField("User.ID").SetLabel("ID").SetValue("asdf"),
-		fields.TextField("User.Username").SetLabel("Username").SetValue("Jun"),
-		fields.TextField("User.Age").SetLabel("Age").SetValue("19"),
+		fields.TextField("User.ID").SetLabel("ID"),
+		fields.TextField("User.Username").SetLabel("Username"),
+		fields.TextField("User.Age").SetLabel("Age"),
 		fields.SelectField("User.PrimaryLanguage", map[string][]fields.InputChoice{
 			"": opts,
 		}).SetLabel("Primary Language"),
@@ -268,6 +305,8 @@ func getForm() []byte {
 		),
 		fields.SubmitButton("User.Save", "Save"),
 	)
+
+	form.PopulateData(v)
 
 	var buf bytes.Buffer
 
