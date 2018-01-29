@@ -16,7 +16,8 @@ type User struct {
 }
 
 type Bag struct {
-	Name string `jjj:"Bag"`
+	Name   string `jjj:"Bag"`
+	Weight uint   `jjj:"Weight"`
 }
 
 type CreditCard struct {
@@ -45,6 +46,11 @@ func ShowFieldNameTypeValueTagV1(v interface{}) {
 		tag := typeField.Tag.Get(tagName)
 
 		fmt.Printf("%d. %v (%v|%v): %#v, tag: %v\n", i+1, typeField.Name, valueField.Kind().String(), valueField.Type(), valueField.Interface(), tag)
+
+		if valueField.Kind() == reflect.Struct {
+			fieldPtr := valueField.Addr()
+			ShowFieldNameTypeValueTagV1(fieldPtr.Interface())
+		}
 	}
 }
 
