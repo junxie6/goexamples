@@ -81,6 +81,10 @@ func main() {
 						Balance: 6999,
 					},
 				},
+				Person: Person{
+					Name: "jun 0",
+					Age:  12,
+				},
 			},
 			CreditCard{
 				Number:      "456",
@@ -96,6 +100,10 @@ func main() {
 						Num:     "444444444444444",
 						Balance: 6999,
 					},
+				},
+				Person: Person{
+					Name: "jun 1",
+					Age:  13,
 				},
 			},
 		},
@@ -142,7 +150,7 @@ func ShowFieldNameTypeValueTagV1(v interface{}) {
 	}
 }
 
-func Flatten(v interface{}, data map[string]interface{}, parentStr string, isParentASlice bool) {
+func Flatten(v interface{}, data map[string]interface{}, parentStr string, isParentASliceOrStruct bool) {
 	t := reflect.ValueOf(v).Elem()
 	typeOfT := t.Type()
 
@@ -162,7 +170,7 @@ func Flatten(v interface{}, data map[string]interface{}, parentStr string, isPar
 
 		var key string
 
-		if isParentASlice == false {
+		if isParentASliceOrStruct == false {
 			key = parentStr + asdf2 + "." + typeField.Name
 		} else {
 			key = parentStr + "." + typeField.Name
@@ -170,7 +178,7 @@ func Flatten(v interface{}, data map[string]interface{}, parentStr string, isPar
 
 		if valueField.Kind() == reflect.Struct {
 			fieldPtr := valueField.Addr()
-			Flatten(fieldPtr.Interface(), data, key, false)
+			Flatten(fieldPtr.Interface(), data, key, true)
 			continue
 		}
 
