@@ -43,6 +43,12 @@ type CreditCard struct {
 	BranchIDArr []string `jjj:"BranchIDArr"`
 	MonthArr    []int
 	AccountArr  []Account
+	Person      Person
+}
+
+type Person struct {
+	Name string
+	Age  uint
 }
 
 type Account struct {
