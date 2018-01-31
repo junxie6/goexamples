@@ -55,6 +55,10 @@ func main() {
 		ID:    1,
 		Name:  "Jun Xie",
 		Email: "jun@example.com",
+		Bag: Bag{
+			Name:   "LV",
+			Weight: 79,
+		},
 		CreditCardArr: []CreditCard{
 			CreditCard{
 				Number:      "123",
@@ -98,7 +102,7 @@ func main() {
 
 	//ShowFieldNameTypeValueTagV1(&user)
 
-	test := make(map[string]string)
+	test := make(map[string]interface{})
 	Flatten(&user, test, "", false)
 	//fmt.Printf("%#v\n", test)
 	ObjectToJSON(test, true)
@@ -132,7 +136,7 @@ func ShowFieldNameTypeValueTagV1(v interface{}) {
 	}
 }
 
-func Flatten(v interface{}, data map[string]string, parentStr string, isParentASlice bool) {
+func Flatten(v interface{}, data map[string]interface{}, parentStr string, isParentASlice bool) {
 	t := reflect.ValueOf(v).Elem()
 	typeOfT := t.Type()
 
@@ -165,10 +169,10 @@ func Flatten(v interface{}, data map[string]string, parentStr string, isParentAS
 		}
 
 		if valueField.Kind() == reflect.Slice || valueField.Kind() == reflect.Array {
-			asdf := key // User.CreditCardArr
+			objKey := key // User.CreditCardArr
 
 			for ii := 0; ii < valueField.Len(); ii++ {
-				key = asdf + "[" + strconv.Itoa(ii) + "]"
+				key = objKey + "[" + strconv.Itoa(ii) + "]"
 
 				if valueField.Index(ii).Kind() == reflect.Struct {
 					fieldPtr := valueField.Index(ii).Addr()
@@ -177,7 +181,7 @@ func Flatten(v interface{}, data map[string]string, parentStr string, isParentAS
 				}
 
 				// For string, or int ??
-				data[key] = ""
+				data[key] = valueField.Index(ii).Interface()
 
 				//data[key] = ""
 
@@ -187,7 +191,15 @@ func Flatten(v interface{}, data map[string]string, parentStr string, isParentAS
 			continue
 		}
 
-		data[key] = ""
+		data[key] = valueField.Interface()
+		//switch vvv := valueField.Interface().(type) {
+		//case int:
+		//	data[key] = vvv
+		//case string:
+		//	data[key] = vvv
+		//case float64:
+		//	data[key] = vvv
+		//}
 	}
 }
 
