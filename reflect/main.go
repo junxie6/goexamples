@@ -31,6 +31,13 @@ type User struct {
 	Bag           Bag          `jjj:"Bag"`
 	CreditCardArr []CreditCard `validate:"CreditCardArr"`
 	Table         [][]string
+	TowerArr      [][]Tower
+}
+
+type Tower struct {
+	Name        string
+	Height      uint
+	ResidentArr []string
 }
 
 type Bag struct {
@@ -76,6 +83,28 @@ func main() {
 		Table: [][]string{
 			[]string{"R0 C0", "R0 C1"},
 			[]string{"R1 C0", "R1 C1"},
+		},
+		TowerArr: [][]Tower{
+			[]Tower{
+				Tower{
+					Name:   "Tower 00",
+					Height: 11,
+				},
+				Tower{
+					Name:   "Tower 01",
+					Height: 12,
+				},
+			},
+			[]Tower{
+				Tower{
+					Name:   "Tower 10",
+					Height: 21,
+				},
+				Tower{
+					Name:   "Tower 11",
+					Height: 22,
+				},
+			},
 		},
 		CreditCardArr: []CreditCard{
 			CreditCard{
