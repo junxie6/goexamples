@@ -30,6 +30,7 @@ type User struct {
 	Email         string       `validate:"Email,required"`
 	Bag           Bag          `jjj:"Bag"`
 	CreditCardArr []CreditCard `validate:"CreditCardArr"`
+	Table         [][]string
 }
 
 type Bag struct {
@@ -47,8 +48,15 @@ type CreditCard struct {
 }
 
 type Person struct {
-	Name string
-	Age  uint
+	Name        string
+	Age         uint
+	LanguageArr []string
+	CarArr      []Car
+}
+
+type Car struct {
+	Model     string
+	YearBuilt uint
 }
 
 type Account struct {
@@ -64,6 +72,10 @@ func main() {
 		Bag: Bag{
 			Name:   "LV",
 			Weight: 79,
+		},
+		Table: [][]string{
+			[]string{"R0 C0", "R0 C1"},
+			[]string{"R1 C0", "R1 C1"},
 		},
 		CreditCardArr: []CreditCard{
 			CreditCard{
@@ -82,8 +94,19 @@ func main() {
 					},
 				},
 				Person: Person{
-					Name: "jun 0",
-					Age:  12,
+					Name:        "jun 0",
+					Age:         12,
+					LanguageArr: []string{"English", "Chinese"},
+					CarArr: []Car{
+						Car{
+							Model:     "X5",
+							YearBuilt: 1999,
+						},
+						Car{
+							Model:     "X6",
+							YearBuilt: 1998,
+						},
+					},
 				},
 			},
 			CreditCard{
@@ -102,8 +125,19 @@ func main() {
 					},
 				},
 				Person: Person{
-					Name: "jun 1",
-					Age:  13,
+					Name:        "jun 1",
+					Age:         13,
+					LanguageArr: []string{"English", "Chinese"},
+					CarArr: []Car{
+						Car{
+							Model:     "X5",
+							YearBuilt: 1999,
+						},
+						Car{
+							Model:     "X6",
+							YearBuilt: 1998,
+						},
+					},
 				},
 			},
 		},
