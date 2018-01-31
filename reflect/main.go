@@ -6,8 +6,10 @@ package main
 // https://gist.github.com/hvoecking/10772475
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 )
 
 const tagName = "validate"
@@ -36,8 +38,16 @@ type Bag struct {
 }
 
 type CreditCard struct {
-	Number     string `validate:"Number"`
-	ExpireDate string `jjj:"ExpireDate"`
+	Number      string   `validate:"Number"`
+	ExpireDate  string   `jjj:"ExpireDate"`
+	BranchIDArr []string `jjj:"BranchIDArr"`
+	MonthArr    []int
+	AccountArr  []Account
+}
+
+type Account struct {
+	Num     string
+	Balance float64
 }
 
 func main() {
@@ -47,12 +57,36 @@ func main() {
 		Email: "jun@example.com",
 		CreditCardArr: []CreditCard{
 			CreditCard{
-				Number:     "123",
-				ExpireDate: "2018-01-29",
+				Number:      "123",
+				ExpireDate:  "2018-01-29",
+				BranchIDArr: []string{"111", "222", "333"},
+				MonthArr:    []int{1, 3, 5},
+				AccountArr: []Account{
+					Account{
+						Num:     "111111111111111",
+						Balance: 5999,
+					},
+					Account{
+						Num:     "222222222222222",
+						Balance: 6999,
+					},
+				},
 			},
 			CreditCard{
-				Number:     "456",
-				ExpireDate: "2018-01-29",
+				Number:      "456",
+				ExpireDate:  "2018-01-29",
+				BranchIDArr: []string{"444", "555", "666"},
+				MonthArr:    []int{2, 4, 6},
+				AccountArr: []Account{
+					Account{
+						Num:     "33333333333333",
+						Balance: 5999,
+					},
+					Account{
+						Num:     "444444444444444",
+						Balance: 6999,
+					},
+				},
 			},
 		},
 	}
@@ -62,7 +96,12 @@ func main() {
 	//fmt.Println("translated:", translated, "->", (*translated.(D).Payload), "->", (*(translated.(D).Payload)).(B).Ptr)
 	//fmt.Printf("%#v\n", translated)
 
-	ShowFieldNameTypeValueTagV1(&user)
+	//ShowFieldNameTypeValueTagV1(&user)
+
+	test := make(map[string]string)
+	Flatten(&user, test, "", false)
+	//fmt.Printf("%#v\n", test)
+	ObjectToJSON(test, true)
 }
 
 func ShowFieldNameTypeValueTagV1(v interface{}) {
@@ -91,6 +130,83 @@ func ShowFieldNameTypeValueTagV1(v interface{}) {
 			}
 		}
 	}
+}
+
+func Flatten(v interface{}, data map[string]string, parentStr string, isParentASlice bool) {
+	t := reflect.ValueOf(v).Elem()
+	typeOfT := t.Type()
+
+	//fmt.Printf("%#v %#v============\n", t.Kind().String(), typeOfT.Name())
+
+	asdf2 := typeOfT.Name()
+
+	for i := 0; i < t.NumField(); i++ {
+		valueField := t.Field(i)
+		typeField := typeOfT.Field(i)
+		//tag := typeField.Tag.Get(tagName)
+
+		// FieldName, FieldSysType, FieldUserType, FieldValue, Tag
+		//fmt.Printf("%d. %v (%v|%v): %#v, tag: %v\n", i+1, typeField.Name, valueField.Kind().String(), valueField.Type(), valueField.Interface(), tag)
+
+		//fmt.Printf("%v.%v\n", typeOfT.Name(), typeField.Name)
+
+		var key string
+
+		if isParentASlice == false {
+			key = parentStr + asdf2 + "." + typeField.Name
+		} else {
+			key = parentStr + "." + typeField.Name
+		}
+
+		if valueField.Kind() == reflect.Struct {
+			fieldPtr := valueField.Addr()
+			Flatten(fieldPtr.Interface(), data, key, false)
+			continue
+		}
+
+		if valueField.Kind() == reflect.Slice || valueField.Kind() == reflect.Array {
+			asdf := key // User.CreditCardArr
+
+			for ii := 0; ii < valueField.Len(); ii++ {
+				key = asdf + "[" + strconv.Itoa(ii) + "]"
+
+				if valueField.Index(ii).Kind() == reflect.Struct {
+					fieldPtr := valueField.Index(ii).Addr()
+					Flatten(fieldPtr.Interface(), data, key, true)
+					continue
+				}
+
+				// For string, or int ??
+				data[key] = ""
+
+				//data[key] = ""
+
+				//fmt.Printf("HHHH: %#v\n", valueField.Index(ii).Interface())
+			}
+
+			continue
+		}
+
+		data[key] = ""
+	}
+}
+
+func ObjectToJSON(v interface{}, isIndent bool) {
+	var byteArr []byte
+	var err error
+
+	if isIndent == true {
+		byteArr, err = json.MarshalIndent(v, "", "    ")
+	} else {
+		byteArr, err = json.Marshal(v)
+	}
+
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return
+	}
+
+	fmt.Printf("v: %s\n", string(byteArr))
 }
 
 func ShowFieldNameTypeValueTagV2(v interface{}) {
