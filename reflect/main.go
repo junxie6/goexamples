@@ -228,6 +228,24 @@ func Flatten(v interface{}, data map[string]interface{}, parentStr string, isPar
 					continue
 				}
 
+				if valueField.Index(ii).Kind() == reflect.Slice || valueField.Index(ii).Kind() == reflect.Array {
+					objKey2 := key
+					valueField2 := valueField.Index(ii)
+
+					for iii := 0; iii < valueField2.Len(); iii++ {
+						key = objKey2 + "[" + strconv.Itoa(iii) + "]"
+
+						if valueField2.Index(iii).Kind() == reflect.Struct {
+							fieldPtr2 := valueField2.Index(iii).Addr()
+							Flatten(fieldPtr2.Interface(), data, key, true)
+							continue
+						}
+
+						data[key] = valueField2.Index(iii).Interface()
+					}
+					continue
+				}
+
 				// For string, or int ??
 				data[key] = valueField.Index(ii).Interface()
 
