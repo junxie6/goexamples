@@ -219,7 +219,7 @@ func Flatten(v interface{}, data map[string]interface{}, parentStr string, isPar
 
 	//fmt.Printf("%#v %#v============\n", t.Kind().String(), typeOfT.Name())
 
-	asdf2 := typeOfT.Name()
+	keyOrig := typeOfT.Name()
 
 	for i := 0; i < t.NumField(); i++ {
 		valueField := t.Field(i)
@@ -234,7 +234,7 @@ func Flatten(v interface{}, data map[string]interface{}, parentStr string, isPar
 		var key string
 
 		if isParentASliceOrStruct == false {
-			key = parentStr + asdf2 + "." + typeField.Name
+			key = parentStr + keyOrig + "." + typeField.Name
 		} else {
 			key = parentStr + "." + typeField.Name
 		}
@@ -287,14 +287,6 @@ func Flatten(v interface{}, data map[string]interface{}, parentStr string, isPar
 		}
 
 		data[key] = valueField.Interface()
-		//switch vvv := valueField.Interface().(type) {
-		//case int:
-		//	data[key] = vvv
-		//case string:
-		//	data[key] = vvv
-		//case float64:
-		//	data[key] = vvv
-		//}
 	}
 }
 
