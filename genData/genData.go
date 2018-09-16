@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"math/rand"
 	"strconv"
@@ -99,6 +100,8 @@ func main() {
 			log.Fatalln(err)
 			return
 		}
+
+		fmt.Printf("%d ", i)
 	}
 
 }
