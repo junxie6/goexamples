@@ -90,11 +90,15 @@ func main() {
 	}
 	wordArrLen := len(wordArr)
 	str := strings.Repeat("test ", 1000)
+	tagStr := ""
 
 	for i := 0; i < 1000000; i++ {
 		bug.ProjectID = RandomNumber(1, wordArrLen)
 		bug.Status = RandomNumber(1, wordArrLen)
-		bug.Summary = "test " + strconv.Itoa(i)
+
+		tagStr = wordArr[bug.ProjectID] + " " + wordArr[bug.Status] + " "
+
+		bug.Summary = tagStr + strconv.Itoa(i)
 
 		if rs, err = ns1.Exec(bug); err != nil {
 			log.Fatalln(err)
@@ -107,7 +111,7 @@ func main() {
 		}
 
 		bugBody.BugID = int(lastInsertID)
-		bugBody.Body = wordArr[bug.ProjectID] + " " + wordArr[bug.Status] + " " + str + strconv.Itoa(int(lastInsertID))
+		bugBody.Body = tagStr + str + strconv.Itoa(int(lastInsertID))
 
 		if _, err = ns2.Exec(bugBody); err != nil {
 			log.Fatalln(err)
