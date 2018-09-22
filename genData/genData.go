@@ -40,7 +40,7 @@ func main() {
 	var db *sqlx.DB
 	var err error
 
-	db, err = sqlx.Connect("mysql", "exp:exp@tcp(127.0.0.1:3600)/exp")
+	db, err = sqlx.Connect("mysql", "exp:exp@tcp(127.0.0.1:3306)/exp")
 
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
