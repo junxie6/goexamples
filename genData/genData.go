@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -41,10 +40,10 @@ func main() {
 	var db *sqlx.DB
 	var err error
 
-	db, err = sqlx.Connect("mysql", "exp:exp@tcp(127.0.0.1:4000)/exp")
+	db, err = sqlx.Connect("mysql", "exp:exp@tcp(127.0.0.1:3600)/exp")
 
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Printf("Error: %s\n", err.Error())
 		return
 	}
 
@@ -56,7 +55,7 @@ func main() {
 	ns1, err = db.PrepareNamed(`INSERT INTO Bug (ProjectID, Status, Summary, Created) VALUES (:ProjectID, :Status, :Summary, NOW())`)
 
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Printf("Error: %s\n", err.Error())
 		return
 	}
 
@@ -66,7 +65,7 @@ func main() {
 	ns2, err = db.PrepareNamed(`INSERT INTO BugBody (BugID, Body) VALUES (:BugID, :Body)`)
 
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Printf("Error: %s\n", err.Error())
 		return
 	}
 
@@ -93,20 +92,20 @@ func main() {
 	tagStr := ""
 
 	for i := 0; i < 1000000; i++ {
-		bug.ProjectID = RandomNumber(1, wordArrLen)
-		bug.Status = RandomNumber(1, wordArrLen)
+		bug.ProjectID = RandomNumber(0, wordArrLen)
+		bug.Status = RandomNumber(0, wordArrLen)
 
 		tagStr = wordArr[bug.ProjectID] + " " + wordArr[bug.Status] + " "
 
 		bug.Summary = tagStr + strconv.Itoa(i)
 
 		if rs, err = ns1.Exec(bug); err != nil {
-			log.Fatalln(err)
+			fmt.Printf("Error: %s\n", err.Error())
 			return
 		}
 
 		if lastInsertID, err = rs.LastInsertId(); err != nil {
-			log.Fatalln(err)
+			fmt.Printf("Error: %s\n", err.Error())
 			return
 		}
 
@@ -114,7 +113,7 @@ func main() {
 		bugBody.Body = tagStr + str + strconv.Itoa(int(lastInsertID))
 
 		if _, err = ns2.Exec(bugBody); err != nil {
-			log.Fatalln(err)
+			fmt.Printf("Error: %s\n", err.Error())
 			return
 		}
 
