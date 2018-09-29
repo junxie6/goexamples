@@ -109,7 +109,7 @@ func main() {
 			return
 		}
 
-		bug.Year = int8(y)
+		bug.Year = int8(year)
 
 		if rs, err = ns1.Exec(bug); err != nil {
 			fmt.Printf("Error: %s\n", err.Error())
