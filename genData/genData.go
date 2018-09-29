@@ -90,6 +90,7 @@ func main() {
 	wordArrLen := len(wordArr)
 	str := strings.Repeat("test ", 1000)
 	tagStr := ""
+	year := 0
 
 	for i := 0; i < 1; i++ {
 		bug.ProjectID = util.RandomNumber(0, wordArrLen)
@@ -102,7 +103,13 @@ func main() {
 		bug.Summary = tagStr + strconv.Itoa(i)
 
 		bug.Created = util.RandomDate(3)
-		bug.Year = bug.Created[2:4]
+
+		if year, err = strconv.Atoi(bug.Created[2:4]); err != nil {
+			fmt.Printf("Error: %s\n", err.Error())
+			return
+		}
+
+		bug.Year = int8(y)
 
 		if rs, err = ns1.Exec(bug); err != nil {
 			fmt.Printf("Error: %s\n", err.Error())
