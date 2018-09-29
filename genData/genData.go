@@ -11,6 +11,7 @@ import (
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/junxie6/util"
 )
 
 func init() {
@@ -19,16 +20,15 @@ func init() {
 	//Reader = &devReader{name: "/dev/urandom"}
 }
 
-func RandomNumber(min, max int) int {
-	return rand.Intn(max-min) + min
-}
-
 type Bug struct {
-	BugID     int    `db:"BugID"`
-	ProjectID int    `db:"ProjectID"`
-	Status    int    `db:"Status"`
-	Summary   string `db:"Summary"`
-	Created   string `db:"Created"`
+	BugID     int     `db:"BugID"`
+	ProjectID int     `db:"ProjectID"`
+	Status    int     `db:"Status"`
+	Amount    float64 `db:"Amount"`
+	Qty       int     `db:"Qty"`
+	Summary   string  `db:"Summary"`
+	Created   string  `db:"Created"`
+	Year      int8    `db:"Year"`
 }
 
 type BugBody struct {
@@ -52,7 +52,7 @@ func main() {
 	//
 	var ns1 *sqlx.NamedStmt
 
-	ns1, err = db.PrepareNamed(`INSERT INTO Bug (ProjectID, Status, Summary, Created) VALUES (:ProjectID, :Status, :Summary, NOW())`)
+	ns1, err = db.PrepareNamed(`INSERT INTO Bug (ProjectID, Status, Amount, Qty, Summary, Created, Year) VALUES (:ProjectID, :Status, :Amount, :Qty, :Summary, :Created, :Year)`)
 
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -91,13 +91,18 @@ func main() {
 	str := strings.Repeat("test ", 1000)
 	tagStr := ""
 
-	for i := 0; i < 1000000; i++ {
-		bug.ProjectID = RandomNumber(0, wordArrLen)
-		bug.Status = RandomNumber(0, wordArrLen)
+	for i := 0; i < 1; i++ {
+		bug.ProjectID = util.RandomNumber(0, wordArrLen)
+		bug.Status = util.RandomNumber(0, wordArrLen)
 
 		tagStr = wordArr[bug.ProjectID] + " " + wordArr[bug.Status] + " "
 
+		bug.Amount = float64(bug.ProjectID)
+		bug.Qty = bug.ProjectID
 		bug.Summary = tagStr + strconv.Itoa(i)
+
+		bug.Created = util.RandomDate(3)
+		bug.Year = bug.Created[2:4]
 
 		if rs, err = ns1.Exec(bug); err != nil {
 			fmt.Printf("Error: %s\n", err.Error())
