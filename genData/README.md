@@ -1,4 +1,13 @@
 ```
+CREATE DATABASE exp DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;
+```
+
+```
+CREATE USER 'exp'@'127.0.0.1' IDENTIFIED BY 'exp';
+GRANT ALL ON exp.* TO 'exp'@'127.0.0.1';
+```
+
+```
 CREATE TABLE `Project` (
   `ProjectID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `Name` varchar(255) NOT NULL STORAGE DISK,
@@ -7,6 +16,7 @@ CREATE TABLE `Project` (
   KEY `Status` (`Status`)
 ) TABLESPACE ts_1 STORAGE DISK ENGINE=NDBCLUSTER DEFAULT CHARSET=utf8mb4;
 ```
+
 ```
 CREATE TABLE `Bug` (
   `BugID` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -25,6 +35,7 @@ CREATE TABLE `Bug` (
   KEY `ProjectID_Status_Created` (`ProjectID`,`Status`,`Created`)
 ) TABLESPACE ts_1 STORAGE DISK ENGINE=NDBCLUSTER DEFAULT CHARSET=utf8mb4;
 ```
+
 ```
 CREATE TABLE `BugBody` (
   `BugID` int(10) unsigned NOT NULL,
@@ -32,3 +43,4 @@ CREATE TABLE `BugBody` (
   PRIMARY KEY (`BugID`)
 ) TABLESPACE ts_1 STORAGE DISK ENGINE=NDBCLUSTER DEFAULT CHARSET=utf8mb4;
 ```
+
