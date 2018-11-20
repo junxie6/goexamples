@@ -2,9 +2,9 @@
 Some useful examples for Go golang
 
 # Show how to use the third party Go middlewares and how to implement a custom Go middleware
-\# cd httpmuxmiddleware
-\# openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=erp.local" -keyout erp.local.key -out erp.local.csr
-\# go run httpmuxmiddleware/httpmuxmiddleware.go
+\# cd httpmuxmiddleware 
+\# openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=erp.local" -keyout erp.local.key -out erp.local.csr 
+\# go run httpmuxmiddleware/httpmuxmiddleware.go 
 
 # Run a web server and Transparently gzip the response body
 \# go run webgzip/webgzip.go
