@@ -11,6 +11,7 @@ import (
 // Reference:
 // https://www.calhoun.io/securing-cookies-in-go/
 // https://github.com/danharper/hmac-examples
+// https://www.jokecamp.com/blog/examples-of-creating-base64-hashes-using-hmac-sha256-in-different-languages/
 func main() {
 	secret := []byte("the shared secret key here")
 	message := []byte("the message to hash here")
