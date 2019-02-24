@@ -129,7 +129,7 @@ func main() {
 	for {
 		// DEBUG:
 		if total == 100000 {
-			break
+			//break
 		}
 
 		// Read tokens from the XML document in a stream.
@@ -138,7 +138,9 @@ func main() {
 				break
 			}
 
-			panic("Failed to read token: " + err.Error())
+			fmt.Printf("Failed to read token: %s\n", err.Error())
+			continue
+			//panic("Failed to read token: " + err.Error())
 		}
 
 		if t == nil {
@@ -160,7 +162,7 @@ func main() {
 				decoder.DecodeElement(&p, &se)
 
 				// Do some stuff with the page.
-				p.Title = CanonicalizeTitle(p.Title)
+				p.Title = CanonicalizeTitle(p.Title)[0:16]
 				m := filter.MatchString(p.Title)
 
 				if !m && p.Redir.Title == "" {
