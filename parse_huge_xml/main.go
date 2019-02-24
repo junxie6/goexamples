@@ -132,9 +132,17 @@ func WritePageRecord(stmt *sqlx.NamedStmt, id string, title string, body string)
 	return err
 }
 
-func worker(stmt *sqlx.NamedStmt, id int, jobs <-chan Page, wg *sync.WaitGroup) {
+func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var err error
+	var stmt *sqlx.NamedStmt
+
+	if stmt, err = DB.PrepareNamed("INSERT INTO Article (OrigID, Title, Body, Data, Created) VALUES (:OrigID, :Title, :Body, '{}', NOW())"); err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return
+	}
+
+	defer stmt.Close()
 
 	for j := range jobs {
 		//fmt.Printf("Worker %d: %#v \n", id, j.Title)
@@ -164,12 +172,6 @@ func main() {
 	defer DB.Close()
 
 	//
-	var stmt *sqlx.NamedStmt
-
-	if stmt, err = DB.PrepareNamed("INSERT INTO Article (OrigID, Title, Body, Data, Created) VALUES (:OrigID, :Title, :Body, '{}', NOW())"); err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		return
-	}
 
 	//
 	var wg sync.WaitGroup
@@ -177,7 +179,7 @@ func main() {
 
 	for w := 1; w <= 30; w++ {
 		wg.Add(1)
-		go worker(stmt, w, jobs, &wg)
+		go worker(w, jobs, &wg)
 	}
 
 	//
@@ -197,7 +199,7 @@ func main() {
 	for {
 		// DEBUG:
 		if total == 10 {
-			break
+			//break
 		}
 
 		// Read tokens from the XML document in a stream.
@@ -246,8 +248,6 @@ func main() {
 	close(jobs)
 
 	wg.Wait()
-
-	stmt.Close()
 
 	fmt.Printf("Total articles: %d \n", total)
 }
