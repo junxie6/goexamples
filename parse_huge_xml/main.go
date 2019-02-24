@@ -247,5 +247,7 @@ func main() {
 
 	wg.Wait()
 
+	stmt.Close()
+
 	fmt.Printf("Total articles: %d \n", total)
 }
