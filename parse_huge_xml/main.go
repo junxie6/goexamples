@@ -15,7 +15,10 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	//"strconv"
 	"strings"
+	"sync"
+	//"time"
 )
 
 var inputFile = flag.String("infile", "data/enwiki-20190220-pages-articles-multistream.xml", "Input file path")
@@ -48,6 +51,7 @@ type Redirect struct {
 }
 
 type Page struct {
+	ID    string   `xml:"id"`
 	Title string   `xml:"title"`
 	Redir Redirect `xml:"redirect"`
 	Text  string   `xml:"revision>text"`
@@ -64,6 +68,11 @@ func WritePage(title string, text string) {
 	var outFile *os.File
 	var err error
 
+	if _, err := os.Stat("out/" + title); err == nil {
+		fmt.Printf("Error: %s\n", "File exist: "+title)
+		return
+	}
+
 	if outFile, err = os.Create("out/" + title); err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		return
@@ -77,11 +86,31 @@ func WritePage(title string, text string) {
 	writer.Flush()
 }
 
+func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for j := range jobs {
+		//fmt.Printf("Worker %d: %#v \n", id, j.Title)
+		//time.Sleep(5 * time.Second)
+
+		WritePage(j.ID+"_"+j.Title, j.Text)
+	}
+}
+
 func main() {
 	var err error
 	var xmlFile *os.File
 
 	flag.Parse()
+
+	//
+	var wg sync.WaitGroup
+	jobs := make(chan Page, 100)
+
+	for w := 1; w <= 30; w++ {
+		wg.Add(1)
+		go worker(w, jobs, &wg)
+	}
 
 	//
 	if xmlFile, err = os.Open(*inputFile); err != nil {
@@ -99,7 +128,7 @@ func main() {
 
 	for {
 		// DEBUG:
-		if total == 10 {
+		if total == 100000 {
 			break
 		}
 
@@ -135,7 +164,7 @@ func main() {
 				m := filter.MatchString(p.Title)
 
 				if !m && p.Redir.Title == "" {
-					WritePage(p.Title, p.Text)
+					jobs <- p
 					total++
 				}
 			}
@@ -143,6 +172,10 @@ func main() {
 		}
 
 	}
+
+	close(jobs)
+
+	wg.Wait()
 
 	fmt.Printf("Total articles: %d \n", total)
 }
