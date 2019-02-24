@@ -8,9 +8,11 @@ package main
 
 import (
 	"bufio"
+	//"database/sql"
 	"encoding/xml"
 	"flag"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"io"
 	"net/url"
 	"os"
@@ -21,10 +23,16 @@ import (
 	//"time"
 )
 
-var inputFile = flag.String("infile", "data/enwiki-20190220-pages-articles-multistream.xml", "Input file path")
-var indexFile = flag.String("indexfile", "out/article_list.txt", "article list output file")
+import (
+	"github.com/jmoiron/sqlx"
+)
 
-var filter, _ = regexp.Compile("^file:.*|^talk:.*|^special:.*|^wikipedia:.*|^wiktionary:.*|^user:.*|^user_talk:.*")
+var (
+	DB        *sqlx.DB
+	inputFile = flag.String("infile", "data/enwiki-20190220-pages-articles-multistream.xml", "Input file path")
+	indexFile = flag.String("indexfile", "out/article_list.txt", "article list output file")
+	filter, _ = regexp.Compile("^file:.*|^talk:.*|^special:.*|^wikipedia:.*|^wiktionary:.*|^user:.*|^user_talk:.*")
+)
 
 // Here is an example article from the Wikipedia XML dump
 //
@@ -64,6 +72,15 @@ func CanonicalizeTitle(title string) string {
 	return can
 }
 
+func FirstNChar(s string, n int) string {
+	l := len(s)
+
+	if l < n {
+		return s[0:l]
+	}
+	return s[0:n]
+}
+
 func WritePage(title string, text string) {
 	var outFile *os.File
 	var err error
@@ -86,14 +103,49 @@ func WritePage(title string, text string) {
 	writer.Flush()
 }
 
-func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
+func InitDB() error {
+	var err error
+
+	DB, err = sqlx.Connect("mysql", "exp:exp@tcp(127.0.0.1)/exp")
+
+	if err != nil {
+		return err
+	}
+
+	// TODO: move setting to config
+	DB.SetMaxOpenConns(1000)
+	DB.SetMaxIdleConns(300)
+	DB.SetConnMaxLifetime(0)
+
+	return err
+}
+
+func WritePageRecord(stmt *sqlx.NamedStmt, id string, title string, body string) error {
+	var err error
+
+	_, err = stmt.Exec(map[string]interface{}{
+		"OrigID": id,
+		"Title":  title,
+		"Body":   body,
+	})
+
+	return err
+}
+
+func worker(stmt *sqlx.NamedStmt, id int, jobs <-chan Page, wg *sync.WaitGroup) {
 	defer wg.Done()
+	var err error
 
 	for j := range jobs {
 		//fmt.Printf("Worker %d: %#v \n", id, j.Title)
 		//time.Sleep(5 * time.Second)
 
-		WritePage(j.ID+"_"+j.Title, j.Text)
+		//WritePage(j.ID+"_"+j.Title, j.Text)
+
+		if err = WritePageRecord(stmt, j.ID, j.Title, j.Text); err != nil {
+			fmt.Printf("Error: %s\n", err.Error())
+			return
+		}
 	}
 }
 
@@ -104,17 +156,33 @@ func main() {
 	flag.Parse()
 
 	//
+	if err = InitDB(); err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return
+	}
+
+	defer DB.Close()
+
+	//
+	var stmt *sqlx.NamedStmt
+
+	if stmt, err = DB.PrepareNamed("INSERT INTO Article (OrigID, Title, Body, Data, Created) VALUES (:OrigID, :Title, :Body, '{}', NOW())"); err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return
+	}
+
+	//
 	var wg sync.WaitGroup
 	jobs := make(chan Page, 100)
 
 	for w := 1; w <= 30; w++ {
 		wg.Add(1)
-		go worker(w, jobs, &wg)
+		go worker(stmt, w, jobs, &wg)
 	}
 
 	//
 	if xmlFile, err = os.Open(*inputFile); err != nil {
-		fmt.Println("Error opening file:", err)
+		fmt.Printf("Error: %s\n", err.Error())
 		return
 	}
 
@@ -128,8 +196,8 @@ func main() {
 
 	for {
 		// DEBUG:
-		if total == 100000 {
-			//break
+		if total == 10 {
+			break
 		}
 
 		// Read tokens from the XML document in a stream.
@@ -162,7 +230,7 @@ func main() {
 				decoder.DecodeElement(&p, &se)
 
 				// Do some stuff with the page.
-				p.Title = CanonicalizeTitle(p.Title)[0:16]
+				p.Title = FirstNChar(CanonicalizeTitle(p.Title), 16)
 				m := filter.MatchString(p.Title)
 
 				if !m && p.Redir.Title == "" {
