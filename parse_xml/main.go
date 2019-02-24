@@ -24,8 +24,9 @@ type Users struct {
 // our social links
 type User struct {
 	XMLName   xml.Name `xml:"user"`
-	Languages []string `xml:"languages>name"`
 	Type      string   `xml:"type,attr"`
+	AB        string   `xml:"b,attr"`
+	Languages []string `xml:"languages>name"`
 	Name      string   `xml:"name"`
 	Social    Social   `xml:"social"`
 }
@@ -69,6 +70,7 @@ func main() {
 	// as just an example
 	for i := 0; i < len(users.Users); i++ {
 		fmt.Println("User Type: " + users.Users[i].Type)
+		fmt.Println("AB: " + users.Users[i].AB)
 		fmt.Println("User Name: " + users.Users[i].Name)
 		fmt.Printf("Languages: %v\n", users.Users[i].Languages)
 		fmt.Println("Facebook Url: " + users.Users[i].Social.Facebook)

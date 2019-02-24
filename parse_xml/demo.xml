@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <users>
-  <user type="admin">
+  <user type="admin" a:b="c1">
     <name>Elliot</name>
     <languages>
       <name>Go</name>
@@ -12,7 +12,7 @@
       <youtube>https://youtube.com</youtube>
     </social>
   </user>  
-  <user type="reader">
+  <user type="reader" a:b="c2">
     <name>Fraser</name>
     <languages>
       <name>PHP</name>
