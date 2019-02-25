@@ -138,8 +138,12 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 	//
 	var err error
 	var stmt *sqlx.NamedStmt
+	var tx *sqlx.Tx
 
-	tx := DB.MustBegin()
+	if tx, err = DB.Beginx(); err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return
+	}
 
 	if stmt, err = tx.PrepareNamed("INSERT INTO Article (OrigID, Title, Body, Data, Created) VALUES (:OrigID, :Title, :Body, '{}', NOW())"); err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -149,7 +153,7 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 	defer stmt.Close()
 
 	count := 0
-	commitNum := 10000
+	commitNum := 100
 
 	for j := range jobs {
 		//fmt.Printf("Worker %d\n", id)
