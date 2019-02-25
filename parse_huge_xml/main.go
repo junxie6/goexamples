@@ -164,7 +164,7 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 			continue
 		}
 
-		if (count % 10) == 0 {
+		if (count % 10000) == 0 {
 			//fmt.Printf("%d Commit: %d\n", id, count)
 			DB.Exec("COMMIT")
 		}
@@ -178,7 +178,7 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 		DB.Exec("COMMIT")
 	}
 
-	fmt.Printf("%d count: %d\n", id, count)
+	fmt.Printf("Worker %d: %d count\n", id, count)
 }
 
 func main() {
@@ -201,7 +201,7 @@ func main() {
 	var wg sync.WaitGroup
 	jobs := make(chan Page, 100)
 
-	for w := 1; w <= 3; w++ {
+	for w := 1; w <= 30; w++ {
 		wg.Add(1)
 		go worker(w, jobs, &wg)
 	}
@@ -222,8 +222,8 @@ func main() {
 
 	for {
 		// DEBUG:
-		if total == 99 {
-			break
+		if total == 102 {
+			//break
 		}
 
 		// Read tokens from the XML document in a stream.
