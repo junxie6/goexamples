@@ -139,12 +139,9 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 	var err error
 	var stmt *sqlx.NamedStmt
 
-	if _, err = DB.Exec("SET autocommit = 0"); err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		return
-	}
+	tx := DB.MustBegin()
 
-	if stmt, err = DB.PrepareNamed("INSERT INTO Article (OrigID, Title, Body, Data, Created) VALUES (:OrigID, :Title, :Body, '{}', NOW())"); err != nil {
+	if stmt, err = tx.PrepareNamed("INSERT INTO Article (OrigID, Title, Body, Data, Created) VALUES (:OrigID, :Title, :Body, '{}', NOW())"); err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		return
 	}
@@ -167,7 +164,14 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 
 		if (count % commitNum) == 0 {
 			//fmt.Printf("%d Commit: %d\n", id, count)
-			DB.Exec("COMMIT")
+			tx.Commit()
+
+			tx = DB.MustBegin()
+
+			if stmt, err = tx.PrepareNamed("INSERT INTO Article (OrigID, Title, Body, Data, Created) VALUES (:OrigID, :Title, :Body, '{}', NOW())"); err != nil {
+				fmt.Printf("Error: %s\n", err.Error())
+				return
+			}
 		}
 
 		count++
@@ -176,7 +180,7 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 	// TODO:
 	if (count % commitNum) > 1 {
 		//fmt.Printf("%d Committed: %d\n", id, count)
-		DB.Exec("COMMIT")
+		tx.Commit()
 	}
 
 	fmt.Printf("Worker %d: %d count\n", id, count)
