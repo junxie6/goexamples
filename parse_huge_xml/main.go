@@ -152,6 +152,7 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 	defer stmt.Close()
 
 	count := 0
+	commitNum := 10000
 
 	for j := range jobs {
 		//fmt.Printf("Worker %d\n", id)
@@ -164,7 +165,7 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 			continue
 		}
 
-		if (count % 10000) == 0 {
+		if (count % commitNum) == 0 {
 			//fmt.Printf("%d Commit: %d\n", id, count)
 			DB.Exec("COMMIT")
 		}
@@ -173,7 +174,7 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 	}
 
 	// TODO:
-	if (count % 1000) > 1 {
+	if (count % commitNum) > 1 {
 		//fmt.Printf("%d Committed: %d\n", id, count)
 		DB.Exec("COMMIT")
 	}
