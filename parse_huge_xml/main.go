@@ -134,8 +134,15 @@ func WritePageRecord(stmt *sqlx.NamedStmt, id string, title string, body string)
 
 func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 	defer wg.Done()
+
+	//
 	var err error
 	var stmt *sqlx.NamedStmt
+
+	if _, err = DB.Exec("SET autocommit = 0"); err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return
+	}
 
 	if stmt, err = DB.PrepareNamed("INSERT INTO Article (OrigID, Title, Body, Data, Created) VALUES (:OrigID, :Title, :Body, '{}', NOW())"); err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -144,16 +151,34 @@ func worker(id int, jobs <-chan Page, wg *sync.WaitGroup) {
 
 	defer stmt.Close()
 
+	count := 0
+
 	for j := range jobs {
-		//fmt.Printf("Worker %d: %#v \n", id, j.Title)
+		//fmt.Printf("Worker %d\n", id)
 		//time.Sleep(5 * time.Second)
 
 		//WritePage(j.ID+"_"+j.Title, j.Text)
 
 		if err = WritePageRecord(stmt, j.ID, j.Title, j.Text); err != nil {
 			fmt.Printf("Error: %s\n", err.Error())
-			return
+			continue
 		}
+
+		if id == 1 {
+		}
+
+		if (count % 10) == 0 {
+			//fmt.Printf("%d Commit: %d\n", id, count)
+			DB.Exec("COMMIT")
+		}
+
+		count++
+	}
+
+	// TODO:
+	if (count % 1000) > 1 {
+		//fmt.Printf("%d Committed: %d\n", id, count)
+		DB.Exec("COMMIT")
 	}
 }
 
@@ -177,7 +202,7 @@ func main() {
 	var wg sync.WaitGroup
 	jobs := make(chan Page, 100)
 
-	for w := 1; w <= 30; w++ {
+	for w := 1; w <= 3; w++ {
 		wg.Add(1)
 		go worker(w, jobs, &wg)
 	}
@@ -198,8 +223,8 @@ func main() {
 
 	for {
 		// DEBUG:
-		if total == 10 {
-			//break
+		if total == 99 {
+			break
 		}
 
 		// Read tokens from the XML document in a stream.
@@ -245,8 +270,10 @@ func main() {
 
 	}
 
+	fmt.Printf("Closing jobs\n")
 	close(jobs)
 
+	fmt.Printf("Waiting jobs to finish\n")
 	wg.Wait()
 
 	fmt.Printf("Total articles: %d \n", total)
