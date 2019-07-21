@@ -23,11 +23,15 @@ func main() {
 	request.Header.Add("Accept-Encoding", "gzip")
 
 	response, err := client.Do(request)
+
+	if response != nil {
+		defer response.Body.Close()
+	}
+
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	defer response.Body.Close()
 
 	// Check that the server actual sent compressed data
 	var reader io.ReadCloser

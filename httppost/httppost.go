@@ -25,11 +25,18 @@ func example1(postURL string) {
 	client := &http.Client{Timeout: 20 * time.Second}
 	resp, err := client.PostForm(postURL, formData)
 
-	if err != nil {
-		log.Printf("%v", err)
+	// NOTE: Most of the time when your http request fails the resp variable will be nil
+	// and the err variable will be non-nil. However, when you get a redirection
+	// failure both variables will be non-nil. This means you can still end up with a leak.
+	// http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/
+	if resp != nil {
+		defer resp.Body.Close()
 	}
 
-	defer resp.Body.Close()
+	if err != nil {
+		log.Printf("%v", err)
+		return
+	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 
@@ -70,11 +77,13 @@ func example2(postURL string) {
 	client := &http.Client{Timeout: 20 * time.Second}
 	resp, err := client.Do(req)
 
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+
 	if err != nil {
 		log.Printf("%v", err)
 	}
-
-	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 
@@ -108,11 +117,13 @@ func example3(postURL string) {
 	client := &http.Client{Timeout: 20 * time.Second}
 	resp, err := client.Do(req)
 
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+
 	if err != nil {
 		log.Printf("%v", err)
 	}
-
-	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 
