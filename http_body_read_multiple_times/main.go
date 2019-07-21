@@ -37,9 +37,16 @@ func srvExample1(w http.ResponseWriter, r *http.Request) {
 
 	// One option is to read the body content from bodyBytes[0:numOfBytes]
 	// or use ioutil.NopCloser to restore r.Body to its original state.
-	p0 := Person{}
+	p001 := Person{}
 
-	if err = json.NewDecoder(bytes.NewReader(bodyBytes[0:numOfBytes])).Decode(&p0); err != nil {
+	if err = json.NewDecoder(bytes.NewReader(bodyBytes[0:numOfBytes])).Decode(&p001); err != nil {
+		fmt.Fprintf(w, "Error: %s!", err.Error())
+		return
+	}
+
+	p002 := Person{}
+
+	if err = json.NewDecoder(bytes.NewReader(bodyBytes[0:numOfBytes])).Decode(&p002); err != nil {
 		fmt.Fprintf(w, "Error: %s!", err.Error())
 		return
 	}
@@ -68,7 +75,7 @@ func srvExample1(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%#v\n%#v\n%#v\n", p0, p1, p2)
+	fmt.Fprintf(w, "%#v\n%#v\n%#v\n%#v\n", p001, p002, p1, p2)
 	//w.Write([]byte("Hello"))
 }
 
