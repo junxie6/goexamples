@@ -3,6 +3,7 @@
 // https://stackoverflow.com/questions/43021058/golang-read-request-body
 // https://stackoverflow.com/questions/28158990/golang-io-ioutil-nopcloser
 // https://stackoverflow.com/questions/31884093/read-multiple-time-a-reader
+// https://stackoverflow.com/questions/38874664/limiting-amount-of-data-read-in-the-response-to-a-http-get-request
 // https://github.com/gin-gonic/gin/issues/1295
 package main
 
