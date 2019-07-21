@@ -13,6 +13,8 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/junxie6/go-bytesize"
 )
 
 type Person struct {
@@ -92,8 +94,10 @@ func srvExample2(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var bodyBytes []byte
 
+	limit := 10 * int64(bytesize.MB)
+
 	// NOTE: It's not a good idea to use ioutil.ReadAll when r.Body is very large, such as 1G Bytes. Use io.LimitedReader to prevent it.
-	if bodyBytes, err = ioutil.ReadAll(r.Body); err != nil {
+	if bodyBytes, err = ioutil.ReadAll(io.LimitReader(r.Body, limit)); err != nil {
 		fmt.Fprintf(w, "Error: %s!", err.Error())
 		return
 	}
