@@ -16,7 +16,7 @@ type Person struct {
 	Name string
 }
 
-func srvHome(w http.ResponseWriter, r *http.Request) {
+func srvExample1(w http.ResponseWriter, r *http.Request) {
 	// Read the content
 	//var bodyBytes []byte
 
@@ -29,9 +29,6 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 		// When you read from io.ReadCloser it drains it.
 		// Once you read from it, the content is gone. You can’t read from it a second time.
 
-		// Or use ioutil.ReadAll(r.Body)
-		// var bodyBytes []byte
-		//if bodyBytes, err = ioutil.ReadAll(r.Body); err != nil {
 		if numOfBytes, err = r.Body.Read(bodyBytes); err != nil {
 			if err != io.EOF {
 				fmt.Fprintf(w, "Error: %s!", err.Error())
@@ -40,10 +37,7 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	//numOfBytes = len(bodyBytes)
-
 	// Restore the io.ReadCloser to its original state
-	//r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes[0:numOfBytes]))
 
 	// Read the r.Body one more time
@@ -54,13 +48,73 @@ func srvHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Hello: %#v!", p1)
+	fmt.Fprintf(w, "%#v\n", p1)
 	//w.Write([]byte("Hello"))
 }
 
-func main() {
+func srvExample2(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var bodyBytes []byte
 
-	http.HandleFunc("/", srvHome)
+	if bodyBytes, err = ioutil.ReadAll(r.Body); err != nil {
+		fmt.Fprintf(w, "Error: %s!", err.Error())
+		return
+	}
+
+	// Restore the io.ReadCloser to its original state
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	// Read the r.Body one more time
+	p1 := Person{}
+
+	if err = json.NewDecoder(r.Body).Decode(&p1); err != nil {
+		fmt.Fprintf(w, "Error: %s!", err.Error())
+		return
+	}
+
+	fmt.Fprintf(w, "%#v\n", p1)
+}
+func srvExample3(w http.ResponseWriter, r *http.Request) {
+	var err error
+	buf := bytes.NewBuffer(make([]byte, 0))
+
+	// TeeReader returns a Reader that writes to w what it reads from r.
+	reader := io.TeeReader(r.Body, buf)
+
+	//
+	p1 := Person{}
+
+	// Note: using reader instead of r.Body
+	if err := json.NewDecoder(reader).Decode(&p1); err != nil {
+		fmt.Fprintf(w, "Error: %s!", err.Error())
+		return
+	}
+
+	// Restore the io.ReadCloser to its original state
+	r.Body = ioutil.NopCloser(buf)
+
+	// Read the r.Body one more time
+	p2 := Person{}
+
+	if err = json.NewDecoder(r.Body).Decode(&p2); err != nil {
+		fmt.Fprintf(w, "Error: %s!", err.Error())
+		return
+	}
+
+	fmt.Fprintf(w, "%#v\n%#v\n", p1, p2)
+}
+
+func main() {
+	// Example1 uses r.Body.Read()
+	// curl http://localhost:8080/Example1 --data '{"Name":"asdf2"}'
+	http.HandleFunc("/Example1", srvExample1)
+
+	// Example2 uses ioutil.ReadAll()
+	// curl http://localhost:8080/Example2 --data '{"Name":"asdf2"}'
+	http.HandleFunc("/Example2", srvExample2)
+
+	// Example3 uses io.TeeReader(()
+	http.HandleFunc("/Example3", srvExample3)
 
 	http.ListenAndServe(":8080", nil)
 }
