@@ -51,7 +51,13 @@ func srvExample1(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Restore the io.ReadCloser to its original state
+	// Restore the io.ReadCloser to its original state.
+	// Use bytes.NewBuffer() to obtain an io.Reader from a byte slice.
+	// Because bytes.Buffer does not have a Close() method.
+	// For this you may use ioutil.NopCloser() which wraps an io.Reader,
+	// and returns an io.ReadCloser, whose added Close() method will be a no-op (does nothing)
+	// Reference: https://stackoverflow.com/questions/43021058/golang-read-request-body
+	//
 	// NOTE: or use bytes.NewReader() instead of bytes.NewBuffer()
 	//r.Body = ioutil.NopCloser(bytes.NewReader(bodyBytes[0:numOfBytes]))
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes[0:numOfBytes]))
