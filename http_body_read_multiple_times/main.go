@@ -1,5 +1,8 @@
 // Reference:
 // https://medium.com/@xoen/golang-read-from-an-io-readwriter-without-loosing-its-content-2c6911805361
+// https://stackoverflow.com/questions/43021058/golang-read-request-body
+// https://stackoverflow.com/questions/28158990/golang-io-ioutil-nopcloser
+// https://stackoverflow.com/questions/31884093/read-multiple-time-a-reader
 // https://github.com/gin-gonic/gin/issues/1295
 package main
 
