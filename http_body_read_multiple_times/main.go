@@ -33,7 +33,6 @@ func srvExample1(w http.ResponseWriter, r *http.Request) {
 		// http.Request.Body is of type io.ReadCloser, which can only be read once.
 		// When you read from io.ReadCloser it drains it.
 		// Once you read from it, the content is gone. You can’t read from it a second time.
-
 		if numOfBytes, err = r.Body.Read(bodyBytes); err != nil {
 			if err != io.EOF {
 				fmt.Fprintf(w, "Error: %s!", err.Error())
