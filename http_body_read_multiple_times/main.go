@@ -4,6 +4,7 @@
 // https://stackoverflow.com/questions/28158990/golang-io-ioutil-nopcloser
 // https://stackoverflow.com/questions/31884093/read-multiple-time-a-reader
 // https://stackoverflow.com/questions/38874664/limiting-amount-of-data-read-in-the-response-to-a-http-get-request
+// https://stackoverflow.com/questions/52539695/alternative-to-ioutil-readall-in-go?rq=1
 // https://github.com/gin-gonic/gin/issues/1295
 package main
 
@@ -45,6 +46,10 @@ func srvExample1(w http.ResponseWriter, r *http.Request) {
 	// or use ioutil.NopCloser to restore r.Body to its original state.
 	p001 := Person{}
 
+	// NOTE: json.NewDecoder() is much more efficient, both memory-wise and time-wise:
+	// - The decoder doesn't have to allocate a huge byte slice to accommodate for the data read - it can simply reuse a tiny buffer which will be used against the Read method to get all the data and parse it. This saves a lot of time in allocations and removes stress from the GC
+	// - The JSON Decoder can start parsing data as soon as the first chunk of data comes in - it doesn't have to wait for everything to finish downloading.
+	// https://stackoverflow.com/questions/52539695/alternative-to-ioutil-readall-in-go?rq=1
 	if err = json.NewDecoder(bytes.NewReader(bodyBytes[0:numOfBytes])).Decode(&p001); err != nil {
 		fmt.Fprintf(w, "Error: %s!", err.Error())
 		return
