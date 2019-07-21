@@ -48,7 +48,18 @@ func srvExample1(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%#v\n", p1)
+	// Restore the io.ReadCloser to its original state
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes[0:numOfBytes]))
+
+	// Read the r.Body one more time
+	p2 := Person{}
+
+	if err = json.NewDecoder(r.Body).Decode(&p2); err != nil {
+		fmt.Fprintf(w, "Error: %s!", err.Error())
+		return
+	}
+
+	fmt.Fprintf(w, "%#v\n%#v\n", p1, p2)
 	//w.Write([]byte("Hello"))
 }
 
@@ -73,7 +84,17 @@ func srvExample2(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%#v\n", p1)
+	// Restore the io.ReadCloser to its original state
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	p2 := Person{}
+
+	if err = json.NewDecoder(r.Body).Decode(&p2); err != nil {
+		fmt.Fprintf(w, "Error: %s!", err.Error())
+		return
+	}
+
+	fmt.Fprintf(w, "%#v\n%#v\n", p1, p2)
 }
 func srvExample3(w http.ResponseWriter, r *http.Request) {
 	var err error
@@ -151,10 +172,10 @@ func main() {
 	// curl http://localhost:8080/Example2 --data '{"Name":"asdf2"}'
 	http.HandleFunc("/Example2", srvExample2)
 
-	// Example3 uses io.TeeReader(()
+	// Example3 uses io.TeeReader()
 	http.HandleFunc("/Example3", srvExample3)
 
-	// Example4 uses io.TeeReader(()
+	// Example4 uses io.Copy()
 	http.HandleFunc("/Example4", srvExample4)
 
 	http.ListenAndServe(":8080", nil)
