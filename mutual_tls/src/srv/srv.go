@@ -30,7 +30,7 @@ import (
 //
 // $ openssl req -newkey rsa:2048 -nodes -keyout key/client.key -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=client.example.com" -out key/client.csr
 //
-// Generate server's certificate:
+// Generate client's certificate:
 //
 // $ openssl x509 -req -extfile <(printf "subjectAltName=DNS:client.example.com") -days 365 -in key/client.csr -CA key/ca.crt -CAkey key/ca.key -CAcreateserial -out key/client.crt
 //
