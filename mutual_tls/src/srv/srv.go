@@ -11,27 +11,28 @@ import (
 
 // Generate CA private key:
 //
-// $ openssl genrsa -out ca.key 2048
+// $ mkdir key
+// $ openssl genrsa -out key/ca.key 2048
 //
 // Genearte CA certificate:
 //
-// $ openssl req -new -x509 -days 365 -key ca.key -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=Acme Root CA" -out ca.crt
+// $ openssl req -new -x509 -days 365 -key key/ca.key -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=Acme Root CA" -out key/ca.crt
 //
 // Generate server's private key and certificate sign request:
 //
-// $ openssl req -newkey rsa:2048 -nodes -keyout server.key -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=*.example.com" -out server.csr
+// $ openssl req -newkey rsa:2048 -nodes -keyout key/server.key -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=*.example.com" -out key/server.csr
 //
 // Generate server's certificate:
 //
-// $ openssl x509 -req -extfile <(printf "subjectAltName=DNS:example.com,DNS:www.example.com") -days 365 -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt
+// $ openssl x509 -req -extfile <(printf "subjectAltName=DNS:example.com,DNS:www.example.com") -days 365 -in key/server.csr -CA key/ca.crt -CAkey key/ca.key -CAcreateserial -out key/server.crt
 //
 // Generate client's private key and certificate sign request:
 //
-// $ openssl req -newkey rsa:2048 -nodes -keyout client.key -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=client.example.com" -out client.csr
+// $ openssl req -newkey rsa:2048 -nodes -keyout key/client.key -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=client.example.com" -out key/client.csr
 //
 // Generate server's certificate:
 //
-// $ openssl x509 -req -extfile <(printf "subjectAltName=DNS:client.example.com") -days 365 -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt
+// $ openssl x509 -req -extfile <(printf "subjectAltName=DNS:client.example.com") -days 365 -in key/client.csr -CA key/ca.crt -CAkey key/ca.key -CAcreateserial -out key/client.crt
 //
 // Reference:
 // https://venilnoronha.io/a-step-by-step-guide-to-mtls-in-go
