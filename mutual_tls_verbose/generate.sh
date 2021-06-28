@@ -1,3 +1,6 @@
+# Reference:
+# https://gist.github.com/xjdrew/97be3811966c8300b724deabc10e38e2
+
 sudo -u root sh -c 'echo "127.0.0.1       example.com" >> /etc/hosts'
 
 # >>>>>>>>>>>>>>>>>> 根证书 <<<<<<<<<<<<<<<<<<<<<<
