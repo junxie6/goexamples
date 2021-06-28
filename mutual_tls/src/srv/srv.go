@@ -9,6 +9,11 @@ import (
 	"net/http"
 )
 
+// Edit hosts file:
+// # vim /etc/hosts
+//
+// 127.0.0.1       example.com
+//
 // Generate CA private key:
 //
 // $ mkdir key
