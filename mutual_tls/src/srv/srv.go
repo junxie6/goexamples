@@ -45,8 +45,30 @@ import (
 // https://smallstep.com/hello-mtls/doc/client/go
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
+	printConnState(r.TLS)
+
 	// Write "Hello, world!" to the response body
 	io.WriteString(w, "Hello, world!\n")
+}
+
+func printConnState(state *tls.ConnectionState) {
+	log.Print(">>>>>>>>>>>>>>>> State <<<<<<<<<<<<<<<<")
+	log.Printf("Version: %x", state.Version)
+	log.Printf("HandshakeComplete: %t", state.HandshakeComplete)
+	log.Printf("DidResume: %t", state.DidResume)
+	log.Printf("CipherSuite: %x", state.CipherSuite)
+	log.Printf("NegotiatedProtocol: %s", state.NegotiatedProtocol)
+	log.Printf("NegotiatedProtocolIsMutual: %t", state.NegotiatedProtocolIsMutual)
+
+	log.Print("Certificate chain:")
+	for i, cert := range state.PeerCertificates {
+		subject := cert.Subject
+		issuer := cert.Issuer
+		log.Printf(" %d subject:/C=%v/ST=%v/L=%v/O=%v/OU=%v/CN=%s", i, subject.Country, subject.Province, subject.Locality, subject.Organization, subject.OrganizationalUnit, subject.CommonName)
+		log.Printf("   issuer:/C=%v/ST=%v/L=%v/O=%v/OU=%v/CN=%s", issuer.Country, issuer.Province, issuer.Locality, issuer.Organization, issuer.OrganizationalUnit, issuer.CommonName)
+	}
+	//log.Printf("%#v", state)
+	log.Print(">>>>>>>>>>>>>>>> State End <<<<<<<<<<<<<<<<")
 }
 
 func main() {
