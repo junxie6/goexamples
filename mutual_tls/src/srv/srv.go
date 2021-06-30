@@ -40,6 +40,8 @@ import (
 // $ openssl x509 -req -extfile <(printf "subjectAltName=DNS:client.example.com") -days 365 -in key/client.csr -CA key/ca.crt -CAkey key/ca.key -CAcreateserial -out key/client.crt
 //
 // Reference:
+// https://golang.org/pkg/crypto/x509/
+// https://golang.org/pkg/crypto/tls/
 // https://venilnoronha.io/a-step-by-step-guide-to-mtls-in-go
 // https://smallstep.com/hello-mtls/doc/server/go
 // https://smallstep.com/hello-mtls/doc/client/go
