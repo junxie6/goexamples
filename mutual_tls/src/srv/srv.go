@@ -43,6 +43,7 @@ import (
 // https://venilnoronha.io/a-step-by-step-guide-to-mtls-in-go
 // https://smallstep.com/hello-mtls/doc/server/go
 // https://smallstep.com/hello-mtls/doc/client/go
+// https://github.com/smallstep/cli#installation-guide
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	printConnState(r.TLS)
