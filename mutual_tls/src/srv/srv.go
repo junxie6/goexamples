@@ -39,6 +39,12 @@ import (
 //
 // $ openssl x509 -req -extfile <(printf "subjectAltName=DNS:client.example.com") -days 365 -in key/client.csr -CA key/ca.crt -CAkey key/ca.key -CAcreateserial -out key/client.crt
 //
+// Check X509v3 Subject Alternative Name
+//
+// $ openssl x509 -in server.crt -text -noout
+// or
+// $ openssl req -in server.csr -text -noout
+//
 // Reference:
 // https://golang.org/pkg/crypto/x509/
 // https://golang.org/pkg/crypto/tls/
