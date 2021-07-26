@@ -39,7 +39,9 @@ import (
 //
 // $ openssl x509 -req -extfile <(printf "subjectAltName=DNS:client.example.com") -days 365 -in key/client.csr -CA key/ca.crt -CAkey key/ca.key -CAcreateserial -out key/client.crt
 //
-// NOTE: Another possible option is -addext "subjectAltName = DNS:foobar.mydomain.svc"
+// NOTE: As of OpenSSL 1.1.1, providing subjectAltName directly on command line becomes much easier, with the introduction of the -addext flag to openssl req:
+// -addext "subjectAltName = DNS:foobar.mydomain.svc"
+// NOTE: https://security.stackexchange.com/questions/74345/provide-subjectaltname-to-openssl-directly-on-the-command-line
 // NOTE: https://stackoverflow.com/questions/64814173/how-do-i-use-sans-with-openssl-instead-of-common-name
 //
 // Check X509v3 Subject Alternative Name
