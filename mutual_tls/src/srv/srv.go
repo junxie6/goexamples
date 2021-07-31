@@ -10,6 +10,7 @@ import (
 )
 
 // Edit hosts file:
+//
 // # vim /etc/hosts
 //
 // 127.0.0.1       example.com
